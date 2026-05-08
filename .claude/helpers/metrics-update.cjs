@@ -48,9 +48,17 @@ function ensureMetrics() {
 function pruneOldSnapshots(dir, prefix, keepN) {
   try {
     if (!fs.existsSync(dir)) return;
+    // Per-file try/catch — if a file vanishes between readdir and stat
+    // (concurrent prune from another instance), skip it instead of aborting
+    // the whole prune operation.
     const files = fs.readdirSync(dir)
       .filter(f => f.startsWith(prefix))
-      .map(f => ({ name: f, full: path.join(dir, f), mtime: fs.statSync(path.join(dir, f)).mtimeMs }))
+      .map(f => {
+        const full = path.join(dir, f);
+        try { return { full, mtime: fs.statSync(full).mtimeMs }; }
+        catch { return null; }
+      })
+      .filter(Boolean)
       .sort((a, b) => b.mtime - a.mtime);
     for (const f of files.slice(keepN)) {
       try { fs.unlinkSync(f.full); } catch { /* non-fatal */ }

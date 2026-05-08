@@ -3,7 +3,7 @@
 
 > **Citit:** Automat cand user cere "swarm", "agenti paraleli", "mesh", "holografic", sau task multi-file (>=5 fisiere).
 > **Nu citit:** Task simplu (<3 fisiere, directie clara).
-> **Routing agent (ce tip de agent pentru ce task):** → `enneagram_topology.md` + `python .claude/helpers/enneagram_router.py route <task_type>`
+> **Routing agent (ce tip de agent pentru ce task):** → `enneagram_topology.md`. Live hook routing rulează prin `.claude/helpers/router.js` (JS, BFS port — apelat de `hook-handler.cjs`). Pentru explorare manuală: `python .claude/helpers/enneagram_router.py route <task_type>` (CLI utilitar).
 
 ---
 

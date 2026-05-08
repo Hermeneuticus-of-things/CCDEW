@@ -2,7 +2,7 @@
 ## Actualizat: 2026-05-01 (META-011 — secțiunile 1+3 mutate în enneagram_topology.md)
 
 > **Citit:** On-demand, când task-ul depășește capacitatea tool-urilor native.
-> **Routing agent / swarm triggers:** → `enneagram_topology.md` + `enneagram_router.py`
+> **Routing agent / swarm triggers:** → `enneagram_topology.md`. Live hook routing: `.claude/helpers/router.js` (JS, folosit de `hook-handler.cjs`). Explorare interactivă: `enneagram_router.py` (CLI utilitar).
 
 ## Regula principala: ruflo complementeaza, nu inlocuieste
 
@@ -13,7 +13,8 @@ Workflow-ul existent (CHANGELOG → TODO → cod → epilog) ramane identic.
 ## 1. Swarm
 
 **Routing agent și când activezi swarm** → `_SETTINGS/RULES/enneagram_topology.md`
-- CLI: `python .claude/helpers/enneagram_router.py route <task_type>`
+- Live (auto, hook chain): `.claude/helpers/router.js` (JS port `bfsPath`/`nextNode`, apelat de `hook-handler.cjs`)
+- CLI utilitar (explorare manuală): `python .claude/helpers/enneagram_router.py route <task_type>`
 - Swarm preset (topologie + parametri) → `_SETTINGS/RULES/swarm_preset.md`
 
 ---

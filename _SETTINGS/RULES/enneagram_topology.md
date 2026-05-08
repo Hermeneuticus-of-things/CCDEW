@@ -3,7 +3,8 @@
 
 > **Citit:** Când dispatch task la swarm multi-agent și nu știu ce agent tip sau în ce ordine.
 > **Nu citit:** Task simplu (<3 fișiere, agent tip clar).
-> **Router rapid:** `python .claude/helpers/enneagram_router.py route <task_type>`
+> **Live hook routing:** `.claude/helpers/router.js` (JS, BFS port — folosit automat de `hook-handler.cjs`)
+> **Explorare interactivă (CLI utilitar):** `python .claude/helpers/enneagram_router.py route <task_type>`
 
 ---
 
@@ -69,7 +70,8 @@ orchestrate/route → 8         → sparc-orchestrator
 memory/obsidian   → 9         → memory-specialist
 ```
 
-**CLI:** `python .claude/helpers/enneagram_router.py route <task_type>`
+**Live routing (auto, hook chain):** `.claude/helpers/router.js` (BFS `bfsPath`/`nextNode` portate în JS)
+**CLI utilitar (explorare manuală):** `python .claude/helpers/enneagram_router.py route <task_type>`
 
 ---
 
@@ -108,7 +110,8 @@ Aripile adaugă flexibilitate locală. Exemple de utilizare:
 
 ```python
 # 1. Determină nodul start
-# python .claude/helpers/enneagram_router.py route <task_type>
+# Live (auto din hook-handler.cjs): .claude/helpers/router.js
+# CLI manual (explorare): python .claude/helpers/enneagram_router.py route <task_type>
 
 # 2. Init swarm
 swarm = mcp__claude_flow__swarm_init({
@@ -129,8 +132,9 @@ mcp__claude_flow__agent_spawn({
     }
 })
 
-# 4. Snippet complet auto-generat:
+# 4. Snippet complet auto-generat (CLI utilitar de explorare):
 # python .claude/helpers/enneagram_router.py spawn <task_type>
+# (în producție, hook-handler.cjs cheamă router.js direct)
 ```
 
 ---
@@ -178,7 +182,8 @@ python .claude/helpers/obs.py audit               # token cost + redundanțe
 
 ## 📝 Referințe
 
-- Router: `.claude/helpers/enneagram_router.py`
+- Live router (hook chain, JS port BFS): `.claude/helpers/router.js` — folosit de `hook-handler.cjs`
+- CLI utilitar pentru explorare interactivă: `.claude/helpers/enneagram_router.py` (`path` / `all_paths` / `route`)
 - Obsidian node: `_MEMORY/system_enneagram_topology.md`
 - Swarm preset existent: `_SETTINGS/RULES/swarm_preset.md` (compatibil)
 - Ruflo integration: `_SETTINGS/RULES/ruflo_integration.md`

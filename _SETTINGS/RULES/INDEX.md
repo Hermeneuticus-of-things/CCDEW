@@ -14,7 +14,7 @@
 | **Bump versiune** | `versioning.md` | Orice modificare care necesita versionare noua (schema V [stadiu] Major.Minor.Build) |
 | **Ruflo tools** | `ruflo_integration.md` | Evaluez daca task-ul beneficiaza de swarm/memory_search/hooks (on-demand, nu la task simplu) |
 | **Swarm preset (holografic-mesh)** | `swarm_preset.md` | User cere "swarm", "mesh", "pine N agenti", "paraleli", "holografic", "ce am omis?", gap-audit, refactor >=5 fisiere. **Default: 1000 symbolic, hierarchical-mesh, specialized.** |
-| **Routing agent (enneagram)** | `enneagram_topology.md` | Nu știu ce agent tip să aleg sau în ce ordine să dispatch; task multi-agent cu tranziții între specialiști. **CLI:** `python .claude/helpers/enneagram_router.py route <task_type>` |
+| **Routing agent (enneagram)** | `enneagram_topology.md` | Nu știu ce agent tip să aleg sau în ce ordine să dispatch; task multi-agent cu tranziții între specialiști. **Live (hook chain):** `.claude/helpers/router.js` (JS port BFS, apelat de `hook-handler.cjs`). **CLI utilitar (explorare manuală):** `python .claude/helpers/enneagram_router.py route <task_type>` |
 | **Unde lucrez fizic** | `scope_routing.md` | Aleg proiectul sau radacina dupa scopul cererii; scriu memoria fizica in `.md` la nivelul potrivit |
 | **Context lookup (memory/reguli)** | `obsidian_context_protocol.md` | Caut context semantic cu `obsidian_global_search` INAINTE de `Read` direct. Vault = `<WORKSPACE_DIR>` + `_MEMORY/` junction. |
 | **NLM/RAG queries lente sau mass workload** | `nlm_async_multi_channel_protocol.md` | Orice queries către NotebookLM sau RAG cu latență variabilă. 10 nivele de soluții (async, timeout, grouped, multi-notebook batch, conversation reuse, CDP backup, throttle, tier limits). Anti-dezlogare obligatoriu. |

@@ -128,6 +128,8 @@ For SIMPLE tasks (1 file, <10 LOC, no cross-references), enneagram + multi-zoom 
 
 Returns the correct swarm composition (which nodes, which zooms, which lenses) for any task.
 
+**Live wiring (commit fb03403):** `enneagram_compose.py` is invoked automatically by the `inject-workflow` hook for hexad workflows ≥8 words — it is NOT a manual-only utility. The CLI invocation above remains valid for explicit, interactive composition outside the hook chain.
+
 Examples:
 ```bash
 python .claude/helpers/enneagram_compose.py "merge paragraphs in 115 files" --files 115

@@ -1,0 +1,23 @@
+{
+  "swarms": {
+    "swarm-1777903236203-bn7avt": {
+      "swarmId": "swarm-1777903236203-bn7avt",
+      "topology": "hierarchical-mesh",
+      "maxAgents": 15,
+      "status": "running",
+      "agents": [],
+      "tasks": [],
+      "config": {
+        "topology": "hierarchical-mesh",
+        "maxAgents": 15,
+        "strategy": "specialized",
+        "communicationProtocol": "message-bus",
+        "autoScaling": true,
+        "consensusMechanism": "majority"
+      },
+      "createdAt": "2026-05-04T14:00:36.203Z",
+      "updatedAt": "2026-05-04T14:00:36.203Z"
+    }
+  },
+  "version": "3.0.0"
+}
