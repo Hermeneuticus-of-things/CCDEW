@@ -387,9 +387,32 @@ nano PROJECTS/ProjectName/CLAUDE.md
 
 ---
 
-## Credits
+## Credits & Acknowledgements
 
-- **Original workspace:** [Hermeneuticus-of-things](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)
-- **Ruflo/claude-flow:** [ruvnet](https://github.com/ruvnet/ruflo)
-- **CodeBurn:** [getagentseal](https://github.com/getagentseal/codeburn)
-- **v6.1 Micro extensions:** implemented in session 2026-05-08
+This workspace stands on the shoulders of several upstream projects and ideas — full credit to their authors:
+
+### Platform
+- **[Claude Code](https://docs.claude.com/en/docs/claude-code/overview)** by **[Anthropic](https://www.anthropic.com/)** — the CLI / IDE platform this entire workspace plugs into. The hook system (`UserPromptSubmit`, `SessionStart`, `PreCompact`, `Stop`, etc.) is the foundation we extend.
+
+### Direct dependencies (npm / runtime)
+- **[codeburn](https://github.com/getagentseal/codeburn)** by **AgentSeal** (`hello@agentseal.org`, MIT) — the only required external package. Reads token usage from `~/.claude/projects/` and powers our cost-visibility layer.
+
+### Methodology & inspiration
+- **[ruvnet/ruflo](https://github.com/ruvnet/ruflo)** & **[claude-flow](https://github.com/ruvnet/claude-flow)** by **ruvnet** — agent topology patterns, hook orchestration ideas, and the swarm-init concepts that informed our routing layer.
+- **Enneagram of Personality** — the 9-node typology and hexad/triangle dynamics (1→4→2→8→5→7 and 3→6→9) are a contemporary systematization rooted in the work of George Gurdjieff and later Oscar Ichazo / Claudio Naranjo. We use it here as a routing topology, not a personality framework.
+
+### Core mechanisms (this workspace)
+- **SSA — Sparse/Selective Attention** (Jaccard trigram filter, top-k context) — implemented for v6.1 Micro
+- **SAFLA — Self-Adaptive Feedback Loop** (per-node weight adjustment +0.05/−0.10) — implemented for v6.1 Micro
+- **Enneagram Compose** (multi-zoom MAHA/MACRO/MEZZO/MICRO/NANO + 5-lens swarm) — implemented for v6.1 Micro
+- **Graphify** (ASCII + Markdown session reports) — implemented for v6.1 Micro
+- **LangGraph Micro** (pure-CJS state-machine workflows) — concept inspired by [LangGraph](https://github.com/langchain-ai/langgraph) (LangChain), implementation is original
+
+### Original workspace template
+- **[Hermeneuticus-of-things/claude-code-eficient-workspace](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)** — root structure, `_TEMPLATES/`, `_BEST_PRACTICES/`, Obsidian memory protocol.
+
+### License
+This repository is released under the **[MIT License](LICENSE)** — same permissive terms as `codeburn` and most upstream dependencies. Use freely, modify freely, no warranty.
+
+### How to credit when reusing
+If you fork or adopt large portions, a link back to this repo and the upstreams above is appreciated but not legally required under MIT. If you publish derivative academic / blog work using SSA/SAFLA/Enneagram-routing, citing the workspace + the upstream Enneagram methodology authors is the courteous path.
