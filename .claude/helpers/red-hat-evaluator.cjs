@@ -24,11 +24,11 @@ const ARCH_KEYWORDS = [
 ];
 
 const RISK_TEMPLATES = [
-  'Ce presupuneri tacite conțin această soluție?',
-  'Care sunt cele 2 moduri prin care aceasta poate eșua în producție?',
-  'Există o abordare mai simplă cu ≤50% din complexitate?',
-  'Ce efect de bord neașteptat poate apărea în 30 de zile?',
-  'Dacă această decizie este greșită, cât costă să o revoci?',
+  'What tacit assumptions does this solution rely on?',
+  'What are the 2 ways this can fail in production?',
+  'Is there a simpler approach with ≤50% of the complexity?',
+  'What unexpected side effect could appear within 30 days?',
+  'If this decision is wrong, how costly is it to roll back?',
 ];
 
 function pickRisks(prompt, count = 2) {
@@ -68,9 +68,9 @@ function evaluate(prompt) {
   const questions = pickRisks(prompt, isArch ? 3 : 2);
 
   const lines = [
-    '[RED-HAT] Evaluare critică înainte de execuție:',
+    '[RED-HAT] Critical evaluation before execution:',
     ...questions.map((q, i) => `  ${i + 1}. ${q}`),
-    isArch ? '  → Răspunde la aceste întrebări ÎNAINTE să scrii cod.' : '',
+    isArch ? '  → Answer these questions BEFORE writing code.' : '',
   ].filter(Boolean);
 
   process.stdout.write(lines.join('\n') + '\n');

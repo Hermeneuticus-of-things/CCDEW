@@ -47,6 +47,12 @@ desktop.ini
 *.pem
 *.key
 
+# Per-machine Claude Code settings (contains local paths, IPs, SSH dirs)
+.claude/settings.local.json
+
+# Personal project journal (per-machine paths)
+PROJECT_LOG.md
+
 # Claude Code auto-generated (session-specific)
 .claude-flow/sessions/
 

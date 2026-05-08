@@ -75,7 +75,7 @@ function analyze(prompt) {
     fs.appendFileSync(OPT_LOG_PATH, entry, 'utf-8');
   } catch { /* non-fatal */ }
 
-  process.stdout.write(`[AUTO-OPT] Prompt ${originalTokens} → ~${strippedTokens} tokens (${savedPct}% estimat)\n`);
+  process.stdout.write(`[AUTO-OPT] Prompt ${originalTokens} → ~${strippedTokens} tokens (${savedPct}% estimated)\n`);
 }
 
 /**

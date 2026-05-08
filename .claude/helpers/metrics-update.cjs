@@ -66,21 +66,21 @@ function writeOptimizeSuggestions(statusData) {
   const lines = [
     `# CodeBurn Optimize — ${ts}`,
     '',
-    '## Status curent',
+    '## Current status',
     `- **Today:** $${(statusData.today_cost||0).toFixed(2)} / ${statusData.today_calls||0} calls`,
     `- **Month:** $${(statusData.month_cost||0).toFixed(2)} / ${statusData.month_calls||0} calls`,
     '',
-    '## Sugestii automate',
+    '## Automatic suggestions',
   ];
 
   // Simple heuristic suggestions based on data
   const costPerCall = statusData.today_calls > 0 ? statusData.today_cost / statusData.today_calls : 0;
-  if (costPerCall > 0.05) lines.push(`- ⚠️ Cost mediu per call ridicat ($${costPerCall.toFixed(3)}/call) → verifică prompturi lungi`);
-  if (statusData.today_calls > 150) lines.push(`- ⚠️ Multe calls azi (${statusData.today_calls}) → grupează task-uri mici`);
-  if (statusData.today_cost > 8) lines.push(`- 🔴 Cost zilnic ridicat ($${statusData.today_cost.toFixed(2)}) → folosește /cost optimize`);
-  if (lines[lines.length-1] === '## Sugestii automate') lines.push('- ✅ Consum în parametri normali');
+  if (costPerCall > 0.05) lines.push(`- ⚠️ High average cost per call ($${costPerCall.toFixed(3)}/call) → review long prompts`);
+  if (statusData.today_calls > 150) lines.push(`- ⚠️ Many calls today (${statusData.today_calls}) → batch small tasks`);
+  if (statusData.today_cost > 8) lines.push(`- 🔴 High daily cost ($${statusData.today_cost.toFixed(2)}) → run /cost optimize`);
+  if (lines[lines.length-1] === '## Automatic suggestions') lines.push('- ✅ Usage within normal parameters');
 
-  lines.push('', `_Generat automat la SessionEnd. Rulează \`codeburn report\` pentru detalii._`);
+  lines.push('', `_Auto-generated at SessionEnd. Run \`codeburn report\` for details._`);
 
   fs.writeFileSync(path.join(METRICS_DIR, 'codeburn-optimize-latest.md'), lines.join('\n'), 'utf-8');
 }
