@@ -43,13 +43,19 @@ function exportSnapshot() {
   ensureMetrics();
   const ts   = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
   const file = path.join(METRICS_DIR, `codeburn-${ts}.json`);
-  // spawn detached — nu blochează session-end
+  // Fix #5 — close the fd if spawn throws to avoid descriptor leak on 7/24.
+  let fd = null;
   try {
+    fd = fs.openSync(file, 'w');
     const child = spawn(CODEBURN_BIN, ['export', '--format', 'json'], {
-      detached: true, stdio: ['ignore', fs.openSync(file, 'w'), 'ignore'],
+      detached: true, stdio: ['ignore', fd, 'ignore'],
     });
     child.unref();
-  } catch { /* non-fatal */ }
+    // child inherits the fd — safe to close ours
+    fs.closeSync(fd);
+  } catch {
+    if (fd !== null) { try { fs.closeSync(fd); } catch { /* already closed */ } }
+  }
 }
 
 // ── 2. codeburn status → optimize suggestions ────────────────────────────────

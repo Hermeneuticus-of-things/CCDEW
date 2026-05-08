@@ -498,8 +498,17 @@ function getContext(prompt) {
  * recordEdit(file) — Called from post-edit. Budget: <2ms.
  * Appends to pending-insights.jsonl.
  */
+const PENDING_MAX_BYTES = 2 * 1024 * 1024; // 2 MB cap — rotated to .old on overflow
+
 function recordEdit(file) {
   ensureDataDir();
+  // Fix #3 — rotate pending-insights.jsonl when it exceeds 2 MB so 7/24
+  // sessions don't fill disk between consolidate() runs.
+  try {
+    if (fs.existsSync(PENDING_PATH) && fs.statSync(PENDING_PATH).size > PENDING_MAX_BYTES) {
+      fs.renameSync(PENDING_PATH, PENDING_PATH + '.old');
+    }
+  } catch { /* non-fatal */ }
   const entry = JSON.stringify({
     type: 'edit',
     file: file || 'unknown',

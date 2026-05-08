@@ -39,7 +39,9 @@ const commands = {
       return null;
     }
 
-    const session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8'));
+    let session;
+    try { session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8')); }
+    catch { console.log('[WARN] Corrupt session file — ignoring'); return null; }
     session.restoredAt = new Date().toISOString();
     fs.writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2));
 
@@ -53,7 +55,9 @@ const commands = {
       return null;
     }
 
-    const session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8'));
+    let session;
+    try { session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8')); }
+    catch { console.log('[WARN] Corrupt session file — ignoring'); return null; }
     session.endedAt = new Date().toISOString();
     session.duration = Date.now() - new Date(session.startedAt).getTime();
 
@@ -75,7 +79,9 @@ const commands = {
       return null;
     }
 
-    const session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8'));
+    let session;
+    try { session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8')); }
+    catch { console.log('[WARN] Corrupt session file — ignoring'); return null; }
     const duration = Date.now() - new Date(session.startedAt).getTime();
 
     console.log(`Session: ${session.id}`);
@@ -92,7 +98,9 @@ const commands = {
       return null;
     }
 
-    const session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8'));
+    let session;
+    try { session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8')); }
+    catch { console.log('[WARN] Corrupt session file — ignoring'); return null; }
     session.context[key] = value;
     session.updatedAt = new Date().toISOString();
     fs.writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2));
@@ -103,7 +111,9 @@ const commands = {
   get: (key) => {
     if (!fs.existsSync(SESSION_FILE)) return null;
     try {
-      const session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8'));
+      let session;
+    try { session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8')); }
+    catch { console.log('[WARN] Corrupt session file — ignoring'); return null; }
       return key ? (session.context || {})[key] : session.context;
     } catch { return null; }
   },
@@ -113,7 +123,9 @@ const commands = {
       return null;
     }
 
-    const session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8'));
+    let session;
+    try { session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8')); }
+    catch { console.log('[WARN] Corrupt session file — ignoring'); return null; }
     if (session.metrics[name] !== undefined) {
       session.metrics[name]++;
       fs.writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2));

@@ -351,14 +351,12 @@ const handlers = {
     if (intelligence && intelligence.recordEdit) {
       try { intelligence.recordEdit(editedFile); } catch (e) { /* non-fatal */ }
     }
-    // CodeBurn: estimate tokens from file size (rough: 1 token ≈ 4 chars)
+    // CodeBurn: print live status badge after every edit (record() is no-op
+    // for the real CLI integration — the CLI tracks tokens itself).
     if (codeburn) {
       try {
-        const fsize = editedFile && fs.existsSync(editedFile)
-          ? fs.statSync(editedFile).size : 0;
-        const estTokens = Math.round(fsize / 4);
-        const data = codeburn.record(estTokens, 0, 'post-edit');
-        if (data) console.log(codeburn.status());
+        const s = codeburn.status();
+        if (s) console.log(s);
       } catch { /* non-fatal */ }
     }
     console.log('[OK] Edit recorded');

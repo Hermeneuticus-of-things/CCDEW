@@ -65,9 +65,12 @@ function analyze(prompt) {
 
   if (savedPct < 5) return; // Not worth reporting
 
-  // Log to file for analytics
+  // Log to file for analytics — rotate at 1 MB to bound disk usage in 7/24.
   try {
     ensureDataDir();
+    if (fs.existsSync(OPT_LOG_PATH) && fs.statSync(OPT_LOG_PATH).size > 1024 * 1024) {
+      fs.renameSync(OPT_LOG_PATH, OPT_LOG_PATH + '.old');
+    }
     const entry = JSON.stringify({ ts: new Date().toISOString(), original: originalTokens, stripped: strippedTokens, savedPct }) + '\n';
     fs.appendFileSync(OPT_LOG_PATH, entry, 'utf-8');
   } catch { /* non-fatal */ }
