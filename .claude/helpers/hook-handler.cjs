@@ -48,7 +48,6 @@ function safeRequire(modulePath) {
 
 const router      = safeRequire(path.join(helpersDir, 'router.js'));
 const session     = safeRequire(path.join(helpersDir, 'session.js'));
-const memory      = safeRequire(path.join(helpersDir, 'memory.js'));
 const intelligence= safeRequire(path.join(helpersDir, 'intelligence.cjs'));
 
 // ── v6.1 Micro modules ───────────────────────────────────────────────────────

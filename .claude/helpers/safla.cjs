@@ -43,7 +43,11 @@ function load() {
 function save(data) {
   ensureDataDir();
   data.updated = new Date().toISOString();
-  fs.writeFileSync(SAFLA_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  // Atomic write — two hooks (post-edit + post-bash) can fire concurrently
+  // and a partial write would corrupt safla.json. tmp+rename is atomic on POSIX.
+  const tmp = SAFLA_PATH + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8');
+  fs.renameSync(tmp, SAFLA_PATH);
 }
 
 /**
