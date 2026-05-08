@@ -10,7 +10,8 @@
     "graphify":     true,
     "langraph":     true,
     "project_scope":true,
-    "crewai":       false
+    "intelligence": true,
+    "auto_optimize":true
   },
   "ssa": {
     "max_context_tokens": 8000,

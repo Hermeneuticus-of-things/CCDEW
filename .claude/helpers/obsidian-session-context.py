@@ -123,6 +123,7 @@ def load_critical_files():
                 entries.append({
                     "name": fm.get("name", fname),
                     "tags": tags,
+                    "priority": fm.get("priority", "normal"),
                     "project": fm.get("project", "workspace"),
                     "body": body,
                     "compact": compact,
@@ -139,14 +140,24 @@ def write_index(entries):
     by_project = {}
     by_tag = {}
     for e in entries:
+        # Include tags and priority so SSA can correctly pin critical memories.
+        # Without these fields, ssa.cjs loadObsidianEntries() saw every pinned
+        # check fall through to false → critical entries silently dropped.
+        compact_record = {
+            "name": e["name"],
+            "compact": e["compact"],
+            "file": e["file"],
+            "tags": e.get("tags", []),
+            "priority": e.get("priority", "normal"),
+        }
         p = e["project"]
         if p not in by_project:
             by_project[p] = []
-        by_project[p].append({"name": e["name"], "compact": e["compact"], "file": e["file"]})
+        by_project[p].append(compact_record)
         for t in e["tags"]:
             if t not in by_tag:
                 by_tag[t] = []
-            by_tag[t].append({"name": e["name"], "compact": e["compact"], "file": e["file"]})
+            by_tag[t].append(compact_record)
 
     all_entries = [e for proj in by_project.values() for e in proj]
     index = {

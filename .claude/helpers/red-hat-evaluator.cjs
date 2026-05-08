@@ -63,7 +63,9 @@ function evaluate(prompt) {
   const isArch   = isArchTask(prompt);
   const alwaysOn = cfg.always_on_for_architecture !== false;
 
-  if (!isArch && Math.random() > 0.4) return; // 40% chance on non-arch tasks
+  // Deterministic gate (was Math.random > 0.4) so identical prompts get
+  // identical hook output — keeps reproducibility for tests/replay.
+  if (!isArch && (prompt.length % 5) >= 2) return; // ~40% of non-arch prompts
 
   const questions = pickRisks(prompt, isArch ? 3 : 2);
 

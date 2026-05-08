@@ -5,9 +5,9 @@
  * Fallback: estimare locală dacă CLI-ul nu e disponibil.
  */
 
-const fs            = require('fs');
-const path          = require('path');
-const { execSync }  = require('child_process');
+const fs                       = require('fs');
+const path                     = require('path');
+const { execSync, execFileSync } = require('child_process');
 
 const FLAGS_PATH = path.join(__dirname, 'feature-flags.json');
 const DATA_DIR   = path.join(process.cwd(), '.claude-flow', 'data');
@@ -47,7 +47,9 @@ function ensureDataDir() {
 function fetchRealStatus() {
   if (!CODEBURN_BIN) return null;
   try {
-    const raw = execSync(`${CODEBURN_BIN} status 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 });
+    // execFileSync with array args — no shell, immune to path-injection if
+    // CODEBURN_BIN ever contains spaces or shell metacharacters.
+    const raw = execFileSync(CODEBURN_BIN, ['status'], { encoding: 'utf-8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] });
     // Format: "  Today  $3.35  101 calls    Month  $230.37  2153 calls"
     const todayMatch = raw.match(/Today\s+\$([0-9.]+)\s+(\d+)\s+calls/);
     const monthMatch = raw.match(/Month\s+\$([0-9.]+)\s+(\d+)\s+calls/);
@@ -122,7 +124,7 @@ function totals() {
 function openDashboard() {
   if (!CODEBURN_BIN) { console.log('[CODEBURN] CLI not found'); return; }
   try {
-    execSync(`${CODEBURN_BIN} report`, { stdio: 'inherit', timeout: 30000 });
+    execFileSync(CODEBURN_BIN, ['report'], { stdio: 'inherit', timeout: 30000 });
   } catch { /* user closed dashboard */ }
 }
 

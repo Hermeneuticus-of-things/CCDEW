@@ -73,8 +73,8 @@ function filterContext(prompt, entries, opts = {}) {
   if (!flags.components || !flags.components.ssa) return entries;
   if (!Array.isArray(entries) || entries.length === 0) return entries;
 
-  const topK    = opts.top_k    || cfg.top_k    || 12;
-  const minScore= opts.min_score|| cfg.min_score|| 0.15;
+  const topK    = opts.top_k    ?? cfg.top_k    ?? 12;
+  const minScore= opts.min_score ?? cfg.min_score ?? 0.15;
 
   const promptTrigrams = trigrams(tokenize(prompt));
 
@@ -90,10 +90,16 @@ function filterContext(prompt, entries, opts = {}) {
     .slice(0, topK)
     .map(s => s.entry);
 
-  // Always include pinned entries regardless of score
-  const pinned = entries.filter(e => e.pinned || e.priority === 'high');
-  const pinnedIds = new Set(pinned.map(e => e.id || e.title));
-  const merged = [...pinned, ...filtered.filter(e => !pinnedIds.has(e.id || e.title))];
+  // Always include pinned entries regardless of score. Filter out falsy
+  // ids before building the dedup Set so entries without id/title don't
+  // collapse to a single 'undefined' key (which would silently drop other
+  // legitimately-keyless scored entries).
+  const pinned = entries.filter(e => e.pinned || e.priority === 'high' || e.priority === 'critical');
+  const pinnedIds = new Set(pinned.map(e => e.id || e.title).filter(Boolean));
+  const merged = [...pinned, ...filtered.filter(e => {
+    const k = e.id || e.title;
+    return !k || !pinnedIds.has(k);
+  })];
 
   return merged.slice(0, Math.max(topK, pinned.length));
 }

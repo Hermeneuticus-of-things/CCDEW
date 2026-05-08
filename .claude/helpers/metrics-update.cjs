@@ -41,6 +41,23 @@ function ensureMetrics() {
 
 // ── 1. Export JSON snapshot — fire-and-forget (non-blocking) ────────────────
 
+/**
+ * Keep at most `keepN` files matching prefix in dir; delete oldest first.
+ * Prevents unbounded growth of session snapshots over months of 7/24 use.
+ */
+function pruneOldSnapshots(dir, prefix, keepN) {
+  try {
+    if (!fs.existsSync(dir)) return;
+    const files = fs.readdirSync(dir)
+      .filter(f => f.startsWith(prefix))
+      .map(f => ({ name: f, full: path.join(dir, f), mtime: fs.statSync(path.join(dir, f)).mtimeMs }))
+      .sort((a, b) => b.mtime - a.mtime);
+    for (const f of files.slice(keepN)) {
+      try { fs.unlinkSync(f.full); } catch { /* non-fatal */ }
+    }
+  } catch { /* non-fatal */ }
+}
+
 function exportSnapshot() {
   if (!CODEBURN_BIN) return;
   ensureMetrics();
@@ -149,6 +166,12 @@ function run(statusData) {
   try { updateDashboard(statusData); } catch { /* non-fatal */ }
   // Export snapshot in background (non-blocking)
   try { exportSnapshot(); } catch { /* non-fatal */ }
+  // Bounded-disk: keep last 30 of each rotating artifact
+  try {
+    pruneOldSnapshots(METRICS_DIR, 'codeburn-', 30);
+    pruneOldSnapshots(path.join(WORKSPACE, '.claude-flow', 'reports'), 'session-', 30);
+    pruneOldSnapshots(path.join(WORKSPACE, '.claude-flow', 'sessions'), 'session-', 30);
+  } catch { /* non-fatal */ }
 }
 
 module.exports = { run, updateDashboard, writeOptimizeSuggestions };

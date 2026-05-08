@@ -212,12 +212,18 @@ function getLearningStats() {
     for (const dbPath of memoryPaths) {
       try {
         if (fs.existsSync(dbPath)) {
-          // Read SQLite header: page count at offset 28 (4 bytes big-endian)
-          const fd = fs.openSync(dbPath, 'r');
-          const buf = Buffer.alloc(4);
-          fs.readSync(fd, buf, 0, 4, 28);
-          fs.closeSync(fd);
-          const pageCount = buf.readUInt32BE(0);
+          // Read SQLite header: page count at offset 28 (4 bytes big-endian).
+          // try/finally guarantees fd close even if readSync throws.
+          let fd = null;
+          let pageCount = 0;
+          try {
+            fd = fs.openSync(dbPath, 'r');
+            const buf = Buffer.alloc(4);
+            fs.readSync(fd, buf, 0, 4, 28);
+            pageCount = buf.readUInt32BE(0);
+          } finally {
+            if (fd !== null) { try { fs.closeSync(fd); } catch { /* already closed */ } }
+          }
           // Each page typically holds ~10-50 rows; use page count as conservative estimate
           // But report 0 if DB exists but has only schema pages (< 3)
           patterns = pageCount > 2 ? pageCount - 2 : 0;

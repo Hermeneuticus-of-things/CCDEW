@@ -66,9 +66,9 @@ function readJSON(filePath) {
 
 function writeJSON(filePath, data) {
   ensureDataDir();
-  // Atomic write — multiple hooks running in parallel could otherwise leave
-  // graph-state.json / ranked-context.json half-written and unparseable.
-  const tmp = filePath + '.tmp';
+  // Atomic write with pid-suffixed tmp so concurrent hooks don't clobber
+  // each other's tmp file before rename.
+  const tmp = filePath + '.' + process.pid + '.' + Date.now() + '.tmp';
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8');
   fs.renameSync(tmp, filePath);
 }

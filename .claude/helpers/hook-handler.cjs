@@ -126,19 +126,32 @@ function selectWorkflow(task, routeResult) {
 // ── Intelligence timeout protection ────────────────────────────────────────
 const INTELLIGENCE_TIMEOUT_MS = 3000;
 function runWithTimeout(fn, label) {
+  // CRITICAL fix: previous version cleared the timer immediately after fn(),
+  // so async fn() returning a Promise NEVER timed out — defeating the safety
+  // budget for intelligence.init/consolidate. Now we wrap fn() with
+  // Promise.resolve() and clear the timer only after the Promise settles.
   return new Promise((resolve) => {
+    let settled = false;
     const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
       process.stderr.write("[WARN] " + label + " timed out after " + INTELLIGENCE_TIMEOUT_MS + "ms, skipping\n");
       resolve(null);
     }, INTELLIGENCE_TIMEOUT_MS);
-    try {
-      const result = fn();
-      clearTimeout(timer);
-      resolve(result);
-    } catch (e) {
-      clearTimeout(timer);
-      resolve(null);
-    }
+    Promise.resolve()
+      .then(() => fn())
+      .then((result) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(result);
+      })
+      .catch(() => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(null);
+      });
   });
 }
 
@@ -629,12 +642,17 @@ const handlers = {
         }
       } catch { /* non-fatal */ }
     }
-    // LangGraph: advance workflow to next node
+    // LangGraph: advance workflow to next node — only print "Workflow
+    // complete" when there was actually an active workflow that finished.
+    // Previous version conflated three null-returns (disabled, no-active,
+    // terminal) into the same misleading message.
     if (langGraph) {
       try {
+        const statusBefore = langGraph.status && langGraph.status();
+        const wasActive = statusBefore && statusBefore.active;
         const next = langGraph.advance(true);
         if (next) console.log(`[LG] → ${next}`);
-        else console.log('[LG] Workflow complete');
+        else if (wasActive) console.log('[LG] Workflow complete');
       } catch { /* non-fatal */ }
     }
     console.log('[OK] Task completed');
