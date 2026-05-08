@@ -391,9 +391,6 @@ nano PROJECTS/ProjectName/CLAUDE.md
 
 This workspace stands on the shoulders of several upstream projects and ideas — full credit to their authors:
 
-### Platform
-- **[Claude Code](https://docs.claude.com/en/docs/claude-code/overview)** by **[Anthropic](https://www.anthropic.com/)** — the CLI / IDE platform this entire workspace plugs into. The hook system (`UserPromptSubmit`, `SessionStart`, `PreCompact`, `Stop`, etc.) is the foundation we extend.
-
 ### Direct dependencies (npm / runtime)
 - **[codeburn](https://github.com/getagentseal/codeburn)** by **AgentSeal** (`hello@agentseal.org`, MIT) — the only required external package. Reads token usage from `~/.claude/projects/` and powers our cost-visibility layer.
 
