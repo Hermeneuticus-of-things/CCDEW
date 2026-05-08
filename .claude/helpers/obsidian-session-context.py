@@ -148,12 +148,14 @@ def write_index(entries):
                 by_tag[t] = []
             by_tag[t].append({"name": e["name"], "compact": e["compact"], "file": e["file"]})
 
+    all_entries = [e for proj in by_project.values() for e in proj]
     index = {
         "generated": __import__('datetime').datetime.now().isoformat(),
         "total": len(entries),
         "memory_dir": MEMORY_DIR,
         "by_project": by_project,
         "by_tag": by_tag,
+        "all": all_entries,
     }
     os.makedirs(os.path.dirname(INDEX_PATH), exist_ok=True)
     with open(INDEX_PATH, "w", encoding="utf-8") as f:

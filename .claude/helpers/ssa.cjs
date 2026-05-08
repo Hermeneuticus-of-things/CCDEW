@@ -95,7 +95,7 @@ function filterContext(prompt, entries, opts = {}) {
   const pinnedIds = new Set(pinned.map(e => e.id || e.title));
   const merged = [...pinned, ...filtered.filter(e => !pinnedIds.has(e.id || e.title))];
 
-  return merged.slice(0, topK + pinned.length);
+  return merged.slice(0, Math.max(topK, pinned.length));
 }
 
 /**

@@ -198,15 +198,9 @@ const handlers = {
     // SSA: filter intelligence context + Obsidian entries
     if (ssa) {
       try {
-        // 1. Intelligence context
+        // 1. Intelligence context (returns pre-ranked string — print directly)
         if (intelligence && intelligence.getContext) {
-          let ctx = intelligence.getContext(prompt);
-          if (ctx && Array.isArray(ctx)) {
-            const filtered = ssa.filterContext(prompt, ctx);
-            const stats    = ssa.summarizeStats(ctx, filtered);
-            if (stats) process.stderr.write(stats + '\n');
-            ctx = filtered;
-          }
+          const ctx = intelligence.getContext(prompt);
           if (ctx) console.log(typeof ctx === 'string' ? ctx : JSON.stringify(ctx));
         }
         // 2. Obsidian entries — filtrate prin SSA, injectate ca hint
@@ -242,9 +236,13 @@ const handlers = {
     if (router && router.routeTask) {
       const result = router.routeTask(prompt);
 
-      // SAFLA: add adaptive weight hint for this node
+      // SAFLA: apply adaptive weight_adj to confidence and show hint
       if (safla) {
         try {
+          const adj = safla.getWeightAdj(result.node);
+          if (adj && !isNaN(adj)) {
+            result.confidence = Math.max(0, Math.min(1, result.confidence + adj));
+          }
           const sfHint = safla.hint(result.node);
           if (sfHint) console.log(sfHint);
         } catch { /* non-fatal */ }
@@ -579,13 +577,13 @@ const handlers = {
         const { spawnSync } = require('child_process');
         const composeScript = path.join(helpersDir, 'enneagram_compose.py');
         if (fs.existsSync(composeScript)) {
-          // Call reinforce_enneagram via inline python snippet
-          spawnSync('python3', ['-c',
-            `import sys; sys.path.insert(0,'${helpersDir}'); ` +
+          const cr = spawnSync('python3', ['-c',
+            `import sys; sys.path.insert(0,${JSON.stringify(helpersDir)}); ` +
             `from enneagram_compose import reinforce_enneagram; ` +
             `r = reinforce_enneagram('default', ${postTaskNode}, True); ` +
             `print(f'[COMPOSE] Node ${postTaskNode} trust: {r:.3f}')`
-          ], { encoding: 'utf-8', timeout: 2000, stdio: ['ignore', 'pipe', 'ignore'] });
+          ], { encoding: 'utf-8', timeout: 2000, stdio: ['ignore', 'pipe', 'pipe'] });
+          if (cr.stdout && cr.stdout.trim()) process.stdout.write(cr.stdout);
         }
       } catch { /* non-fatal */ }
     }

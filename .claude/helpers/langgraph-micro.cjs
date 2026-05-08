@@ -113,12 +113,13 @@ function detectGraph(prompt) {
 
   const lower = prompt.toLowerCase();
 
-  // Strong architecture signals — must have BOTH a verb AND a noun
+  // Strong architecture signals — must have BOTH a verb AND a noun within 6 words of each other
   const archVerbs = ['implementeaz', 'implement', 'creeaz', 'create', 'refactor', 'migrat', 'rescri', 'rewrit', 'design'];
   const archNouns = ['arhitectur', 'architect', 'sistem', 'system', 'serviciu', 'service', 'modul', 'module', 'api', 'baza de date', 'database'];
-  const hasArchVerb = archVerbs.some(k => lower.includes(k));
-  const hasArchNoun = archNouns.some(k => lower.includes(k));
-  if (hasArchVerb && hasArchNoun) return 'architecture';
+  const lowerWords = words.map(w => w.toLowerCase());
+  const verbWIdx = archVerbs.reduce((idx, k) => { const i = lowerWords.findIndex(w => w.startsWith(k)); return (i !== -1 && (idx === -1 || i < idx)) ? i : idx; }, -1);
+  const nounWIdx = archNouns.reduce((idx, k) => { const i = lowerWords.findIndex(w => w.startsWith(k)); return (i !== -1 && (idx === -1 || i < idx)) ? i : idx; }, -1);
+  if (verbWIdx !== -1 && nounWIdx !== -1 && Math.abs(verbWIdx - nounWIdx) <= 6) return 'architecture';
 
   // Strong fix signals
   const fixKws = ['bug', 'eroare', 'error', 'crash', 'broken', 'nu functioneaz', 'not working', 'repara', 'fix'];

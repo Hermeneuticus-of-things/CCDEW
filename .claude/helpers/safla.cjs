@@ -96,6 +96,7 @@ function hint(nodeId) {
   if (!node || (node.success + node.failure) === 0) return '';
   const total = node.success + node.failure;
   const rate  = Math.round((node.success / total) * 100);
+  if (isNaN(node.weight_adj)) node.weight_adj = 0;
   const adj   = node.weight_adj >= 0 ? '+' + node.weight_adj.toFixed(2) : node.weight_adj.toFixed(2);
   return `[SAFLA] Node ${nodeId}: ${rate}% success (${total} tasks) | adj ${adj} | last: ${node.last_task || 'n/a'}`;
 }
