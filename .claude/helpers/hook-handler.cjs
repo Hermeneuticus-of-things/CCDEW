@@ -518,10 +518,28 @@ const handlers = {
       try { intelligence.feedback(true); } catch (e) { /* non-fatal */ }
     }
     // SAFLA: record success outcome for last routed node
+    let postTaskNode = null;
     if (safla && router && router.routeTask && prompt) {
       try {
         const result = router.routeTask(prompt);
+        postTaskNode = result.node;
         safla.recordOutcome(result.node, true, prompt.substring(0, 60));
+      } catch { /* non-fatal */ }
+    }
+    // enneagram_compose: reinforce adaptive topology on success
+    if (postTaskNode !== null) {
+      try {
+        const { spawnSync } = require('child_process');
+        const composeScript = path.join(helpersDir, 'enneagram_compose.py');
+        if (fs.existsSync(composeScript)) {
+          // Call reinforce_enneagram via inline python snippet
+          spawnSync('python3', ['-c',
+            `import sys; sys.path.insert(0,'${helpersDir}'); ` +
+            `from enneagram_compose import reinforce_enneagram; ` +
+            `r = reinforce_enneagram('default', ${postTaskNode}, True); ` +
+            `print(f'[COMPOSE] Node ${postTaskNode} trust: {r:.3f}')`
+          ], { encoding: 'utf-8', timeout: 2000, stdio: ['ignore', 'pipe', 'ignore'] });
+        }
       } catch { /* non-fatal */ }
     }
     // LangGraph: advance workflow to next node

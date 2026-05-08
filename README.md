@@ -1,112 +1,112 @@
-# claude-code-eficient-workspace v2.0
+# claude-code-efficient-workspace v2.0
 
-**Workspace ultra-eficient pentru Claude Code** cu routing Enneagram, optimizare token automată, cost tracking real și feedback loop adaptiv.
+**An ultra-efficient workspace for Claude Code** with Enneagram routing, automatic token optimization, real cost tracking, and adaptive feedback loop.
 
-> Bazat pe: [Hermeneuticus-of-things/claude-code-eficient-workspace](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)  
-> Extins cu: v6.1 Micro — SSA + CodeBurn + SAFLA + Graphify + LangGraph Micro
+> Based on: [Hermeneuticus-of-things/claude-code-eficient-workspace](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)  
+> Extended with: v6.1 Micro — SSA + CodeBurn + SAFLA + Graphify + LangGraph Micro
 
 ---
 
-## De ce acest workspace? — Ce economisești și cum
+## Why this workspace? — What you save and how
 
-### Problema
+### The problem
 
-Claude Code consumă tokeni la fiecare interacțiune. Fără optimizare:
-- **La fiecare SessionStart** se injectează toată memoria disponibilă (130+ fișiere), chiar dacă 90% e irelevant pentru task-ul curent.
-- **La fiecare prompt** contextul crește incremental — Claude "uită" ce a funcționat și ce nu.
-- **Fără vizibilitate de cost** — nu știi ce task-uri costă cel mai mult sau unde e waste-ul.
-- **Fără routing inteligent** — Claude tratează `"fix bug"` și `"redesign arhitectura"` la fel.
+Claude Code consumes tokens at every interaction. Without optimization:
+- **At every SessionStart** the entire available memory is injected (130+ files), even if 90% is irrelevant to the current task.
+- **At every prompt** context grows incrementally — Claude "forgets" what worked and what didn't.
+- **No cost visibility** — you don't know which tasks cost the most or where the waste is.
+- **No intelligent routing** — Claude treats `"fix bug"` and `"redesign architecture"` the same way.
 
-### Soluția — 5 mecanisme care lucrează împreună
+### The solution — 5 mechanisms working together
 
-#### 1. SSA — Filtrare context (−76% tokeni injectați)
-La fiecare prompt, în loc să injectezi toată memoria, SSA calculează **similaritatea Jaccard trigram** între prompt și fiecare entry de memorie. Rezultat: din 50 entries, injectezi doar 12 — cele mai relevante. Obsidian index este inclus automat.
-
-```
-Fără SSA:  50 entries × ~200 tokeni = ~10.000 tokeni context
-Cu SSA:    12 entries × ~200 tokeni =  ~2.400 tokeni context
-Economie:  ~7.600 tokeni per prompt
-```
-
-#### 2. Enneagram Routing — Agentul potrivit pentru task-ul potrivit
-Sistemul clasifică automat fiecare prompt în unul din 9 tipuri de task și alege agentul specializat. Un bug fix merge la `tester` (Node 6), nu la `sparc-orchestrator` (Node 8). Agentul potrivit → răspuns mai scurt și mai precis → mai puțini tokeni.
+#### 1. SSA — Context filtering (−76% injected tokens)
+At every prompt, instead of injecting all memory, SSA calculates **Jaccard trigram similarity** between the prompt and each memory entry. Result: from 50 entries, only 12 are injected — the most relevant ones. The Obsidian index is included automatically.
 
 ```
-Task simplu  → TRIANGLE (3 agenți): coder → tester → memory-specialist
-Task complex → HEXAD (6 agenți):   reviewer → researcher → ... → analyst
+Without SSA:  50 entries × ~200 tokens = ~10,000 tokens context
+With SSA:     12 entries × ~200 tokens =  ~2,400 tokens context
+Savings:      ~7,600 tokens per prompt
 ```
 
-#### 3. CodeBurn — Vizibilitate completă a costurilor
-Citește direct din `~/.claude/projects/` și afișează în statusline:
+#### 2. Enneagram Routing — Right agent for the right task
+The system automatically classifies each prompt into one of 9 task types and selects the specialized agent. A bug fix goes to `tester` (Node 6), not `sparc-orchestrator` (Node 8). Right agent → shorter and more precise response → fewer tokens.
 
 ```
-🔥 $3.81 azi  |  $230.82 luna aceasta  |  112 calls
+Simple task  → TRIANGLE (3 agents): coder → tester → memory-specialist
+Complex task → HEXAD (6 agents):   reviewer → researcher → ... → analyst
 ```
 
-La SessionEnd generează automat `_METRICS/codeburn-optimize-latest.md` cu sugestii concrete: "152 calls azi → grupează task-uri mici".
+#### 3. CodeBurn — Complete cost visibility
+Reads directly from `~/.claude/projects/` and displays in the status line:
 
-#### 4. SAFLA — Sistem care învață din experiență
-Urmărește ce agent a funcționat sau nu pentru fiecare tip de task. Dacă Node 3 (coder) a eșuat de 3 ori pe task-uri de arhitectură, sistemul penalizează acest routing cu −0.30 și favorizează Node 7 (architecture). Se sincronizează cu CodeBurn: nodurile cu cost/call ridicat sunt penalizate automat.
+```
+🔥 $3.81 today  |  $230.82 this month  |  112 calls
+```
 
-#### 5. Red Hat Evaluator — Previne over-engineering
-Înainte de orice task de arhitectură, injectează 2-3 întrebări critice:
-- *"Ce presupuneri tacite conține această soluție?"*
-- *"Există o abordare mai simplă cu ≤50% din complexitate?"*
+At SessionEnd it automatically generates `_METRICS/codeburn-optimize-latest.md` with concrete suggestions: "152 calls today → group small tasks".
 
-Previne construirea unor soluții complexe care apoi necesită refactoring (= tokeni dubli).
+#### 4. SAFLA — System that learns from experience
+Tracks which agent worked or not for each task type. If Node 3 (coder) failed 3 times on architecture tasks, the system penalizes this routing by −0.30 and favors Node 7 (architecture). Syncs with CodeBurn: nodes with high cost/call are automatically penalized.
 
-### Rezultate măsurate
+#### 5. Red Hat Evaluator — Prevents over-engineering
+Before any architecture task, injects 2-3 critical questions:
+- *"What tacit assumptions does this solution contain?"*
+- *"Is there a simpler approach with ≤50% of the complexity?"*
 
-| Metric | Valoare |
-|--------|---------|
-| Reducere context per prompt | **76%** (SSA) |
+Prevents building complex solutions that then require refactoring (= double tokens).
+
+### Measured results
+
+| Metric | Value |
+|--------|-------|
+| Context reduction per prompt | **76%** (SSA) |
 | Overhead per hook event | **93–185ms** |
-| session-end overhead | **117ms** (optimizat de la 8.5s) |
-| Vizibilitate cost | **real-time** via codeburn CLI |
+| Session-end overhead | **117ms** (optimized from 8.5s) |
+| Cost visibility | **real-time** via codeburn CLI |
 
 ---
 
-## Ce face
+## What it does
 
-La fiecare prompt, sistemul:
+At every prompt, the system:
 
-1. **Filtrează contextul** — SSA reduce memoria injectată cu ~76% (Jaccard trigram, top-12 entries relevante)
-2. **Evaluează critic** — Red Hat pune 2-3 întrebări înainte de arhitecturi complexe
-3. **Rutează inteligent** — Enneagram trimite task-ul spre agentul optim (9 noduri, hexad/triangle)
-4. **Urmărește costul** — CodeBurn afișează `$X.XX azi / $X.XX luna` în statusline
-5. **Învață** — SAFLA ajustează weights per nod în funcție de succese/eșecuri
-6. **Raportează** — Graphify generează raport la sfârșitul sesiunii
+1. **Filters context** — SSA reduces injected memory by ~76% (Jaccard trigram, top-12 relevant entries)
+2. **Critically evaluates** — Red Hat asks 2-3 questions before complex architectures
+3. **Routes intelligently** — Enneagram sends the task to the optimal agent (9 nodes, hexad/triangle)
+4. **Tracks cost** — CodeBurn displays `$X.XX today / $X.XX this month` in the status line
+5. **Learns** — SAFLA adjusts weights per node based on successes/failures
+6. **Reports** — Graphify generates a report at the end of each session
 
 ---
 
-## Instalare rapidă
+## Quick Setup
 
-### 1. Cerințe
+### 1. Requirements
 
 - Node.js ≥ 18
 - Python 3.x
 - Claude Code CLI
 
-### 2. Clonează workspace-ul
+### 2. Clone the workspace
 
 ```bash
 git clone https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace.git workspace
 cd workspace
 ```
 
-### 3. Instalează CodeBurn (singurul pachet extern)
+### 3. Install CodeBurn (the only external package)
 
 ```bash
 npm install -g codeburn
 ```
 
-### 4. Pornește Claude Code
+### 4. Start Claude Code
 
 ```bash
 claude
 ```
 
-La primul prompt, sistemul se auto-inițializează. Verifică:
+On the first prompt, the system auto-initializes. Verify:
 
 ```bash
 node .claude/helpers/hook-handler.cjs flags
@@ -114,155 +114,178 @@ node .claude/helpers/hook-handler.cjs flags
 
 ---
 
-## Structura workspace
+## Workspace structure
 
 ```
 workspace/
 ├── .claude/
-│   ├── settings.json          ← 13 hook-uri active
-│   ├── helpers/               ← 40+ module (JS + Python)
-│   │   ├── hook-handler.cjs   ← dispatcher central
-│   │   ├── feature-flags.json ← toggle componente
-│   │   ├── codeburn.cjs       ← cost tracking real
-│   │   ├── ssa.cjs            ← filtrare context
-│   │   ├── safla.cjs          ← feedback adaptiv
-│   │   ├── graphify.cjs       ← rapoarte sesiune
+│   ├── settings.json          ← 13 active hooks
+│   ├── helpers/               ← 40+ modules (JS + Python)
+│   │   ├── hook-handler.cjs   ← central dispatcher
+│   │   ├── feature-flags.json ← component toggles
+│   │   ├── codeburn.cjs       ← real cost tracking
+│   │   ├── ssa.cjs            ← context filtering
+│   │   ├── safla.cjs          ← adaptive feedback
+│   │   ├── graphify.cjs       ← session reports
 │   │   ├── langgraph-micro.cjs← workflow state machine
-│   │   ├── red-hat-evaluator.cjs ← evaluare critică
-│   │   ├── auto-optimize.cjs  ← detectare prompt verbos
+│   │   ├── red-hat-evaluator.cjs ← critical evaluation
+│   │   ├── auto-optimize.cjs  ← verbose prompt detection
 │   │   ├── metrics-update.cjs ← dashboard + metrics
-│   │   ├── enneagram_router.py← routing 9 noduri
+│   │   ├── enneagram_router.py← 9-node routing
+│   │   ├── enneagram_compose.py← multi-zoom swarm composer
 │   │   ├── intelligence.cjs   ← PageRank memory graph
-│   │   └── obsidian-session-context.py ← context Obsidian
+│   │   └── obsidian-session-context.py ← Obsidian context
 │   └── commands/
 │       └── cost.md            ← /cost command
-├── PROJECTS/                  ← proiectele tale
-├── _BEST_PRACTICES/           ← wisdom per tip proiect
-├── _TEMPLATES/                ← scaffolding (android/carte/generic)
-├── _SETTINGS/RULES/           ← protocoale workspace
-├── _MEMORY/                   ← vault Obsidian
-├── _METRICS/                  ← snapshots codeburn + optimize
-├── _DASHBOARD.md              ← actualizat automat la SessionEnd
-└── BEST_PRACTICES.md          ← încărcat la fiecare session start
+├── PROJECTS/                  ← your projects
+├── _BEST_PRACTICES/           ← wisdom per project type
+├── _TEMPLATES/                ← scaffolding (android/book/generic)
+├── _SETTINGS/RULES/           ← workspace protocols
+├── _MEMORY/                   ← Obsidian memory vault
+├── _METRICS/                  ← codeburn snapshots + optimize
+├── _DASHBOARD.md              ← auto-updated at SessionEnd
+└── BEST_PRACTICES.md          ← loaded at every session start
 ```
 
 ---
 
-## Componente și feature flags
+## Components and feature flags
 
-Editează `.claude/helpers/feature-flags.json` pentru a activa/dezactiva:
+Edit `.claude/helpers/feature-flags.json` to enable/disable:
 
 ```json
 {
   "components": {
-    "enneagram": true,   // routing inteligent
-    "ssa":       true,   // filtrare context -76%
-    "codeburn":  true,   // cost tracking real
-    "red_hat":   true,   // evaluare critică
-    "safla":     true,   // feedback adaptiv
-    "graphify":  true,   // rapoarte sesiune
+    "enneagram": true,   // intelligent routing
+    "ssa":       true,   // context filtering -76%
+    "codeburn":  true,   // real cost tracking
+    "red_hat":   true,   // critical evaluation
+    "safla":     true,   // adaptive feedback
+    "graphify":  true,   // session reports
     "langraph":  true,   // workflow tracking
-    "crewai":    false   // dezactivat permanent
+    "crewai":    false   // permanently disabled
   }
 }
 ```
 
 ---
 
-## Comenzi CLI
+## CLI commands
 
 ```bash
-# Status sistem
+# System status
 node .claude/helpers/hook-handler.cjs flags
 
-# Cost real (citeşte din ~/.claude/projects/)
+# Real cost (reads from ~/.claude/projects/)
 node .claude/helpers/hook-handler.cjs burn
 
-# Performance per agent Enneagram
+# Performance per Enneagram agent
 node .claude/helpers/hook-handler.cjs safla
 
-# Raport sesiune ASCII
+# ASCII session report
 node .claude/helpers/hook-handler.cjs graphify
 
-# Workflow activ
+# Active workflow
 node .claude/helpers/hook-handler.cjs lg
 
-# Diagnostice intelligence/memory
+# Intelligence/memory diagnostics
 node .claude/helpers/hook-handler.cjs stats
 ```
 
-## Slash commands în Claude Code
+## Slash commands in Claude Code
 
 ```
-/cost           → codeburn status (azi + luna)
-/cost today     → detalii ziua curentă
-/cost month     → detalii luna curentă
-/cost report    → dashboard TUI interactiv
-/cost optimize  → sugestii reducere waste
+/cost           → codeburn status (today + month)
+/cost today     → current day details
+/cost month     → current month details
+/cost report    → interactive TUI dashboard
+/cost optimize  → waste reduction suggestions
 ```
 
 ---
 
-## Enneagram — routingul inteligent
+## Enneagram — intelligent routing
 
-9 noduri specializate, 2 cicluri de lucru:
+9 specialized nodes, 2 work cycles:
 
-| Nod | Agent | Rol | Ciclu |
-|-----|-------|-----|-------|
+| Node | Agent | Role | Cycle |
+|------|-------|------|-------|
 | 1 | reviewer | QA, code review | hexad |
-| 2 | backend-dev | integrare, API | hexad |
-| 3 | coder | implementare directă | triangle |
-| 4 | researcher | context, documentare | hexad |
-| 5 | analyst | analiză, debugging | hexad |
-| 6 | tester | validare, testare | triangle |
-| 7 | architecture | design sistem | hexad |
-| 8 | sparc-orchestrator | orchestrare complexă | hexad |
-| 9 | memory-specialist | memorie, consolidare | triangle |
+| 2 | backend-dev | integration, API | hexad |
+| 3 | coder | direct implementation | triangle |
+| 4 | researcher | context, documentation | hexad |
+| 5 | analyst | analysis, debugging | hexad |
+| 6 | tester | validation, testing | triangle |
+| 7 | architecture | system design | hexad |
+| 8 | sparc-orchestrator | complex orchestration | hexad |
+| 9 | memory-specialist | memory, consolidation | triangle |
 
-**HEXAD** (1→4→2→8→5→7): task-uri complexe, cross-project, ≥6 agenți  
-**TRIANGLE** (3→6→9): task-uri rapide, implementare directă, 3 agenți
+**HEXAD** (1→4→2→8→5→7): complex tasks, cross-project, ≥6 agents  
+**TRIANGLE** (3→6→9): fast tasks, direct implementation, 3 agents
 
 ---
 
 ## SSA — Sparse/Selective Attention
 
-Reduce contextul injectat la fiecare prompt:
+Reduces injected context at every prompt:
 
-- **Input:** toate entries din memoria Intelligence graph + Obsidian index
-- **Algoritm:** Jaccard trigram similarity între prompt și fiecare entry
-- **Output:** top-12 entries cele mai relevante + pinned (prioritate `critical`)
-- **Rezultat tipic:** 50 entries → 12 entries (76% reducere)
+- **Input:** all entries from the Intelligence memory graph + Obsidian index
+- **Algorithm:** Jaccard trigram similarity between prompt and each entry
+- **Output:** top-12 most relevant entries + pinned (`critical` priority)
+- **Typical result:** 50 entries → 12 entries (76% reduction)
 
-**SSA Zoom levels** (detectate automat din lungimea promptului):
-- `NANO` — prompt scurt (<15 cuvinte): context minim
-- `MICRO` — prompt mediu (15-30 cuvinte): context moderat
-- `MAHA` — prompt lung (>30 cuvinte): context maxim
-
----
-
-## SAFLA — Feedback adaptiv
-
-Urmărește ce funcționează pentru fiecare agent:
-
-- **+0.05** weight adjustment la task reușit
-- **-0.10** weight adjustment la task eșuat (asimetric — penalizare mai mare)
-- **Sync cu CodeBurn:** la cost/call > $0.05 → penalizare automată pe noduri active
-- **Range:** [-0.5, +0.5] per nod
+**SSA Zoom levels** (auto-detected from prompt length):
+- `NANO` — short prompt (<15 words): minimal context
+- `MICRO` — medium prompt (15-30 words): moderate context
+- `MAHA` — long prompt (>30 words): maximum context
 
 ---
 
-## Dashboard automat
+## SAFLA — Adaptive feedback
 
-La fiecare SessionEnd, sistemul actualizează automat:
+Tracks what works for each agent:
 
-- **`_DASHBOARD.md`** — metrici CodeBurn live (cost azi/luna, calls, cost/call)
-- **`_METRICS/codeburn-optimize-latest.md`** — sugestii waste reduction
-- **`_METRICS/codeburn-<timestamp>.json`** — snapshot complet (background)
-- **`.claude-flow/reports/session-<timestamp>.md`** — raport Graphify complet
+- **+0.05** weight adjustment on successful task
+- **-0.10** weight adjustment on failed task (asymmetric — larger penalty)
+- **Sync with CodeBurn:** when cost/call > $0.05 → automatic penalty on active nodes
+- **Range:** [-0.5, +0.5] per node
 
 ---
 
-## Performanță
+## Enneagram Compose — Multi-zoom swarm composer
+
+For hexad (complex) tasks, `enneagram_compose.py` automatically selects the correct swarm composition across **5 zoom levels** and **5 lenses**:
+
+| Zoom | Scope | Checks |
+|------|-------|--------|
+| MAHA | Entire system/project | center of gravity, balance |
+| MACRO | Cross-module/cross-chapter | cross-references, drift |
+| MEZZO | Module/chapter | canonical host, rhythm |
+| MICRO | Function/paragraph | internal logic, distinctions |
+| NANO | Character/token | ASCII vs Unicode, punctuation |
+
+**5 lenses:** stylistic (Node 4) · doctrinal (Node 5) · structural (Node 7) · regression (Node 6) · memory (Node 9)
+
+Complexity is auto-determined from file count:
+- **1-2 files:** no swarm — use Edit/Write directly
+- **3-4 files:** MEDIUM — 3 lenses minimum, 4 phases
+- **5-9 files:** COMPLEX — all 5 lenses, parallel cross-check
+- **≥10 files:** MASSIVE — full protocol with DAG decomposition + Bargain-Triangle consensus
+
+---
+
+## Automatic dashboard
+
+At every SessionEnd, the system automatically updates:
+
+- **`_DASHBOARD.md`** — live CodeBurn metrics (cost today/month, calls, cost/call)
+- **`_METRICS/codeburn-optimize-latest.md`** — waste reduction suggestions
+- **`_METRICS/codeburn-<timestamp>.json`** — full snapshot (background)
+- **`.claude-flow/reports/session-<timestamp>.md`** — complete Graphify report
+
+---
+
+## Performance
 
 | Hook | Overhead |
 |------|----------|
@@ -274,7 +297,7 @@ La fiecare SessionEnd, sistemul actualizează automat:
 
 ---
 
-## Arhitectură conexiuni
+## Architecture connections
 
 ```
 UserPromptSubmit
@@ -283,11 +306,15 @@ UserPromptSubmit
     ├── RedHat.evaluate(prompt)
     ├── LangGraph.startWorkflow(prompt)
     ├── SAFLA.hint(node)
-    └── Enneagram.routeTask(prompt)
+    ├── Enneagram.routeTask(prompt)
+    └── EnneagramCompose.compose(prompt, files)  ← hexad only
 
 SessionStart
     ├── SAFLA.sessionStart()
     └── obsidian-session-context.py → session-critical-index.json
+
+PreCompact
+    └── compact-save (CodeBurn + SAFLA + metrics — no duplicate session-end)
 
 SessionEnd
     ├── CodeBurn.totals() [cache-first]
@@ -299,23 +326,23 @@ SessionEnd
 
 ---
 
-## Adaugă un proiect nou
+## Add a new project
 
 ```bash
-# Copiază template-ul potrivit
-cp -r _TEMPLATES/generic/ PROJECTS/NumeProiect/
+# Copy the appropriate template
+cp -r _TEMPLATES/generic/ PROJECTS/ProjectName/
 
-# Editează CLAUDE.md al proiectului
-nano PROJECTS/NumeProiect/CLAUDE.md
+# Edit the project CLAUDE.md
+nano PROJECTS/ProjectName/CLAUDE.md
 
-# Adaugă în tabelul de proiecte din CLAUDE.md root
+# Add to the projects table in root CLAUDE.md
 ```
 
 ---
 
-## Credite
+## Credits
 
-- **Workspace original:** [Hermeneuticus-of-things](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)
+- **Original workspace:** [Hermeneuticus-of-things](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)
 - **Ruflo/claude-flow:** [ruvnet](https://github.com/ruvnet/ruflo)
 - **CodeBurn:** [getagentseal](https://github.com/getagentseal/codeburn)
-- **v6.1 Micro extensions:** implementate în sesiunea 2026-05-08
+- **v6.1 Micro extensions:** implemented in session 2026-05-08
