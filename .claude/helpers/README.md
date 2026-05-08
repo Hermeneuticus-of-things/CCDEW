@@ -1,97 +1,68 @@
-# Claude Flow V3 Helpers
+# Claude Code Workspace — Helper Scripts
 
-This directory contains helper scripts and utilities for V3 development.
+This directory holds the runtime helpers wired into Claude Code via `.claude/settings.json`. The 31 legacy V3 / daemon / swarm helpers were archived to `_ARCHIVE/dead-helpers-2026-05-08/` once they proved to be orphan code paths.
 
-## 🚀 Quick Start
+For full project documentation see the workspace root [README.md](../../README.md).
 
-```bash
-# Initialize V3 development environment
-.claude/helpers/v3.sh init
+## Active helpers (wired into hooks)
 
-# Quick status check
-.claude/helpers/v3.sh status
+### Central dispatcher
+- **`hook-handler.cjs`** — central handler invoked by every Claude Code hook event (`pre-bash`, `pre-edit`, `post-edit`, `post-bash`, `inject-workflow`, `route`, `session-restore`, `session-end`, `compact-manual`/`-auto`/`-save`, `post-task`, `notify`, `status`, plus CLI subcommands like `stats`, `burn`, `flags`, `scope-status`, `scope-set`).
 
-# Update progress metrics
-.claude/helpers/v3.sh update domain 3
-.claude/helpers/v3.sh update agent 8
-.claude/helpers/v3.sh update security 2
-```
+### Routing & workflows
+- **`router.js`** — Enneagram routing (9 nodes, hexad/triangle cycles) + JS-ported BFS path-finding (`bfsPath`, `nextNode`).
+- **`langgraph-micro.cjs`** — pure-CJS state-machine for multi-step workflows (`standard`, `architecture`, `quick_fix`).
+- **`workspace_node_map.json`** — Enneagram workflow templates (hexad / triangle / agent capabilities).
 
-## Available Helpers
+### Context & memory
+- **`ssa.cjs`** — Sparse/Selective Attention Jaccard trigram filter (top-k entries, pinned-aware).
+- **`intelligence.cjs`** — PageRank-ranked memory graph (auto-memory-store, ranked-context, pending-insights jsonl with 2 MB rotation).
+- **`obsidian-session-context.py`** — generates `session-critical-index.json` from `_MEMORY/` Obsidian vault (priority + tags propagated).
+- **`obs.py`** — Obsidian CLI utility (search, read, fm, replace, audit) — primary CLI for memory access.
+- **`auto-memory-hook.mjs`** — bridges auto-memory store on SessionStart/Stop.
 
-### 🎛️ V3 Master Tool
-- **`v3.sh`** - Main command-line interface for all V3 operations
-  ```bash
-  .claude/helpers/v3.sh help           # Show all commands
-  .claude/helpers/v3.sh status         # Quick development status
-  .claude/helpers/v3.sh update domain 3 # Update specific metrics
-  .claude/helpers/v3.sh validate       # Validate configuration
-  .claude/helpers/v3.sh full-status    # Complete status overview
-  ```
+### Cost & metrics
+- **`codeburn.cjs`** — wraps the `codeburn` CLI for real cost data (cache-first, 60s).
+- **`metrics-update.cjs`** — at SessionEnd writes `_METRICS/_DASHBOARD.md` + `_METRICS/codeburn-optimize-latest.md`, prunes old snapshots (keep last 30).
+- **`graphify.cjs`** — ASCII + Markdown session reports.
 
-### 📊 V3 Progress Management
-- **`update-v3-progress.sh`** - Update V3 development metrics
-  ```bash
-  # Usage examples:
-  .claude/helpers/update-v3-progress.sh domain 3      # Mark 3 domains complete
-  .claude/helpers/update-v3-progress.sh agent 8       # 8 agents active
-  .claude/helpers/update-v3-progress.sh security 2    # 2 CVEs fixed
-  .claude/helpers/update-v3-progress.sh performance 2.5x # Performance boost
-  .claude/helpers/update-v3-progress.sh status        # Show current status
-  ```
+### Adaptive layer
+- **`safla.cjs`** — Self-Adaptive Feedback Loop, per-node weight adjustment (+0.05 success / −0.10 failure), syncs with CodeBurn.
+- **`auto-optimize.cjs`** — verbose-prompt detection, suggests bloat removal.
+- **`red-hat-evaluator.cjs`** — injects critical questions before architecture tasks (deterministic gate).
+- **`project-scope.cjs`** — detects active `PROJECTS/<Name>/`, warns on cross-project edits.
 
-### 🔍 Configuration Validation
-- **`validate-v3-config.sh`** - Comprehensive environment validation
-  - Checks all required directories and files
-  - Validates JSON configuration files
-  - Verifies Node.js and development tools
-  - Confirms Git repository status
-  - Validates file permissions
+### Multi-zoom composition
+- **`enneagram_compose.py`** — multi-zoom (MAHA / MACRO / MEZZO / MICRO / NANO) × 5-lens swarm composer; reinforced via `_MEMORY/enneagram_adaptive_topology.json`.
+- **`enneagram_router.py`** — Python CLI for **interactive** Enneagram exploration (`path`, `all_paths`, `route`, `spawn`). NOT in the live hook chain — the JS port in `router.js` does the live routing.
 
-### ⚡ Quick Status
-- **`v3-quick-status.sh`** - Compact development progress overview
-  - Shows domain, agent, and DDD progress
-  - Displays security and performance metrics
-  - Color-coded status indicators
-  - Current Git branch information
+### Auto-learning (META-017)
+- **`auto_learn.py`** — Stop-hook queue-only heuristic detector (zero LLM, < 100 ms).
+- **`auto_learn_consolidate.py`** — SessionEnd LLM-merge of queued items into Obsidian memory.
+- **`auto_learn_rotate.py`** — manual lunar archival (run `python .claude/helpers/auto_learn_rotate.py [--dry-run]`); not currently wired to a hook.
 
-## Helper Script Standards
+### Status line
+- **`statusline.cjs`** — generates the Claude Code status line (git info, model, codeburn, SSA stats, etc.).
 
-### File Naming
-- Use kebab-case: `update-v3-progress.sh`
-- Include version prefix: `v3-*` for V3-specific helpers
-- Use descriptive names that indicate purpose
+### Configuration
+- **`feature-flags.json`** — per-component enable/disable toggles.
+- **`session.js`** — atomic session lifecycle (start/restore/end/update/metric, all writes pid-suffixed tmp + rename).
 
-### Script Requirements
-- Must be executable (`chmod +x`)
-- Include proper error handling (`set -e`)
-- Provide usage help when called without arguments
-- Use consistent exit codes (0 = success, non-zero = error)
+## Test files
 
-### Configuration Integration
-Helpers are configured in `.claude/settings.json`:
-```json
-{
-  "helpers": {
-    "directory": ".claude/helpers",
-    "enabled": true,
-    "v3ProgressUpdater": ".claude/helpers/update-v3-progress.sh"
-  }
-}
-```
+- `_test_project-scope.cjs` (13/13)
+- `_test_runWithTimeout.cjs` (8/8)
+- `_test_atomic_writes.cjs` (6/6 + 100 concurrent writes from 20 forked PIDs)
 
-## Development Guidelines
+Run with `node .claude/helpers/_test_<name>.cjs`. They are self-contained: backup/restore real state files, leave no `.tmp` leftovers.
 
-1. **Security First**: All helpers must validate inputs
-2. **Idempotent**: Scripts should be safe to run multiple times
-3. **Fast Execution**: Keep helper execution under 1 second when possible
-4. **Clear Output**: Provide clear success/error messages
-5. **JSON Safe**: When updating JSON files, use `jq` for safety
+## Conventions
 
-## Adding New Helpers
+- All `.cjs` modules export pure functions, gated by `feature-flags.json` `components.<name>`.
+- All multi-line state writes use atomic tmp+rename with `<pid>.<ts>.tmp` suffix to be concurrent-safe across multiple Claude Code instances on the same workspace.
+- Cross-platform paths via `WORKSPACE_DIR` env or script-relative resolution; no hardcoded absolute paths.
+- Every helper that runs in the hook chain stays under the 5 s global safety timeout in `hook-handler.cjs`; long-running work is `spawn`'d detached or skipped with `runWithTimeout`.
 
-1. Create script in `.claude/helpers/`
-2. Make executable: `chmod +x script-name.sh`
-3. Add to settings.json helpers section
-4. Test thoroughly before committing
-5. Update this README with usage documentation
+## Archived helpers
+
+`_ARCHIVE/dead-helpers-2026-05-08/` contains 31 orphan modules from the v3 / daemon / swarm-monitor / worker-manager subsystems that were never wired into the live hook chain. Kept on disk (gitignored) for safety; can be `git restore` from history if any external user proves to need them.

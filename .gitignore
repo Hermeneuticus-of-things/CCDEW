@@ -10,8 +10,13 @@ _GLOBAL_SKILLS/
 _REFERENCE_LIBRARY/
 graphify-out/
 
-# Runtime data
+# Runtime data — per-machine state, never committed
 .claude-flow/data/
+.claude-flow/metrics/
+.claude-flow/performance/
+.claude-flow/security/
+.claude-flow/swarm/
+.swarm/
 *.log
 __pycache__/
 *.pyc
