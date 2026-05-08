@@ -1,0 +1,35 @@
+{
+  "_comment": "Workspace Enneagram Node Map — Consiliu project active",
+  "_version": 1,
+  "_updated": "2026-05-04",
+
+  "projects": {
+    "Consiliu": {
+      "node": 7,
+      "node_name": "Architect",
+      "agent": "architecture",
+      "cycle": "hexad",
+      "obs_query": "project:Consiliu",
+      "memory_tags": ["consiliu", "hermes", "qnap", "simbioza", "ai-agents"],
+      "path_hint": "PROJECTS/Consiliu",
+      "description": "Simbioza AI 5-tier — Phone + QNAP + Think/Honor"
+    }
+  },
+
+  "node_memory_tags": {
+    "1": ["review", "quality", "audit", "security"],
+    "2": ["api", "integration", "backend"],
+    "3": ["code", "build", "implementation"],
+    "4": ["research", "docs", "context"],
+    "5": ["debug", "analysis", "profiling", "bottleneck"],
+    "6": ["testing", "validation", "regression"],
+    "7": ["design", "architecture", "planning"],
+    "8": ["workflow", "coordination", "session-start"],
+    "9": ["memory", "consolidation", "workflow"]
+  },
+
+  "workflow_templates": {
+    "hexad": [1, 4, 2, 8, 5, 7],
+    "triangle": [3, 6, 9]
+  }
+}

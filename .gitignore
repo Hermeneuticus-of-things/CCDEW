@@ -1,0 +1,68 @@
+# Personal projects (not part of the template)
+PROJECTS/*
+!PROJECTS/.gitkeep
+
+# Archive and inbox
+_ARCHIVE/
+_INBOX_ZIPS/
+_GLOBAL_ASSETS/
+_GLOBAL_SKILLS/
+_REFERENCE_LIBRARY/
+graphify-out/
+
+# Runtime data
+.claude-flow/data/
+*.log
+__pycache__/
+*.pyc
+*.pyo
+
+# Personal memory (keep templates, not actual memory files)
+memory/*.md
+!memory/MEMORY.md
+
+# _MEMORY runtime files (keep templates)
+_MEMORY/agents/*
+!_MEMORY/agents/.gitkeep
+
+# Node modules and package locks (user installs locally)
+node_modules/
+ruflo/
+
+# Personal canvases
+*.canvas
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Claude Code auto-generated (session-specific)
+.claude-flow/sessions/
+
+# Generated runtime files at root
+codeburn-*.json
+ruvector.db
+*.db
+
+# Claude flow reports (session-specific)
+.claude-flow/reports/
+
+# Metrics snapshots (contain cost data — keep template only)
+_METRICS/codeburn-*.json
+
+# Auto-memory (session-specific)
+memory/project_*.md
+memory/user_*.md
+memory/feedback_*.md
+memory/reference_*.md

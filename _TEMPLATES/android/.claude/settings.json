@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c python -c \"import graphify,json,sys,pathlib; g=pathlib.Path('graphify-out/graph.json'); d=json.load(g.open()) if g.exists() else None; print(f'graphify: {len(d[\\\"nodes\\\"])} nodes ready' if d else 'graphify: no graph yet - run /graphify [path] to build')\" 2>nul || echo graphify: not installed",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
