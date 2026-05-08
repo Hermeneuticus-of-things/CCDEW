@@ -54,6 +54,7 @@ const intelligence= safeRequire(path.join(helpersDir, 'intelligence.cjs'));
 const codeburn    = safeRequire(path.join(helpersDir, 'codeburn.cjs'));
 const redHat      = safeRequire(path.join(helpersDir, 'red-hat-evaluator.cjs'));
 const ssa         = safeRequire(path.join(helpersDir, 'ssa.cjs'));
+const projectScope= safeRequire(path.join(helpersDir, 'project-scope.cjs'));
 const autoOptimize= safeRequire(path.join(helpersDir, 'auto-optimize.cjs'));
 const safla       = safeRequire(path.join(helpersDir, 'safla.cjs'));
 const graphify    = safeRequire(path.join(helpersDir, 'graphify.cjs'));
@@ -299,6 +300,14 @@ const handlers = {
     if (file && sensitive.some(s => file.endsWith(s))) {
       console.log(`[PRE-EDIT] ⚠️  Editing sensitive file: ${path.basename(file)}`);
     }
+    // Project scope: warn (do not block) when editing outside active project
+    if (file && projectScope) {
+      try {
+        const active = projectScope.getActive(prompt);
+        const warn = projectScope.preEditWarning(file, active);
+        if (warn) console.log(warn);
+      } catch { /* non-fatal */ }
+    }
     console.log('[OK] Edit validated');
   },
 
@@ -535,6 +544,17 @@ const handlers = {
       ];
     }
     if (composeHint) lines.push(composeHint);
+
+    // Project scope: surface active project + structure so Claude knows
+    // where to write and where NOT to (other projects / root).
+    if (projectScope) {
+      try {
+        const active = projectScope.getActive(prompt);
+        const scopeHint = projectScope.hintLine(active);
+        if (scopeHint) lines.push(scopeHint);
+      } catch { /* non-fatal */ }
+    }
+
     console.log(lines.join('\n'));
   },
 
@@ -672,6 +692,35 @@ const handlers = {
     for (const [k, v] of Object.entries(flags.components || {})) {
       console.log(`  ${v ? '✓' : '✗'} ${k}`);
     }
+  },
+
+  'scope-status': () => {
+    if (!projectScope) { console.log('[SCOPE] module unavailable'); return; }
+    const active = projectScope.getActive(prompt, { force: true });
+    if (!active) {
+      const projects = projectScope.listProjects();
+      console.log(`[SCOPE] No active project. Available: ${projects.join(', ') || '(none)'}`);
+      return;
+    }
+    console.log(`[SCOPE] Active: ${active.path} (detected via ${active.detected_from})`);
+    console.log(`        Structure: ${(active.structure||[]).join(', ')}`);
+  },
+
+  'scope-set': () => {
+    if (!projectScope) { console.log('[SCOPE] module unavailable'); return; }
+    const name = (args[0] || '').trim();
+    if (!name) {
+      console.log('Usage: hook-handler.cjs scope-set <project-name>');
+      console.log('Available:', projectScope.listProjects().join(', '));
+      return;
+    }
+    const state = projectScope.setActive(name);
+    if (!state) {
+      console.log(`[SCOPE] ERROR — '${name}' not found under PROJECTS/`);
+      console.log('Available:', projectScope.listProjects().join(', '));
+      return;
+    }
+    console.log(`[SCOPE] Active project set to ${state.path} (manual)`);
   },
 
   'graphify': () => {

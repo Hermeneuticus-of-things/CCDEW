@@ -13,7 +13,10 @@ const { execSync, spawn } = require('child_process');
 
 const WORKSPACE     = process.cwd();
 const METRICS_DIR   = path.join(WORKSPACE, '_METRICS');
-const DASHBOARD_PATH= path.join(WORKSPACE, '_DASHBOARD.md');
+// Dashboard lives under _METRICS/ to keep the workspace root clean.
+// Older versions wrote it at root; on first run we migrate the legacy file.
+const DASHBOARD_PATH      = path.join(WORKSPACE, '_METRICS', '_DASHBOARD.md');
+const LEGACY_DASHBOARD_AT_ROOT = path.join(WORKSPACE, '_DASHBOARD.md');
 const FLAGS_PATH    = path.join(__dirname, 'feature-flags.json');
 
 const CODEBURN_BIN  = (() => {
@@ -108,6 +111,16 @@ function updateDashboard(statusData) {
     `> Detalii complete: \`/cost report\` | Optimizare: \`/cost optimize\``,
     DASHBOARD_MARKER_END,
   ].join('\n');
+
+  // One-time migration: move legacy root _DASHBOARD.md into _METRICS/
+  ensureMetrics();
+  if (!fs.existsSync(DASHBOARD_PATH) && fs.existsSync(LEGACY_DASHBOARD_AT_ROOT)) {
+    try { fs.renameSync(LEGACY_DASHBOARD_AT_ROOT, DASHBOARD_PATH); }
+    catch { /* fall through — fresh dashboard will be written below */ }
+  } else if (fs.existsSync(LEGACY_DASHBOARD_AT_ROOT)) {
+    // both exist (post-migration leftover) — keep the canonical one, drop legacy
+    try { fs.unlinkSync(LEGACY_DASHBOARD_AT_ROOT); } catch { /* non-fatal */ }
+  }
 
   let content = '';
   if (fs.existsSync(DASHBOARD_PATH)) {

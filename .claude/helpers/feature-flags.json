@@ -9,6 +9,7 @@
     "safla":        true,
     "graphify":     true,
     "langraph":     true,
+    "project_scope":true,
     "crewai":       false
   },
   "ssa": {
