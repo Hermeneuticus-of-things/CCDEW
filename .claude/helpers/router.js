@@ -76,6 +76,47 @@ const AGENT_CAPABILITIES = {
   'memory-specialist':  ['memory-consolidation', 'obsidian-sync', 'session-state'],
 };
 
+// ─── ENNEAGRAM ARCS (mirrors enneagram_router.py topology) ───────────────────
+// Hexad ring: 1→4→2→8→5→7→1 ; Triangle ring: 3→6→9→3 ; Wings (bidirectional)
+const ENNEAGRAM_ARCS = {
+  1: [4, 2, 9],   2: [8, 1, 3],   3: [6, 2, 4],
+  4: [2, 3, 5],   5: [7, 4, 6],   6: [9, 5, 7],
+  7: [1, 6, 8],   8: [5, 7, 9],   9: [3, 8, 1],
+};
+
+/**
+ * BFS shortest path between two enneagram nodes (mirrors enneagram_router.py).
+ * Returns [from,…,to] or null if unreachable. Used by hook-handler to validate
+ * workflow paths and propose next-hop suggestions.
+ */
+function bfsPath(from, to) {
+  from = Number(from); to = Number(to);
+  if (!ENNEAGRAM_ARCS[from] || !ENNEAGRAM_ARCS[to]) return null;
+  if (from === to) return [from];
+  const visited = new Set([from]);
+  const queue = [[from]];
+  while (queue.length) {
+    const path = queue.shift();
+    const tail = path[path.length - 1];
+    for (const next of ENNEAGRAM_ARCS[tail]) {
+      if (visited.has(next)) continue;
+      if (next === to) return [...path, next];
+      visited.add(next);
+      queue.push([...path, next]);
+    }
+  }
+  return null;
+}
+
+/**
+ * Returns the natural next node in the cycle (hexad or triangle) from the
+ * given node — used to suggest the follow-up agent after a successful task.
+ */
+function nextNode(node) {
+  const arcs = ENNEAGRAM_ARCS[Number(node)];
+  return arcs ? arcs[0] : null;
+}
+
 // ─── ROUTING ─────────────────────────────────────────────────────────────────
 
 function routeTask(task) {
@@ -161,4 +202,4 @@ if (task) {
     .map(([n, r]) => `${n}=${r.agent}`).join(', '));
 }
 
-module.exports = { routeTask, ENNEAGRAM_NODES, ENNEAGRAM_ROUTING, AGENT_CAPABILITIES };
+module.exports = { routeTask, ENNEAGRAM_NODES, ENNEAGRAM_ROUTING, AGENT_CAPABILITIES, ENNEAGRAM_ARCS, bfsPath, nextNode };

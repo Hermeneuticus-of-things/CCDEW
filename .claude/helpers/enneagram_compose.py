@@ -110,9 +110,9 @@ ESCALATION_TRIGGERS = {
 SELF_TEST_CONFIG = {
     "review_interval_days": 90,
     "audit_targets": [
-        os.path.join("_SETTINGS", "RULES", "enneagram_multi_zoom_protocol.md"),
-        os.path.join(".claude", "helpers", "enneagram_compose.py"),
-        os.path.join(".claude", "helpers", "enneagram_router.py"),
+        os.path.join(WORKSPACE, "_SETTINGS", "RULES", "enneagram_multi_zoom_protocol.md"),
+        os.path.join(WORKSPACE, ".claude", "helpers", "enneagram_compose.py"),
+        os.path.join(WORKSPACE, ".claude", "helpers", "enneagram_router.py"),
     ],
 }
 

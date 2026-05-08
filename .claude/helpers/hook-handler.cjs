@@ -274,11 +274,19 @@ const handlers = {
   },
 
   'pre-bash': () => {
-    const cmd = (hookInput.command || prompt).toLowerCase();
-    const dangerous = ['rm -rf /', 'format c:', 'del /s /q c:\\', ':(){:|:&};:'];
-    for (const d of dangerous) {
-      if (cmd.includes(d)) {
-        console.error(`[BLOCKED] Dangerous command detected: ${d}`);
+    const cmd = (hookInput.command || prompt || '').toLowerCase();
+    // Fix #7 — match dangerous commands only when they appear as actual commands
+    // (start of string, after ;/&&/||/|/`/$( ), not inside quoted strings or comments).
+    // Pattern: optional command-separator + literal danger token + word boundary.
+    const dangerousPatterns = [
+      /(^|[;&|`]|\$\()\s*rm\s+-rf\s+\/(\s|$)/,
+      /(^|[;&|`]|\$\()\s*format\s+c:/,
+      /(^|[;&|`]|\$\()\s*del\s+\/s\s+\/q\s+c:\\/,
+      /:\(\)\s*\{\s*:\|:&\s*\}\s*;:/,
+    ];
+    for (const re of dangerousPatterns) {
+      if (re.test(cmd)) {
+        console.error(`[BLOCKED] Dangerous command detected: ${re}`);
         process.exit(1);
       }
     }
@@ -297,12 +305,14 @@ const handlers = {
 
   'post-bash': () => {
     const exitCode = hookInput.exit_code ?? hookInput.exitCode ?? null;
-    // Only record SAFLA failure on exit ≥2 (actual errors).
-    // Exit code 1 is used legitimately by grep (no match), diff (files differ), etc.
-    if (exitCode !== null && exitCode >= 2) {
-      if (safla && router && router.routeTask && prompt) {
+    // Fix #2 — only record SAFLA failure when we have the ORIGINAL user task
+    // (env CLAUDE_USER_PROMPT), not the bash command itself. Otherwise we'd
+    // penalize the node routed for "npm test" rather than the actual task.
+    const userTask = process.env.CLAUDE_USER_PROMPT || '';
+    if (exitCode !== null && exitCode >= 2 && userTask.trim().split(/\s+/).length >= 4) {
+      if (safla && router && router.routeTask) {
         try {
-          const result = router.routeTask(prompt);
+          const result = router.routeTask(userTask);
           safla.recordOutcome(result.node, false, `bash exit:${exitCode}`);
         } catch { /* non-fatal */ }
       }
@@ -562,13 +572,28 @@ const handlers = {
     if (intelligence && intelligence.feedback) {
       try { intelligence.feedback(true); } catch (e) { /* non-fatal */ }
     }
-    // SAFLA: record success outcome for last routed node
+    // SAFLA: record success outcome only when prompt is meaningful (≥4 words).
+    // Fix #1 — empty/short prompts (e.g. SubagentStop) defaulted to node 3 and
+    // skewed stats heavily. Skip the silent default.
     let postTaskNode = null;
-    if (safla && router && router.routeTask && prompt) {
+    const promptWords = (prompt || '').trim().split(/\s+/).filter(Boolean);
+    if (safla && router && router.routeTask && promptWords.length >= 4) {
       try {
         const result = router.routeTask(prompt);
         postTaskNode = result.node;
         safla.recordOutcome(result.node, true, prompt.substring(0, 60));
+      } catch { /* non-fatal */ }
+    }
+    // Fix #3 — surface the natural next node from enneagram topology so the
+    // user/Claude can chain agents along the BFS path instead of re-routing
+    // from scratch each turn.
+    if (postTaskNode !== null && router && router.nextNode) {
+      try {
+        const nxt = router.nextNode(postTaskNode);
+        if (nxt && router.ENNEAGRAM_NODES[nxt]) {
+          const nxtAgent = router.ENNEAGRAM_NODES[nxt].agent;
+          console.log(`[ENNEAGRAM] Next hop: node ${postTaskNode} → ${nxt} (${nxtAgent})`);
+        }
       } catch { /* non-fatal */ }
     }
     // enneagram_compose: reinforce adaptive topology on success
@@ -598,15 +623,26 @@ const handlers = {
     console.log('[OK] Task completed');
   },
 
-  'compact-manual': () => {
+  'compact-manual': async () => {
     console.log('[COMPACT] Manual compaction triggered — saving state');
+    // Fix #5 — wrap consolidate in shared INTELLIGENCE_TIMEOUT_MS so PreCompact never hangs.
     if (intelligence && intelligence.consolidate) {
-      try { intelligence.consolidate(); } catch { /* non-fatal */ }
+      await runWithTimeout(() => intelligence.consolidate(), 'intelligence.consolidate()');
     }
   },
 
   'compact-auto': () => {
+    // Fix #6 — auto compaction also persists state (was a no-op before).
     console.log('[COMPACT] Auto compaction triggered — context limit reached');
+    if (codeburn) {
+      try {
+        const t = codeburn.totals();
+        if (t.source !== 'unavailable') {
+          if (safla) safla.syncWithCodeBurn(t);
+          if (metricsUpdate) metricsUpdate.run(t);
+        }
+      } catch { /* non-fatal */ }
+    }
   },
 
   'stats': () => {
