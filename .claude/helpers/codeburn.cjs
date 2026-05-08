@@ -15,8 +15,10 @@ const CACHE_PATH = path.join(DATA_DIR, 'codeburn-cache.json');
 
 // Calea CLI detectată la instalare
 const CODEBURN_BIN = (() => {
+  const home = process.env.HOME || process.env.USERPROFILE || '';
   const candidates = [
-    '/home/think/.npm-global/bin/codeburn',
+    path.join(home, '.npm-global', 'bin', 'codeburn'),
+    path.join(home, '.local', 'bin', 'codeburn'),
     '/usr/local/bin/codeburn',
     '/usr/bin/codeburn',
   ];

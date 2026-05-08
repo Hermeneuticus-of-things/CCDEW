@@ -20,7 +20,7 @@ import time
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 WORKSPACE   = os.environ.get('WORKSPACE_DIR', os.path.normpath(os.path.join(_script_dir, '..', '..')))
 
-MEMORY_DIR   = os.path.join(WORKSPACE, 'memory')
+MEMORY_DIR   = os.path.join(WORKSPACE, '_MEMORY')
 INDEX_PATH   = os.path.join(WORKSPACE, '.claude-flow', 'data', 'session-critical-index.json')
 PROJECTS_DIR = os.path.join(WORKSPACE, 'PROJECTS')
 

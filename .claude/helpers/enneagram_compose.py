@@ -15,7 +15,7 @@ Usage:
   python enneagram_compose.py "refactor 8 Android components" --files 8
   python enneagram_compose.py "fix 1 typo" --files 1   # → returns "no swarm needed"
 
-Reference: D:\\Cloude Code\\_SETTINGS\\RULES\\enneagram_multi_zoom_protocol.md
+Reference: _SETTINGS/RULES/enneagram_multi_zoom_protocol.md
 """
 
 import sys
@@ -946,7 +946,7 @@ def format_output(composition: dict, output_format: str = "text") -> str:
         lines.append(f"               Întreabă: {info['questions']}")
 
     lines.append("\n" + "=" * 70)
-    lines.append("Detalii: D:\\Cloude Code\\_SETTINGS\\RULES\\enneagram_multi_zoom_protocol.md")
+    lines.append(f"Details: {os.path.join(WORKSPACE, '_SETTINGS', 'RULES', 'enneagram_multi_zoom_protocol.md')}")
     lines.append("=" * 70)
 
     return "\n".join(lines)

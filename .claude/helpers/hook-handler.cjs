@@ -598,6 +598,17 @@ const handlers = {
     console.log('[OK] Task completed');
   },
 
+  'compact-manual': () => {
+    console.log('[COMPACT] Manual compaction triggered — saving state');
+    if (intelligence && intelligence.consolidate) {
+      try { intelligence.consolidate(); } catch { /* non-fatal */ }
+    }
+  },
+
+  'compact-auto': () => {
+    console.log('[COMPACT] Auto compaction triggered — context limit reached');
+  },
+
   'stats': () => {
     if (intelligence && intelligence.stats) {
       intelligence.stats(args.includes('--json'));

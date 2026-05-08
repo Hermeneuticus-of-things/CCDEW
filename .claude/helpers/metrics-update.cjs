@@ -17,7 +17,13 @@ const DASHBOARD_PATH= path.join(WORKSPACE, '_DASHBOARD.md');
 const FLAGS_PATH    = path.join(__dirname, 'feature-flags.json');
 
 const CODEBURN_BIN  = (() => {
-  const candidates = ['/home/think/.npm-global/bin/codeburn','/usr/local/bin/codeburn','/usr/bin/codeburn'];
+  const home = process.env.HOME || process.env.USERPROFILE || '';
+  const candidates = [
+    path.join(home, '.npm-global', 'bin', 'codeburn'),
+    path.join(home, '.local', 'bin', 'codeburn'),
+    '/usr/local/bin/codeburn',
+    '/usr/bin/codeburn',
+  ];
   for (const c of candidates) { if (fs.existsSync(c)) return c; }
   try { return execSync('which codeburn',{encoding:'utf-8',timeout:2000}).trim(); } catch { return null; }
 })();
