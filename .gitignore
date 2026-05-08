@@ -72,6 +72,11 @@ ruvector.db
 # Metrics snapshots (contain cost data — keep template only)
 _METRICS/codeburn-*.json
 
+# Runtime-regenerated telemetry (per-machine state, regenerates on first hook)
+_METRICS/_DASHBOARD.md
+_METRICS/codeburn-optimize-latest.md
+_MEMORY/enneagram_adaptive_topology.json
+
 # Auto-memory (session-specific)
 memory/project_*.md
 memory/user_*.md
