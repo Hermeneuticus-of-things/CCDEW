@@ -287,6 +287,51 @@ const handlers = {
     console.log('[OK] Command validated');
   },
 
+  'pre-edit': () => {
+    const file = toolInput.file_path || process.env.TOOL_INPUT_file_path || '';
+    // Warn on direct edits to sensitive workspace files
+    const sensitive = ['.claude/settings.json', 'CLAUDE.md', '.gitignore'];
+    if (file && sensitive.some(s => file.endsWith(s))) {
+      console.log(`[PRE-EDIT] ⚠️  Editing sensitive file: ${path.basename(file)}`);
+    }
+    console.log('[OK] Edit validated');
+  },
+
+  'post-bash': () => {
+    const exitCode = hookInput.exit_code ?? hookInput.exitCode ?? null;
+    if (exitCode !== null && exitCode !== 0) {
+      if (safla && router && router.routeTask && prompt) {
+        try {
+          const result = router.routeTask(prompt);
+          safla.recordOutcome(result.node, false, `bash exit:${exitCode}`);
+        } catch { /* non-fatal */ }
+      }
+    }
+    console.log('[OK] Bash completed');
+  },
+
+  'status': () => {
+    const sessionId = process.env.CLAUDE_SESSION_ID || 'unknown';
+    const flags = loadFeatureFlags();
+    const active = Object.entries(flags.components || {}).filter(([,v]) => v).map(([k]) => k).join(', ');
+    if (codeburn) {
+      try {
+        const cached = codeburn.totals();
+        if (cached.source !== 'unavailable') {
+          console.log(`[STATUS] $${(cached.today_cost||0).toFixed(2)} today | ${cached.today_calls||0} calls | Active: ${active}`);
+          return;
+        }
+      } catch { /* non-fatal */ }
+    }
+    console.log(`[STATUS] Session active | Components: ${active}`);
+  },
+
+  'notify': () => {
+    const msg = hookInput.message || hookInput.notification || prompt || '';
+    if (msg) console.log(`[NOTIFY] ${msg.substring(0, 120)}`);
+    else console.log('[NOTIFY] Notification received');
+  },
+
   'post-edit': () => {
     if (session && session.metric) {
       try { session.metric('edits'); } catch (e) { /* no active session */ }

@@ -1,7 +1,7 @@
 {
-  "_comment": "Workspace Enneagram Node Map — Consiliu project active",
-  "_version": 1,
-  "_updated": "2026-05-04",
+  "_comment": "Workspace Enneagram Node Map — v2.0 with proper workflow templates",
+  "_version": 2,
+  "_updated": "2026-05-08",
 
   "projects": {
     "Consiliu": {
@@ -24,12 +24,32 @@
     "5": ["debug", "analysis", "profiling", "bottleneck"],
     "6": ["testing", "validation", "regression"],
     "7": ["design", "architecture", "planning"],
-    "8": ["workflow", "coordination", "session-start"],
-    "9": ["memory", "consolidation", "workflow"]
+    "8": ["workflow", "coordination", "orchestration"],
+    "9": ["memory", "consolidation", "sync"]
   },
 
   "workflow_templates": {
-    "hexad": [1, 4, 2, 8, 5, 7],
-    "triangle": [3, 6, 9]
+    "hexad": {
+      "trigger_keywords": [
+        "architecture", "design", "review", "research", "analyze", "integrate",
+        "debug", "refactor", "migrate", "audit", "system", "distributed",
+        "cross", "complex", "multiple", "investigate", "evaluate"
+      ],
+      "path": [1, 4, 2, 8, 5, 7],
+      "agents": [
+        "reviewer", "researcher", "backend-dev",
+        "sparc-orchestrator", "analyst", "architecture"
+      ],
+      "description": "Complex cross-project task — 6-agent hexad cycle (1→4→2→8→5→7)"
+    },
+    "triangle": {
+      "trigger_keywords": [
+        "fix", "build", "implement", "add", "create", "write",
+        "update", "test", "check", "run", "generate", "make", "patch"
+      ],
+      "path": [3, 6, 9],
+      "agents": ["coder", "tester", "memory-specialist"],
+      "description": "Fast direct implementation — 3-agent triangle cycle (3→6→9)"
+    }
   }
 }
