@@ -9,6 +9,7 @@ _version: 1
 _created: <!-- fill in date -->
 _modified: <!-- fill in date -->
 _modified_by: user
+related: [_INBOX.md, _PROTOCOL.md]
 ---
 
 # User Notes

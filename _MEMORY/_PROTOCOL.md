@@ -9,7 +9,7 @@ _version: 1
 _created: <!-- fill in date -->
 _modified: <!-- fill in date -->
 _modified_by: claude
-related: []
+related: [_INBOX.md, _DASHBOARD.md, _USER_NOTES.md]
 ---
 
 # Obsidian Interactive Memory v1 — Protocol
