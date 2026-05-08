@@ -25,7 +25,7 @@ All numbers below are **measured from real sessions**, not estimates. Reproduce 
 | Metric | What you get |
 |---|---|
 | Per-session cost | live in status line (`🟢 $0.43 today / 12 calls`) |
-| Daily cost | auto-written to `_DASHBOARD.md` at SessionEnd |
+| Daily cost | auto-written to `_METRICS/_DASHBOARD.md` at SessionEnd |
 | Monthly cost | rolling tally (`$230.82 this month`) |
 | Per-call average | flagged red if > $0.05 |
 | Optimization suggestions | auto-generated in `_METRICS/codeburn-optimize-latest.md` |
@@ -189,8 +189,7 @@ workspace/
 ├── _TEMPLATES/                ← scaffolding (android/book/generic)
 ├── _SETTINGS/RULES/           ← workspace protocols
 ├── _MEMORY/                   ← Obsidian memory vault
-├── _METRICS/                  ← codeburn snapshots + optimize
-├── _DASHBOARD.md              ← auto-updated at SessionEnd
+├── _METRICS/                  ← codeburn snapshots + optimize + _DASHBOARD.md (auto-updated at SessionEnd)
 └── BEST_PRACTICES.md          ← loaded at every session start
 ```
 
@@ -237,6 +236,12 @@ node .claude/helpers/hook-handler.cjs lg
 
 # Intelligence/memory diagnostics
 node .claude/helpers/hook-handler.cjs stats
+
+# Project Scope Guard — show currently detected active project
+node .claude/helpers/hook-handler.cjs scope-status
+
+# Project Scope Guard — pin the active project explicitly (overrides auto-detect)
+node .claude/helpers/hook-handler.cjs scope-set <name>
 ```
 
 ## Slash commands in Claude Code
@@ -321,11 +326,33 @@ Complexity is auto-determined from file count:
 
 ---
 
+## Project Scope Guard
+
+**What:** an auto-detector that figures out which `PROJECTS/<Name>/` you are actively working in and surfaces it at every prompt, plus a soft warning when an edit lands outside that scope.
+
+**Why:** the workspace hosts many parallel projects. Without scope, edits drift across `PROJECTS/` and root files get polluted. Scope Guard keeps work focused without ever blocking.
+
+**How:** `.claude/helpers/project-scope.cjs` resolves the active project by checking, in order: env var `CLAUDE_PROJECT` → cwd → recently-modified files (last 2h) → mention in the prompt. Result is cached 5 min in `.claude-flow/data/active-project.json`. Works for any project added under `PROJECTS/` — no hardcoding. Toggle via `components.project_scope` in `feature-flags.json`.
+
+**Example output** (UserPromptSubmit hint):
+
+```
+[SCOPE] Active: PROJECTS/Consiliu (detected via cwd) | top: doc/INDEX.md, CLAUDE.md, src/main.py
+```
+
+**Pre-edit warning** (edit outside the active project):
+
+```
+[SCOPE WARN] Edit target _SETTINGS/RULES/foo.md is outside active project PROJECTS/Consiliu (warning only, not blocked)
+```
+
+---
+
 ## Automatic dashboard
 
 At every SessionEnd, the system automatically updates:
 
-- **`_DASHBOARD.md`** — live CodeBurn metrics (cost today/month, calls, cost/call)
+- **`_METRICS/_DASHBOARD.md`** — live CodeBurn metrics (cost today/month, calls, cost/call). One-time auto-migration in `metrics-update.cjs` moves a legacy root `_DASHBOARD.md` here on first run.
 - **`_METRICS/codeburn-optimize-latest.md`** — waste reduction suggestions
 - **`_METRICS/codeburn-<timestamp>.json`** — full snapshot (background)
 - **`.claude-flow/reports/session-<timestamp>.md`** — complete Graphify report
@@ -367,7 +394,7 @@ SessionEnd
     ├── CodeBurn.totals() [cache-first]
     ├── SAFLA.syncWithCodeBurn(burnTotals)
     ├── Graphify.generateReport()
-    ├── MetricsUpdate → _DASHBOARD.md + _METRICS/
+    ├── MetricsUpdate → _METRICS/_DASHBOARD.md + _METRICS/
     └── LangGraph.clearActive()
 ```
 

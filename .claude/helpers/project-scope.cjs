@@ -113,11 +113,12 @@ function detect(prompt, options = {}) {
   }
   if (bestProj) return { name: bestProj, path: `PROJECTS/${bestProj}`, detected_from: 'recent-edit' };
 
-  // 4. Project name mentioned in prompt
+  // 4. Project name mentioned in prompt — word-boundary match so "auth" in
+  // "authenticate" doesn't accidentally match a project named "Auth".
   if (prompt) {
-    const lower = prompt.toLowerCase();
     for (const proj of projects) {
-      if (lower.includes(proj.toLowerCase())) {
+      const re = new RegExp('\\b' + escapeRegExp(proj) + '\\b', 'i');
+      if (re.test(prompt)) {
         return { name: proj, path: `PROJECTS/${proj}`, detected_from: 'prompt' };
       }
     }
@@ -136,11 +137,15 @@ function loadState() {
 function saveState(state) {
   try {
     fs.mkdirSync(path.dirname(STATE_PATH), { recursive: true });
-    const tmp = STATE_PATH + '.tmp';
+    // Per-pid+timestamp tmp suffix avoids tmp clobbering when concurrent
+    // hooks (post-edit + pre-edit) both call saveState().
+    const tmp = STATE_PATH + '.' + process.pid + '.' + Date.now() + '.tmp';
     fs.writeFileSync(tmp, JSON.stringify(state, null, 2), 'utf-8');
     fs.renameSync(tmp, STATE_PATH);
   } catch { /* non-fatal */ }
 }
+
+function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 /**
  * Get currently active project, refreshing detection if stale.
@@ -193,10 +198,13 @@ function setActive(name) {
  */
 function isFileInScope(filePath, activeProject) {
   if (!filePath || !activeProject) return true;
-  const abs = path.isAbsolute(filePath) ? filePath : path.join(WORKSPACE, filePath);
-  const projAbs = path.join(WORKSPACE, activeProject.path);
-  // Allowed: anywhere under the project dir
-  if (abs === projAbs || abs.startsWith(projAbs + path.sep)) return true;
+  // Use path.relative to handle cross-platform separator mismatch and any
+  // mixed-slash inputs from hookInput.toolInput.file_path on Windows.
+  const abs = path.resolve(path.isAbsolute(filePath) ? filePath : path.join(WORKSPACE, filePath));
+  const projAbs = path.resolve(path.join(WORKSPACE, activeProject.path));
+  if (abs === projAbs) return true;
+  const rel = path.relative(projAbs, abs);
+  if (rel && !rel.startsWith('..') && !path.isAbsolute(rel)) return true;
   // Allowed: workspace meta files (root CLAUDE.md, README, etc.) the user
   // might genuinely need to update — these are explicit, never accidental.
   // We'll WARN on root edits but not classify them as out-of-scope-rejection.

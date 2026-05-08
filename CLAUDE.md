@@ -23,10 +23,26 @@
 
 ---
 
-## Swarm preset — 1000-agent holographic-mesh (default)
+## Parallel agents — default behavior (portable across machines)
 
-Trigger: "swarm" / "mesh" / "N parallel agents" / "holographic" / "what did I miss?" / gap-audit / refactor ≥5 files → apply AUTO `hierarchical-mesh, maxAgents=1000 symbolic, strategy=specialized, exclusive scope per agent`.
-**DO NOT apply to:** linear text editing, "one change at a time", strict serial dependencies.
+**Default rule:** whenever a task has 2+ independent sub-tasks, spawn ruflo agents in parallel. Single sequential work is the exception, not the norm. Goal: maximum quality + speed + credit economy on every machine that clones this repo.
+
+**Spawn in parallel when:**
+- multi-file audit, code review, refactor across ≥3 files
+- documentation pass that touches independent sections
+- test generation while implementation continues
+- research while another agent edits
+- any "check if I missed something" / gap-audit / quality sweep
+- any prompt where the AUTO-SWARM DIRECTIVE hint shows HEXAD or TRIANGLE
+
+**Sequential is correct when:**
+- single small edit (1–2 lines)
+- linear text editing of one document
+- strict serial dependency (B reads A's output)
+- explicit "one change at a time" from the user
+
+**Swarm preset (when keyword swarm/mesh/holographic appears or refactor ≥5 files):** apply AUTO `hierarchical-mesh, maxAgents=1000 symbolic, strategy=specialized, exclusive scope per agent`.
+
 Details: [`_SETTINGS/RULES/swarm_preset.md`](_SETTINGS/RULES/swarm_preset.md)
 
 ## Obsidian context

@@ -39,7 +39,7 @@ from typing import Any, Iterable
 try:
     import yaml
 except ImportError:
-    print("EROARE: PyYAML lipseste. Ruleaza: pip install pyyaml", file=sys.stderr)
+    print("ERROR: PyYAML missing. Run: pip install pyyaml", file=sys.stderr)
     sys.exit(2)
 
 # Set WORKSPACE_DIR env variable or change this path to your workspace root
@@ -206,7 +206,7 @@ def cmd_search(args, targets: list[tuple[str, Path]]) -> int:
     total_hits = 0
     for label, vault in targets:
         if not vault.is_dir():
-            print(f"[{label}] vault inexistent: {vault}", file=sys.stderr)
+            print(f"[{label}] vault does not exist: {vault}", file=sys.stderr)
             continue
         vault_hits = 0
         for path in iter_md(vault, args.in_folder):
@@ -231,7 +231,7 @@ def cmd_search(args, targets: list[tuple[str, Path]]) -> int:
                     snippet = line if len(line) <= 200 else line[:197] + "..."
                     print(f"  L{line_no}: {snippet}")
                 if total_hits >= args.max_files:
-                    print(f"\n... oprit la {args.max_files} fisiere.")
+                    print(f"\n... stopped at {args.max_files} files.")
                     return 0
     if total_hits == 0:
         print("Niciun rezultat.")
@@ -308,7 +308,7 @@ def cmd_fm(args, targets: list[tuple[str, Path]]) -> int:
         else:
             v = n.fm.get(args.key)
             if v is None:
-                print(f"(lipseste: {args.key})", file=sys.stderr)
+                print(f"(missing: {args.key})", file=sys.stderr)
                 return 1
             print(json.dumps(v, ensure_ascii=False, default=str)
                   if not isinstance(v, str) else v)
@@ -333,9 +333,9 @@ def cmd_fm(args, targets: list[tuple[str, Path]]) -> int:
         if args.key in n.fm:
             del n.fm[args.key]
             write_note(n)
-            print(f"OK: sters {args.key}")
+            print(f"OK: deleted {args.key}")
             return 0
-        print(f"(lipsea deja: {args.key})")
+        print(f"(already missing: {args.key})")
         return 1
     raise SystemExit(f"actiune fm necunoscuta: {args.action}")
 
@@ -353,7 +353,7 @@ def cmd_tags(args, targets: list[tuple[str, Path]]) -> int:
         raise SystemExit(f"tags {args.action} necesita <tag>")
     if args.action == "add":
         if args.tag in tags:
-            print(f"(deja: {args.tag})")
+            print(f"(already present: {args.tag})")
             return 0
         tags.append(args.tag)
         n.fm["tags"] = tags
@@ -383,7 +383,7 @@ def cmd_replace(args, targets: list[tuple[str, Path]]) -> int:
         count = text.count(args.old)
         new_text = text.replace(args.old, args.new)
     if count == 0:
-        print("(0 inlocuiri — pattern negasit)")
+        print("(0 replacements — pattern not found)")
         return 1
     if args.dry_run:
         print(f"DRY: ar inlocui {count} aparitii in {path.relative_to(vault)}")
@@ -485,11 +485,11 @@ def cmd_link(args, targets: list[tuple[str, Path]]) -> int:
     if a_changed:
         print(f"OK: {a.relative_to(vault)} ← {b_link}")
     else:
-        print(f"(deja avea linkul: {a.relative_to(vault)})")
+        print(f"(already had link: {a.relative_to(vault)})")
     if b_changed:
         print(f"OK: {b.relative_to(vault)} ← {a_link}")
     else:
-        print(f"(deja avea linkul: {b.relative_to(vault)})")
+        print(f"(already had link: {b.relative_to(vault)})")
     return 0
 
 
@@ -861,7 +861,7 @@ def cmd_setup(args, default_workspace: Path) -> int:
 
         print(f"--- {name} (v{cur_ver} → v{target_ver}) ---")
         if cur_ver >= target_ver:
-            print(f"  · deja la zi (v{cur_ver})")
+            print(f"  · already up to date (v{cur_ver})")
             # Even at latest, refresh dynamic content (memory index)
             if auto or _ask_yes(f"  refresh dynamic content (memory index)?"):
                 _upgrade_v3(proj_dir, workspace, key, existing)
@@ -900,7 +900,7 @@ def cmd_setup(args, default_workspace: Path) -> int:
     # Cap history to last 20 runs
     reg["history"] = reg["history"][-20:]
     save_registry(workspace, reg)
-    print(f"Run salvat: {workspace / REGISTRY_REL}")
+    print(f"Run saved: {workspace / REGISTRY_REL}")
     print(f"Total proiecte procesate: {len(run_summary)}")
     return 0
 
@@ -936,7 +936,7 @@ def cmd_audit(args, default_workspace: Path) -> int:
     print(f"=== AUDIT vault: {workspace} ===\n")
 
     # 1. Token cost al fisierelor auto-loaded
-    print("[1] Token cost — fisiere auto-loaded la sesiune:")
+    print("[1] Token cost — files auto-loaded at session start:")
     total_auto = 0
     for p in _claude_md_chain(workspace):
         text = p.read_text(encoding="utf-8", errors="replace")
@@ -960,9 +960,9 @@ def cmd_audit(args, default_workspace: Path) -> int:
         no_proj = [n for n in notes if not n.fm.get("project")]
         no_type = [n for n in notes if not n.fm.get("type")]
         no_tags = [n for n in notes if not n.tags]
-        print(f"  fara project:  {len(no_proj)}")
-        print(f"  fara type:     {len(no_type)}")
-        print(f"  fara tags:     {len(no_tags)}")
+        print(f"  without project:  {len(no_proj)}")
+        print(f"  without type:     {len(no_type)}")
+        print(f"  without tags:     {len(no_tags)}")
 
         # Duplicate names
         by_name: dict[str, list[Note]] = {}
@@ -972,7 +972,7 @@ def cmd_audit(args, default_workspace: Path) -> int:
                 by_name.setdefault(nm, []).append(n)
         dups = {k: v for k, v in by_name.items() if len(v) > 1}
         if dups:
-            print(f"\n  ⚠ Nume duplicate ({len(dups)}):")
+            print(f"\n  ⚠ Duplicate names ({len(dups)}):")
             for nm, notes_list in list(dups.items())[:10]:
                 print(f"    '{nm}'")
                 for n in notes_list:
@@ -1007,7 +1007,7 @@ def cmd_audit(args, default_workspace: Path) -> int:
             for n in unindexed[:10]:
                 print(f"    - {n.rel}")
             if len(unindexed) > 10:
-                print(f"    ... +{len(unindexed)-10} mai multe")
+                print(f"    ... +{len(unindexed)-10} more")
             print()
 
         # 5. Auto-generated indexes
@@ -1025,9 +1025,9 @@ def cmd_audit(args, default_workspace: Path) -> int:
     else:
         print(f"  ✓ Auto-load = {total_auto} tk (lean)")
     if mem_dir.is_dir() and no_proj:
-        print(f"  ⚠ {len(no_proj)} memory notes fara `project:` — adauga ca sa apara in _INDEX_MEMORY")
+        print(f"  ⚠ {len(no_proj)} memory notes without `project:` — add it so they appear in _INDEX_MEMORY")
     if mem_dir.is_dir() and dups:
-        print(f"  ⚠ {len(dups)} duplicate de nume — consolideaza")
+        print(f"  ⚠ {len(dups)} name duplicates — consolidate")
     return 0
 
 
@@ -1106,7 +1106,7 @@ def main() -> int:
     if args.cmd in ("vaults", "setup", "audit"):
         ws = (args.vault.resolve() if args.vault else DEFAULT_WORKSPACE)
         if not ws.is_dir():
-            print(f"EROARE: workspace inexistent: {ws}", file=sys.stderr)
+            print(f"ERROR: workspace does not exist: {ws}", file=sys.stderr)
             return 2
         return {"vaults": cmd_vaults, "setup": cmd_setup,
                 "audit": cmd_audit}[args.cmd](args, ws)
