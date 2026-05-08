@@ -476,7 +476,7 @@ Multi-zoom + Auto-Swarm Enneagram (META-013):
 
 **Soluție:** log structured pe disc per sesiune:
 ```
-D:\Cloude Code\_MEMORY\enneagram_telemetry\YYYY-MM\session_HHMMSS.json
+<WORKSPACE_DIR>/_MEMORY\enneagram_telemetry\YYYY-MM\session_HHMMSS.json
 {
   "session_id", "task_type", "num_files",
   "phases_executed": [0,1,2,3,4],

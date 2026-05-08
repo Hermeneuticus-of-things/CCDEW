@@ -17,7 +17,7 @@
 | Session start / 3 reguli critice | `_SETTINGS/RULES/session_start.md` |
 | Format CHANGELOG | `_SETTINGS/RULES/changelog.md` |
 | Cerinta noua mid-task | `_SETTINGS/RULES/cerinta_noua.md` |
-| Best practices cross-project | `D:\Cloude Code\BEST_PRACTICES.md` |
+| Best practices cross-project | `<WORKSPACE_DIR>/BEST_PRACTICES.md` |
 | Best practices carte mature (Karma Book) | `PROJECTS/Karma Book/BEST_PRACTICES.md` |
 | Best practices {{NUME_PROIECT}} | `../BEST_PRACTICES.md` |
 

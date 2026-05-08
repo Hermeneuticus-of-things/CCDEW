@@ -7,8 +7,8 @@ Structure mirrors the Binder hierarchy through folder naming.
 """
 import os, re, sys
 
-SRC = r"D:\Cloude Code\PROJECTS\Karma Book\04_CARTE"
-OUT = r"D:\Cloude Code\PROJECTS\Karma Book\export\scrivener_import"
+SRC = r"<WORKSPACE_DIR>/PROJECTS\Karma Book\04_CARTE"
+OUT = r"<WORKSPACE_DIR>/PROJECTS\Karma Book\export\scrivener_import"
 
 # Chapter titles for folder names
 CHAPTERS = {

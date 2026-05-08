@@ -21,7 +21,7 @@
 | Format BUG_LOG | `_SETTINGS/RULES/bug_log.md` |
 | Cerinta noua mid-task | `_SETTINGS/RULES/cerinta_noua.md` |
 | Schema versionare | `_SETTINGS/RULES/versioning.md` |
-| Best practices cross-project | `D:\Cloude Code\BEST_PRACTICES.md` |
+| Best practices cross-project | `<WORKSPACE_DIR>/BEST_PRACTICES.md` |
 | Best practices {{NUME_PROIECT}} | `../BEST_PRACTICES.md` |
 
 ## Fisiere operationale in root proiect

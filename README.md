@@ -57,7 +57,7 @@ All numbers below are **measured from real sessions**, not estimates. Reproduce 
 | Atomic state writes | ✅ tmp+rename for safla/intelligence (no torn writes under concurrent hooks) |
 | Disk usage bounded | ✅ log rotation at 1–2 MB on 3 jsonl files |
 | Crash recovery | ✅ corrupt state files log warning, never crash hook chain |
-| Cross-platform | ✅ Linux + macOS + Windows (no hardcoded `/home/think` or `D:/` paths) |
+| Cross-platform | ✅ Linux + macOS + Windows (paths resolved via `WORKSPACE_DIR` env or script-relative) |
 
 ---
 

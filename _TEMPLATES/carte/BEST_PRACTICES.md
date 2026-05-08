@@ -1,6 +1,6 @@
 # BEST_PRACTICES.md — {{NUME_PROIECT}} (Carte)
 
-> **Parent:** `D:\Cloude Code\BEST_PRACTICES.md` — patterns cross-project
+> **Parent:** `<WORKSPACE_DIR>/BEST_PRACTICES.md` — patterns cross-project
 > **Related:** `doc/INDEX.md` — detalii proiect
 > **Scop:** Lectii specifice acestei carti — protocoale editoriale, gotchas export, disciplina autor.
 > **Creste cu:** Fiecare editare, capitol finalizat, export.
@@ -51,7 +51,7 @@ Exemple anti-patterns de evitat:
 
 ## 🌳 Cross-links fractal
 
-- **Parent:** `D:\Cloude Code\BEST_PRACTICES.md` — patterns cross-project
+- **Parent:** `<WORKSPACE_DIR>/BEST_PRACTICES.md` — patterns cross-project
 - **Sibling reference:** `PROJECTS/Karma Book/BEST_PRACTICES.md` — patterns editoriale mature
 - **Related doc:** `doc/BOOK_STRUCTURE.md`, `doc/EXPORT_TOOLS.md`
 - **Operational:** `CHANGELOG.md`, `TODO.md`

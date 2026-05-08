@@ -7,10 +7,10 @@ import os, re, uuid, shutil
 from datetime import datetime
 from xml.etree.ElementTree import Element, SubElement, ElementTree, indent
 
-SRC = r"D:\Cloude Code\PROJECTS\Karma Book\04_CARTE"
+SRC = r"<WORKSPACE_DIR>/PROJECTS\Karma Book\04_CARTE"
 from datetime import datetime as _dt
 _stamp = _dt.now().strftime('%Y-%m-%d_%H%M')
-OUT = rf"D:\Cloude Code\PROJECTS\Karma Book\export\Karma_{_stamp}.scriv"
+OUT = rf"<WORKSPACE_DIR>/PROJECTS\Karma Book\export\Karma_{_stamp}.scriv"
 
 CHAPTERS = [
     ('Cap0', 'Introducere'),

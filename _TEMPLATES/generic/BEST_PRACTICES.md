@@ -1,6 +1,6 @@
 # BEST_PRACTICES.md — {{NUME_PROIECT}}
 
-> **Parent:** `D:\Cloude Code\BEST_PRACTICES.md` — patterns cross-project
+> **Parent:** `<WORKSPACE_DIR>/BEST_PRACTICES.md` — patterns cross-project
 > **Related:** `doc/INDEX.md` — detalii proiect
 > **Scop:** Lectii specifice {{NUME_PROIECT}} — patterns si anti-patterns care NU sunt generalizabile la alte proiecte.
 > **Creste cu:** Fiecare sesiune, bug rezolvat, feature implementat.
@@ -33,7 +33,7 @@
 
 ## 🌳 Cross-links fractal
 
-- **Parent:** `D:\Cloude Code\BEST_PRACTICES.md` — patterns cross-project
+- **Parent:** `<WORKSPACE_DIR>/BEST_PRACTICES.md` — patterns cross-project
 - **Related doc:** `doc/INDEX.md`
 - **Operational:** `CHANGELOG.md`, `TODO.md`
 

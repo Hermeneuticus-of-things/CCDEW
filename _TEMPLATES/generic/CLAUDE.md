@@ -1,9 +1,9 @@
 # {{NUME_PROIECT}}
 ## Actualizat: {{DATA}}
 
-> **Parent:** `D:\Cloude Code\CLAUDE.md` (reguli workspace)
+> **Parent:** `<WORKSPACE_DIR>/CLAUDE.md` (reguli workspace)
 > **Reguli cross-project:** `_SETTINGS/RULES/INDEX.md`
-> **Patterns + anti-patterns:** `D:\Cloude Code\BEST_PRACTICES.md` + `./BEST_PRACTICES.md`
+> **Patterns + anti-patterns:** `<WORKSPACE_DIR>/BEST_PRACTICES.md` + `./BEST_PRACTICES.md`
 > **Ruflo:** `_SETTINGS/RULES/ruflo_integration.md`
 > **Detalii proiect:** `./doc/INDEX.md`
 

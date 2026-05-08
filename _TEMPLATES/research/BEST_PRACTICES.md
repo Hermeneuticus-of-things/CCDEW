@@ -1,6 +1,6 @@
 # BEST_PRACTICES.md — {{NUME_PROIECT}} (Research)
 
-> **Parent:** `D:\Cloude Code\BEST_PRACTICES.md` — patterns cross-project
+> **Parent:** `<WORKSPACE_DIR>/BEST_PRACTICES.md` — patterns cross-project
 > **Related:** `doc/INDEX.md` — detalii proiect
 > **Scop:** Lectii specifice acestui research — metodologie, capcane de interpretare, validare surse.
 > **Creste cu:** Fiecare sesiune de analiza, colectare date, redactare.
@@ -47,7 +47,7 @@ Exemple anti-patterns research:
 
 ## 🌳 Cross-links fractal
 
-- **Parent:** `D:\Cloude Code\BEST_PRACTICES.md`
+- **Parent:** `<WORKSPACE_DIR>/BEST_PRACTICES.md`
 - **Related doc:** `doc/METHODOLOGY.md`, `doc/SOURCES.md`, `doc/FINDINGS.md`
 - **Operational:** `CHANGELOG.md`, `TODO.md`
 
