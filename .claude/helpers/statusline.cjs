@@ -16,7 +16,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const os = require('os');
 
 // Configuration
@@ -59,6 +59,20 @@ function safeExec(cmd, timeoutMs = 2000) {
   }
 }
 
+// Cross-platform: invoke a binary directly with array args, no shell wrapper.
+// Works identically on Linux/macOS/Windows (no sh -c, no 2>/dev/null hacks).
+function safeExecFile(bin, args, timeoutMs = 2000) {
+  try {
+    return execFileSync(bin, args, {
+      encoding: 'utf-8',
+      timeout: timeoutMs,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return '';
+  }
+}
+
 // Safe JSON file reader (returns null on failure)
 function readJSON(filePath) {
   try {
@@ -89,47 +103,43 @@ function getSettings() {
 
 // ─── Data Collection (all pure-Node.js or single-exec) ──────────
 
-// Get all git info in ONE shell call
+// Cross-platform git info — 4 direct git invocations via execFileSync (no
+// sh -c). Works on Linux/macOS/Windows-pure (no Git Bash needed). Each call
+// has its own timeout; failures degrade silently to defaults.
 function getGitInfo() {
   const result = {
     name: 'user', gitBranch: '', modified: 0, untracked: 0,
     staged: 0, ahead: 0, behind: 0,
   };
 
-  // Single shell: get user.name, branch, porcelain status, and upstream diff
-  const script = [
-    'git config user.name 2>/dev/null || echo user',
-    'echo "---SEP---"',
-    'git branch --show-current 2>/dev/null',
-    'echo "---SEP---"',
-    'git status --porcelain 2>/dev/null',
-    'echo "---SEP---"',
-    'git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null || echo "0 0"',
-  ].join('; ');
+  // Bail fast if not a git repo (saves 4 spawns)
+  if (!fs.existsSync(path.join(CWD, '.git'))) return result;
 
-  const raw = safeExec("sh -c '" + script + "'", 3000);
-  if (!raw) return result;
+  // 1. user.name
+  const name = safeExecFile('git', ['config', 'user.name'], 1500);
+  if (name) result.name = name;
 
-  const parts = raw.split('---SEP---').map(s => s.trim());
-  if (parts.length >= 4) {
-    result.name = parts[0] || 'user';
-    result.gitBranch = parts[1] || '';
+  // 2. current branch
+  result.gitBranch = safeExecFile('git', ['branch', '--show-current'], 1500);
 
-    // Parse porcelain status
-    if (parts[2]) {
-      for (const line of parts[2].split('\n')) {
-        if (!line || line.length < 2) continue;
-        const x = line[0], y = line[1];
-        if (x === '?' && y === '?') { result.untracked++; continue; }
-        if (x !== ' ' && x !== '?') result.staged++;
-        if (y !== ' ' && y !== '?') result.modified++;
-      }
+  // 3. porcelain status (parses modified / staged / untracked counts)
+  const porcelain = safeExecFile('git', ['status', '--porcelain'], 1500);
+  if (porcelain) {
+    for (const line of porcelain.split(/\r?\n/)) {
+      if (!line || line.length < 2) continue;
+      const x = line[0], y = line[1];
+      if (x === '?' && y === '?') { result.untracked++; continue; }
+      if (x !== ' ' && x !== '?') result.staged++;
+      if (y !== ' ' && y !== '?') result.modified++;
     }
+  }
 
-    // Parse ahead/behind
-    const ab = (parts[3] || '0 0').split(/\s+/);
-    result.ahead = parseInt(ab[0]) || 0;
-    result.behind = parseInt(ab[1]) || 0;
+  // 4. ahead/behind vs upstream — silently 0/0 if no upstream configured
+  const ab = safeExecFile('git', ['rev-list', '--left-right', '--count', 'HEAD...@{upstream}'], 1500);
+  if (ab) {
+    const parts = ab.split(/\s+/);
+    result.ahead  = parseInt(parts[0]) || 0;
+    result.behind = parseInt(parts[1]) || 0;
   }
 
   return result;
