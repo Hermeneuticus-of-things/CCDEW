@@ -22,9 +22,10 @@ import hashlib
 import datetime
 from pathlib import Path
 
-WORKSPACE = Path("D:/Cloude Code")
-QUEUE = WORKSPACE / ".claude" / "cache" / "learn_queue.jsonl"
-LOG = WORKSPACE / ".claude" / "cache" / "auto_learn.log"
+_SCRIPT_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
+WORKSPACE   = Path(os.environ.get('WORKSPACE_DIR', str(_SCRIPT_DIR.parent.parent)))
+QUEUE       = WORKSPACE / ".claude-flow" / "data" / "learn_queue.jsonl"
+LOG         = WORKSPACE / ".claude-flow" / "data" / "auto_learn.log"
 PROJECTS_DIR = WORKSPACE / "PROJECTS"
 MAX_LOG_BYTES = 256 * 1024
 THRESHOLD = 0.6
@@ -249,8 +250,7 @@ def queue_load() -> list:
 CRASH_RECOVERY_THRESHOLD = 8  # spawn consolidate detached dacă queue ≥ N (safety net)
 CONSOLIDATE_SCRIPT = WORKSPACE / ".claude" / "helpers" / "auto_learn_consolidate.py"
 
-
-CONSOLIDATE_SENTINEL = WORKSPACE / ".claude" / "cache" / "consolidate_in_progress.sentinel"
+CONSOLIDATE_SENTINEL = WORKSPACE / ".claude-flow" / "data" / "consolidate_in_progress.sentinel"
 CONSOLIDATE_SENTINEL_TTL_SEC = 120  # consider stale după 2min
 
 

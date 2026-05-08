@@ -123,8 +123,9 @@ function loadObsidianEntries() {
     for (const e of source) {
       entries.push({
         id:      e.file || e.path || '',
-        content: e.content || e.body || e.summary || '',
-        title:   e.title || e.file || '',
+        // obsidian-session-context.py writes 'compact' and 'name'; other sources use content/body/title
+        content: e.content || e.body || e.summary || e.compact || '',
+        title:   e.title || e.name || e.file || '',
         tags:    e.tags || [],
         pinned:  e.priority === 'critical' || e.tags?.includes('session-critical'),
       });

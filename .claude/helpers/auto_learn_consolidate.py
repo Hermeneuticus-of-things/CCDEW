@@ -28,18 +28,19 @@ import subprocess
 import sys
 from pathlib import Path
 
-WORKSPACE = Path("D:/Cloude Code")
-AUTO_MEM = Path.home() / ".claude" / "projects" / "D--Cloude-Code" / "memory"
-OBS_MEM = WORKSPACE / "_MEMORY"
+_SCRIPT_DIR  = Path(os.path.dirname(os.path.abspath(__file__)))
+WORKSPACE    = Path(os.environ.get('WORKSPACE_DIR', str(_SCRIPT_DIR.parent.parent)))
+AUTO_MEM     = WORKSPACE / "memory"
+OBS_MEM      = WORKSPACE / "_MEMORY"
 PROJECTS_DIR = WORKSPACE / "PROJECTS"
-QUEUE = WORKSPACE / ".claude" / "cache" / "learn_queue.jsonl"
-LAST_CONSOLIDATE = WORKSPACE / ".claude" / "cache" / "last_consolidate.txt"
-CONSOLIDATE_SENTINEL = WORKSPACE / ".claude" / "cache" / "consolidate_in_progress.sentinel"
-LOG = WORKSPACE / ".claude" / "cache" / "auto_learn.log"
-DASHBOARD = OBS_MEM / "_DASHBOARD.md"
+QUEUE               = WORKSPACE / ".claude-flow" / "data" / "learn_queue.jsonl"
+LAST_CONSOLIDATE    = WORKSPACE / ".claude-flow" / "data" / "last_consolidate.txt"
+CONSOLIDATE_SENTINEL= WORKSPACE / ".claude-flow" / "data" / "consolidate_in_progress.sentinel"
+LOG                 = WORKSPACE / ".claude-flow" / "data" / "auto_learn.log"
+DASHBOARD           = OBS_MEM / "_DASHBOARD.md"
 MEMORY_INDEX_GLOBAL = AUTO_MEM / "MEMORY.md"
-MEMORY_INDEX_OBS = OBS_MEM / "MEMORY.md"
-OBS_PY = WORKSPACE / ".claude" / "helpers" / "obs.py"
+MEMORY_INDEX_OBS    = OBS_MEM / "MEMORY.md"
+OBS_PY              = WORKSPACE / ".claude" / "helpers" / "obs.py"
 
 BATCH_SIZE = 5
 BATCH_WINDOW_SEC = 3600

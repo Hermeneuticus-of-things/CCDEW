@@ -299,7 +299,9 @@ const handlers = {
 
   'post-bash': () => {
     const exitCode = hookInput.exit_code ?? hookInput.exitCode ?? null;
-    if (exitCode !== null && exitCode !== 0) {
+    // Only record SAFLA failure on exit ≥2 (actual errors).
+    // Exit code 1 is used legitimately by grep (no match), diff (files differ), etc.
+    if (exitCode !== null && exitCode >= 2) {
       if (safla && router && router.routeTask && prompt) {
         try {
           const result = router.routeTask(prompt);

@@ -21,11 +21,13 @@ import shutil
 import sys
 from pathlib import Path
 
-WORKSPACE = Path("D:/Cloude Code")
-PROJECTS_DIR = WORKSPACE / "PROJECTS"
+import os as _os
+_SCRIPT_DIR     = Path(_os.path.dirname(_os.path.abspath(__file__)))
+WORKSPACE       = Path(_os.environ.get('WORKSPACE_DIR', str(_SCRIPT_DIR.parent.parent)))
+PROJECTS_DIR    = WORKSPACE / "PROJECTS"
 GLOBAL_AUTO_DIR = WORKSPACE / "_MEMORY" / "auto"
-ARCHIVE_DIR = WORKSPACE / "_ARCHIVE" / "auto_learned"
-LOG = WORKSPACE / ".claude" / "cache" / "auto_learn.log"
+ARCHIVE_DIR     = WORKSPACE / "_ARCHIVE" / "auto_learned"
+LOG             = WORKSPACE / ".claude-flow" / "data" / "auto_learn.log"
 
 DEFAULT_RETENTION_DAYS = 60
 
