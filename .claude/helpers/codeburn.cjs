@@ -26,7 +26,9 @@ const CODEBURN_BIN = (() => {
     if (fs.existsSync(c)) return c;
   }
   try {
-    return execSync('which codeburn', { encoding: 'utf-8', timeout: 2000 }).trim();
+    // POSIX → which, Windows → where
+    const finder = process.platform === 'win32' ? 'where' : 'which';
+    return execSync(`${finder} codeburn`, { encoding: 'utf-8', timeout: 2000 }).trim().split('\n')[0];
   } catch { return null; }
 })();
 

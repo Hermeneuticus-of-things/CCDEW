@@ -24,6 +24,19 @@ const fs = require('fs');
 
 const helpersDir = __dirname;
 
+// Resolve python interpreter once — Windows installs typically expose 'python'
+// or 'py', POSIX systems usually have 'python3'. Honors PYTHON_BIN env override.
+const PYTHON_BIN = (() => {
+  if (process.env.PYTHON_BIN) return process.env.PYTHON_BIN;
+  const { execSync } = require('child_process');
+  const finder = process.platform === 'win32' ? 'where' : 'which';
+  for (const cand of ['python3', 'python', 'py']) {
+    try { execSync(`${finder} ${cand}`, { stdio: 'ignore', timeout: 1500 }); return cand; }
+    catch { /* try next */ }
+  }
+  return 'python3'; // last-resort default
+})();
+
 // Safe require with stdout suppression
 function safeRequire(modulePath) {
   try {
@@ -407,7 +420,7 @@ const handlers = {
       const { execSync } = require('child_process');
       const obsScript = path.join(helpersDir, 'obsidian-session-context.py');
       if (require('fs').existsSync(obsScript)) {
-        const obsOut = execSync(`python3 "${obsScript}" 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 }).trim();
+        const obsOut = execSync(`${PYTHON_BIN} "${obsScript}"`, { encoding: 'utf-8', timeout: 5000 }).trim();
         if (obsOut) console.log(obsOut);
       }
     } catch { /* non-fatal — Obsidian index opțional */ }
@@ -522,7 +535,7 @@ const handlers = {
         if (fs.existsSync(composeScript)) {
           const fileM = prompt.match(/\b(\d+)\s*(files?|fi[șs]iere|components?|componente|module?s?)\b/i);
           const fileCount = fileM ? parseInt(fileM[1]) : (wf.type === 'hexad' ? 5 : 1);
-          const res = spawnSync('python3', [composeScript, prompt.substring(0, 120), '--files', String(fileCount), '--json'], {
+          const res = spawnSync(PYTHON_BIN, [composeScript, prompt.substring(0, 120), '--files', String(fileCount), '--json'], {
             encoding: 'utf-8', timeout: 2500, stdio: ['ignore', 'pipe', 'ignore'],
           });
           if (res.status === 0 && res.stdout) {
@@ -632,7 +645,7 @@ const handlers = {
         const { spawnSync } = require('child_process');
         const composeScript = path.join(helpersDir, 'enneagram_compose.py');
         if (fs.existsSync(composeScript)) {
-          const cr = spawnSync('python3', ['-c',
+          const cr = spawnSync(PYTHON_BIN, ['-c',
             `import sys; sys.path.insert(0,${JSON.stringify(helpersDir)}); ` +
             `from enneagram_compose import reinforce_enneagram; ` +
             `r = reinforce_enneagram('default', ${postTaskNode}, True); ` +

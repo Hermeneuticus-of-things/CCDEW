@@ -28,7 +28,10 @@ const CODEBURN_BIN  = (() => {
     '/usr/bin/codeburn',
   ];
   for (const c of candidates) { if (fs.existsSync(c)) return c; }
-  try { return execSync('which codeburn',{encoding:'utf-8',timeout:2000}).trim(); } catch { return null; }
+  try {
+    const finder = process.platform === 'win32' ? 'where' : 'which';
+    return execSync(`${finder} codeburn`, { encoding: 'utf-8', timeout: 2000 }).trim().split('\n')[0];
+  } catch { return null; }
 })();
 
 function loadFlags() {
