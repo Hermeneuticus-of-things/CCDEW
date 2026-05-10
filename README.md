@@ -1,50 +1,60 @@
-# CCDEW — Claude Code Development Efficient Workspace
+# 🚀 CCDEW — Claude Code Development Efficient Workspace
 
-[![tests](https://img.shields.io/badge/tests-147%2F147%20PASS-brightgreen)]() [![audit](https://img.shields.io/badge/audit-38%2F38%20PASS-brightgreen)]() [![suites](https://img.shields.io/badge/suites-22-blue)]() [![version](https://img.shields.io/badge/version-3.8.0-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]()
+[![tests](https://img.shields.io/badge/tests-147%2F147%20PASS-brightgreen?style=for-the-badge)]() [![audit](https://img.shields.io/badge/audit-38%2F38%20PASS-brightgreen?style=for-the-badge)]() [![suites](https://img.shields.io/badge/suites-22-blue?style=for-the-badge)]() [![version](https://img.shields.io/badge/version-3.8.0-blue?style=for-the-badge)]() [![license](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)]()
 
-## What · How · Where — in 30 seconds
+> **Drop-in workspace for Claude Code that cuts your token bill by ~76% per prompt, blocks secret leaks before they ship, and audits itself at 5 zoom levels — without slowing you down.**
+
+---
+
+## 🎯 In 30 seconds
 
 | | |
 |---|---|
-| **What** | A drop-in workspace wrapper for Claude Code. It sits between you and the LLM, filters context, picks the right agent, tracks cost, blocks secret leaks, and audits itself. |
-| **How** | 13 lifecycle hooks + 19 slash commands. Each prompt is filtered through SSA (Jaccard trigram), routed via Enneagram (9 nodes), weighted by SAFLA (adaptive learning), and budgeted by codeburn (real-time cost). Every edit is checked for secret leaks. Every session is archived. |
-| **Where** | Primary: **Claude Code** (full features). Compatible: Cursor, Codex, Gemini, OpenCode (capabilities detected, degraded gracefully). Cross-platform: Linux + macOS + Windows. |
+| 📦 **What** | A wrapper around Claude Code. Filters context, picks the right agent, tracks cost live, blocks secret leaks, audits itself, archives every session. |
+| ⚙️ **How** | **13 hooks** + **19 slash commands** wire into Claude Code's lifecycle. SSA filters context (Jaccard trigram). Enneagram routes (9 nodes). SAFLA learns weights. codeburn tracks cost. secret-scan blocks leaks. session-snapshot archives. |
+| 🌍 **Where** | ✅ Claude Code (full features) · ⚠ Cursor / Codex / Gemini / OpenCode (graceful fallback) · ✅ Linux + macOS + Windows |
 
-## What you save (measured, live)
+---
 
-| | Without CCDEW | With CCDEW | Saved |
+## 💰 What you save
+
+| | Before | After | Δ |
 |---|---|---|---|
-| **Context tokens / prompt** | ~10,000 | ~2,400 | **−76%** |
-| **Memory injected at SessionStart** | 130+ files (~26 KB) | 2 critical + 12 SSA-filtered | **−85%** |
-| **Verbose-prompt bloat** | full text | stripped patterns | **5–15%** |
-| **Wrong-agent routing** | ~30% on day 1 | <10% after 50 tasks | **adaptive** |
-| **Daily cost (visible live)** | unknown | `💰 $X.XX/$100/d` in statusline | budget alert at 75%, 100% |
-| **Secret leaks at edit** | possible | hard-blocked (11 patterns) | **0** leaks possible |
-| **Session-end overhead** | ~8.5s (v2.0) | 117ms | **−98.6%** |
+| 📊 **Tokens / prompt** | ~10,000 | ~2,400 | **−76%** ⬇ |
+| 📁 **Memory at SessionStart** | 130+ files | 14 filtered | **−85%** ⬇ |
+| 🎯 **Wrong-agent routing** | ~30% | <10% | **adaptive** 🧠 |
+| 💸 **Daily cost visibility** | ❌ unknown | ✅ live in statusline | budget alert at 75% / 100% |
+| 🔐 **Secret leaks at edit** | ⚠ possible | 🛡️ hard-blocked | **0** possible |
+| ⚡ **Session-end overhead** | 8.5 s | 117 ms | **−98.6%** ⬇ |
+| 🗣️ **Verbose-prompt bloat** | full text | stripped | **5–15%** ⬇ |
 
-## Speed (median, post-warm)
+---
 
-| Operation | Time |
+## ⚡ Speed (median, post-warm)
+
+| | Time |
 |---|---|
-| `ssa.filterContext(50)` | **0.31 ms** |
-| `safla.recordOutcome` (cross-process locked) | **0.85 ms** |
-| Hook `pre-edit` (incl. secret-scan) | ~30 ms |
-| Hook `inject-workflow` | ~100 ms |
-| Hook `route` | ~100 ms |
-| Hook `session-end` (snapshot + bench) | ~150 ms |
-| Full audit (`/evaluate-setup`, 38 checks) | **<1 s** |
-| Full test suite (`npm test`, 147 tests) | <2 s |
-| **Global hook timeout** | 5 s force-exit (hooks can never hang Claude Code) |
+| 🔍 SSA context filter (50 entries) | **0.31 ms** |
+| 🤖 SAFLA record outcome (cross-process locked) | **0.85 ms** |
+| 🔐 Pre-edit + secret scan | **~30 ms** |
+| 💉 Inject-workflow (every prompt) | **~100 ms** |
+| 🎯 Route to agent | **~100 ms** |
+| 📸 Session-end (snapshot + bench) | **~150 ms** |
+| 📋 Full audit (`/evaluate-setup`, 38 checks) | **< 1 s** |
+| 🧪 Full test suite (`npm test`, 147 tests) | **< 2 s** |
+| ⏱ Global hook timeout (force-exit, never hangs) | **5 s** |
 
-## Scope
+---
+
+## 📊 Scope
 
 ```
-22 test suites · 147/147 PASS · 0 FAIL
-38 audit checks · 0 WARN · 0 FAIL
-~7500 LOC · 47 helpers (21 lib/ + 26 top-level)
-19 slash commands · 13 hook events
-10 architectural decisions documented
-1 external runtime dep (codeburn — optional, native fallback included)
+✅ 22 test suites · 147/147 PASS · 0 FAIL
+✅ 38 audit checks · 0 WARN · 0 FAIL
+📦 ~7500 LOC · 47 helpers (21 lib/ + 26 top-level)
+⚙️  19 slash commands · 13 hook events
+📚 10 architectural decisions documented
+📦 1 external runtime dep (codeburn — optional, native fallback included)
 ```
 
 ---
