@@ -160,6 +160,18 @@ Se aplica si la proiecte de alt tip?
 **Corect:** CHANGELOG inainte de cod (`PATTERN-002`), TODO actualizat in timpul lucrului (`PATTERN-003`).
 **Refs:** `_SETTINGS/RULES/session_start.md`.
 
+### PATTERN-009 — Protocol agenti pereche (N divergenti + N convergenti) inainte de orice decizie complexa
+**Cand:** Orice decizie complexa sau actiune cu incertitudine — nu stii calea corecta, daca resursa e accesibila, comportamentul exact al unui sistem extern, sau cum sa formulezi o comanda.
+**Ce fac:**
+1. Stabilesc N = numarul de agenti necesar pentru complexitatea deciziei
+2. Lansez **N agenti DIVERGENTI** in paralel — exploreaza toate alternativele, unghiurile, caile posibile
+3. Lansez **N agenti CONVERGENTI** in paralel — valideaza, filtreaza, verifica solutia candidata
+4. Comunic DOAR daca convergenta e clara. Daca nu → mai explorez, NU actionez orbeste.
+**Regula scalare:** Daca task-ul necesita 50 agenti → lansez 100 (50 divergenti + 50 convergenti). Mereu **1:1**.
+**De ce:** Am trimis comenzi la QnapGX fara sa verific accesul la /share/Multimedia (nu era accesibil din container). Am actionat in loc sa investighez. Agentii paraleli elimina asumptiile gresite inainte de actiune.
+**Anti-pattern reflex:** "Stiu eu" → actiune directa → eroare → reparare. Costul investigatiei e mereu mai mic decat costul recuperarii.
+**Refs:** `memory/feedback_investigate_before_act.md`, `PROJECTS/Consiliu/BEST_PRACTICES.md PROJ-004`.
+
 ### ANTI-005 — Incep task fara sa citesc SESSION_STATUS / TODO
 **Gresit:** User zice "continua de unde ai ramas" dar sar direct pe cod.
 **Corect:** Citesc `TODO.md` + ultimul entry din `CHANGELOG.md` al proiectului activ pentru continuity.
