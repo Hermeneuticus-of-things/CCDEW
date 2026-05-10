@@ -1,5 +1,5 @@
 ---
-name: PII redaction obligatorie în logs
+name: Mandatory PII redaction in logs
 severity: MED
 version: v3.3
 date: 2026-05-10
@@ -7,17 +7,17 @@ status: applied
 tags: [security, privacy, logging, gdpr]
 ---
 
-# PII redaction obligatorie în logs
+# Mandatory PII redaction in logs
 
 ## Context
-`error-log.cjs` scria mesaje + extra obj direct în `errors.jsonl` fără filtrare. Risc:
-- prompt user content cu emails/PII
-- API keys leakat în message
-- home paths absolute (`C:\Users\Alice\...`) → identifică userul
-- JWT-uri în error stacks
+`error-log.cjs` was writing messages + extra obj directly into `errors.jsonl` without filtering. Risk:
+- user prompt content with emails/PII
+- API keys leaking in messages
+- absolute home paths (`C:\Users\Alice\...`) → identifies the user
+- JWTs in error stacks
 
-## Decizie
-**`lib/redact.cjs` integrat automat în `error-log.cjs::logError()`.**
+## Decision
+**`lib/redact.cjs` integrated automatically into `error-log.cjs::logError()`.**
 
 ## Patterns redacted
 ```js
@@ -31,11 +31,11 @@ AKIA[A-Z]{16} → <aws-key>
 $HOME     → ~
 ```
 
-## Consecințe
-- Toate erorile loguite trec prin `redact()` automat
-- `redactObject` recursiv (depth ≤5) pentru nested fields
-- 10 teste regression (`redact.test.cjs`)
-- **Nu blochează debugging real** — semnătura erorii (code, stack lines) păstrată
+## Consequences
+- All logged errors pass through `redact()` automatically
+- `redactObject` recursive (depth ≤5) for nested fields
+- 10 regression tests (`redact.test.cjs`)
+- **Does not block real debugging** — error signature (code, stack lines) preserved
 
 ## Trade-off
-Pierdem ~5ms per error log (negligibil). În schimb, logs sunt safe-to-share (suport tickets, GitHub issues).
+~5ms lost per error log (negligible). In return, logs are safe-to-share (support tickets, GitHub issues).

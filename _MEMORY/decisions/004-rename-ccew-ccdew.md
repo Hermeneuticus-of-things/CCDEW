@@ -10,17 +10,17 @@ tags: [naming, branding]
 # Folder rename CCEW → CCDEW
 
 ## Context
-Numele inițial `claude-code-eficient-workspace` (typo "eficient" în loc de "efficient") era lung, conținea typo. Userul a propus inițial `CCEW` (Claude Code Efficient Workspace), apoi `CCDEW` (Claude Code Development Efficient Workspace).
+The original name `claude-code-eficient-workspace` (typo "eficient" instead of "efficient") was long and contained a typo. The user initially proposed `CCEW` (Claude Code Efficient Workspace), then `CCDEW` (Claude Code Development Efficient Workspace).
 
-## Decizie
-Final: **CCDEW**. Acoperă scope-ul de "development workspace" mai precis decât CCEW (care suna ca tool generic).
+## Decision
+Final: **CCDEW**. Covers the "development workspace" scope more precisely than CCEW (which sounded like a generic tool).
 
-## Consecințe
+## Consequences
 - Folder rename: `claude-code-eficient-workspace/` → `CCEW/` → `CCDEW/`
-- 4 referințe interne actualizate: README.md, MIGRATION.md, CHANGELOG.md, statusline.cjs
-- Path-uri Windows-only au fost preservate; relative paths nu au necesitat modificări
+- 4 internal references updated: README.md, MIGRATION.md, CHANGELOG.md, statusline.cjs
+- Windows-only paths preserved; relative paths required no modification
 - npm package name: `ccdew`
 
-## Referințe externe NEMODIFICATE (intentional)
-- Root `D:/Cloude Code/CHANGELOG.md` păstrează numele istoric `claude-code-eficient-workspace` în mențiunile de commit SHA-uri (sunt menționări istorice, nu path local)
-- GitHub repo upstream rămâne `Hermeneuticus-of-things/claude-code-eficient-workspace` (nu am control)
+## External references NOT modified (intentional)
+- Root `D:/Cloude Code/CHANGELOG.md` keeps the historical name `claude-code-eficient-workspace` in commit-SHA mentions (these are historical references, not local paths)
+- GitHub upstream repo remains `Hermeneuticus-of-things/claude-code-eficient-workspace` (no CCDEW control)

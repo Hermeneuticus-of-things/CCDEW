@@ -10,35 +10,35 @@ tags: [reliability, dependencies, codeburn, fallback]
 # Native codeburn engine (CLI-independent fallback)
 
 ## Context
-`codeburn` CLI (npm package, AgentSeal) e singura dependență externă. Dacă userul rulează `npm install -g codeburn` greșit (sau pe alt machine), tot sistemul de cost-tracking pică. Output: `[CODEBURN] CLI unavailable`.
+The `codeburn` CLI (npm package, AgentSeal) is the only external dependency. If the user runs `npm install -g codeburn` incorrectly (or on a different machine), the entire cost-tracking system breaks. Output: `[CODEBURN] CLI unavailable`.
 
-## Opțiuni
+## Options
 
 **A. Hard-require codeburn (status quo v3.0)**
-- Pro: pricing canonical, latency 150ms
-- Contra: SPOF dacă CLI lipsește; utilizator novice se blochează
+- Pro: canonical pricing, ~150ms latency
+- Contra: SPOF if CLI is missing; novice user gets stuck
 
-**B. Fallback la engine nativ (parser direct `~/.claude/projects/**/*.jsonl`)**
-- Pro: zero dependențe externe; funcționează imediat
-- Contra: pricing differă (modele/multipliers nu sunt 1:1 cu CLI); latency ~2.7s pe 79 fișiere
+**B. Fallback to native engine (parser directly on `~/.claude/projects/**/*.jsonl`)**
+- Pro: zero external dependencies; works immediately
+- Contra: pricing differs (models/multipliers not 1:1 with CLI); ~2.7s latency on 79 files
 
-**C. Doar engine nativ (drop CLI complet)**
-- Pro: simplicitate
-- Contra: pierdere precizie pricing canonical
+**C. Native engine only (drop CLI completely)**
+- Pro: simplicity
+- Contra: loss of canonical pricing precision
 
-## Decizie
+## Decision
 **B — CLI preferred when present, native fallback otherwise.**
 
-## Motiv
-- CLI dă cifre canonical când existent (cea mai bună sursă)
-- Native asigură că sistemul **nu se blochează** când CLI lipsește
-- User vede sursa explicit (`source: 'real'` vs `source: 'native'`) → e clar ce numere are
+## Rationale
+- CLI returns canonical numbers when available (best source)
+- Native ensures the system **never blocks** when CLI is missing
+- User sees the source explicitly (`source: 'real'` vs `source: 'native'`) → it's clear which numbers they have
 
-## Consecințe
-- `lib/codeburn-engine.cjs` 123 linii noi (parser pricing per model tier opus/sonnet/haiku)
-- Disclaimer în README: native pricing e estimate, CLI e canonical
-- 8 teste pentru engine (modelTier, costForLine, totals, isAvailable)
+## Consequences
+- `lib/codeburn-engine.cjs` 123 new lines (per-model-tier pricing parser opus/sonnet/haiku)
+- README disclaimer: native pricing is an estimate, CLI is canonical
+- 8 tests for the engine (modelTier, costForLine, totals, isAvailable)
 
-## Verificare
-- Live test cu CLI absent: returnează cifre native ($1398/zi vs $235 CLI — pricing diferit, dar magnitudine ok)
+## Verification
+- Live test with CLI absent: returns native numbers ($1398/d vs $235 CLI — different pricing, but magnitude OK)
 - 8/8 tests PASS

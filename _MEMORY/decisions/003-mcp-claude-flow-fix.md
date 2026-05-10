@@ -3,42 +3,42 @@ name: MCP claude-flow `mcp start` arg fix
 severity: HIGH
 version: v3.1
 date: 2026-05-10
-status: applied (necesită Claude Code restart pentru efect)
+status: applied (requires Claude Code restart to take effect)
 tags: [mcp, ruflo, integration, blocker]
 ---
 
 # MCP claude-flow `mcp start` arg fix
 
 ## Context
-`~/.claude.json::mcpServers["claude-flow"].args` era `["D:/Cloude Code/ruflo/bin/cli.js"]` — fără subcomandă `mcp start`. Apelul ruflo CLI fără args printează help și iese în 611ms. Claude Code încearcă handshake JSON-RPC pe stdin/stdout, primește text help + exit 0, marchează MCP mort. **Userul trebuie să repornească Claude Code de fiecare dată sperând că merge.**
+`~/.claude.json::mcpServers["claude-flow"].args` was `["D:/Cloude Code/ruflo/bin/cli.js"]` — without the `mcp start` subcommand. Invoking ruflo CLI without args prints help and exits in 611ms. Claude Code attempts JSON-RPC handshake on stdin/stdout, receives help text + exit 0, marks MCP dead. **The user has to restart Claude Code each time hoping it works.**
 
-## Investigație
-- Test manual handshake: `echo '{"jsonrpc":"2.0",...}' | ruflo mcp start` → răspunde corect cu `{"name":"ruflo","version":"3.0.0","capabilities":{...}}`
-- ONNX warning pe stderr (nu corupe stdout JSON-RPC)
-- Server-ul e funcțional, doar comanda de start nu o avea în config
+## Investigation
+- Manual handshake test: `echo '{"jsonrpc":"2.0",...}' | ruflo mcp start` → responds correctly with `{"name":"ruflo","version":"3.0.0","capabilities":{...}}`
+- ONNX warning on stderr (does not corrupt stdout JSON-RPC)
+- Server is functional, only the start command was missing in config
 
-## Decizie
-**Patch `~/.claude.json` cu `args: [..., "mcp", "start"]`.**
+## Decision
+**Patch `~/.claude.json` with `args: [..., "mcp", "start"]`.**
 
-## Motiv
-- Singura modificare necesară pentru ca MCP să se atașeze permanent
-- Backup creat: `~/.claude.json.bak.2026-05-10` (22915 bytes, identical pre-fix)
-- Reversible instant: `cp .claude.json.bak.2026-05-10 .claude.json`
+## Rationale
+- The single change required for MCP to attach permanently
+- Backup created: `~/.claude.json.bak.2026-05-10` (22915 bytes, identical pre-fix)
+- Instantly reversible: `cp .claude.json.bak.2026-05-10 .claude.json`
 
-## Consecințe
-- ⚠️ Necesită **Claude Code restart** (config citit la startup)
-- ✅ După restart: `mcp__claude-flow__*` tools devin disponibile (`swarm_init`, `agent_spawn`, `memory_search`, etc.)
-- ✅ 12 agenți Ruflo persistați devin spawn-able real (au fost idle din lipsa MCP)
-- ⚠️ ONNX onnxruntime-node încă lipsește în `D:/Cloude Code/ruflo/` — vector embeddings local disabled
+## Consequences
+- ⚠️ Requires **Claude Code restart** (config is read at startup)
+- ✅ After restart: `mcp__claude-flow__*` tools become available (`swarm_init`, `agent_spawn`, `memory_search`, etc.)
+- ✅ The 12 persisted Ruflo agents become spawn-able for real (they were idle due to missing MCP)
+- ⚠️ ONNX onnxruntime-node still missing in `D:/Cloude Code/ruflo/` — local vector embeddings disabled
 
-## Status curent
+## Current status
 - Config patched: ✅
-- Necesită restart pentru efect: ⏳ pending user action
+- Restart needed for effect: ⏳ pending user action
 - ONNX install needed: `cd D:/Cloude Code/ruflo && npm install onnxruntime-node`
 
-## Verificare manuală post-restart
+## Manual post-restart verification
 ```bash
-# În sesiunea Claude Code nouă:
-# ToolSearch +swarm_init  → trebuie să găsească mcp__claude-flow__swarm_init
-# (în sesiunea curentă pre-restart: "No matching deferred tools found")
+# In a new Claude Code session:
+# ToolSearch +swarm_init  → must find mcp__claude-flow__swarm_init
+# (in current pre-restart session: "No matching deferred tools found")
 ```

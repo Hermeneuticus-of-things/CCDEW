@@ -10,41 +10,41 @@ tags: [architecture, refactor, foundational]
 # Rebuild from scratch (vs incremental fixes)
 
 ## Context
-v2.0 al `claude-code-eficient-workspace` avea 5 fix-uri identificate într-un audit anterior:
+v2.0 of `claude-code-eficient-workspace` had 5 fixes identified in a prior audit:
 1. SAFLA `[object Object]` silent corruption
 2. Codeburn Windows ENOENT (no `.cmd` ext)
-3. Atomic rename EPERM concurrent
+3. Atomic rename EPERM under concurrency
 4. hook-handler eager-require 12 modules
-5. Node 22 refuză `.cmd` la `execFileSync`
+5. Node 22 refuses `.cmd` at `execFileSync`
 
-## Opțiuni considerate
+## Options considered
 
-**A. Incremental patch (5 fix-uri minore)**
-- Pro: minimal change, low risk regresie
-- Contra: state învățat SAFLA rămâne corupt; arhitectura veche cu eager-require persistă; testabilitate slabă
+**A. Incremental patch (5 minor fixes)**
+- Pro: minimal change, low regression risk
+- Contra: SAFLA learned state remains corrupt; old eager-require architecture persists; weak testability
 
-**B. Rebuild from scratch cu best practices**
-- Pro: arhitectură curată (lib/ + helpers/); lazy require; full test suite; documented decisions
-- Contra: HIGH risk regresie; pierdere temporară state învățat; 1 zi de muncă
+**B. Rebuild from scratch with best practices**
+- Pro: clean architecture (lib/ + helpers/); lazy require; full test suite; documented decisions
+- Contra: HIGH regression risk; temporary loss of learned state; 1 day of work
 
-## Decizie
+## Decision
 **B — rebuild from scratch.**
 
-## Motiv
-- Workspace-ul era deja "experimental, ne-testat pe scară largă" (recunoscut)
-- 5 fix-uri = 5 puncte de fragility; un rebuild rezolvă cauzele structurale
-- Backup snapshot la `_ARCHIVE/pre-rebuild-2026-05-10/` permite rollback total instant
+## Rationale
+- The workspace was already "experimental, not widely tested" (acknowledged)
+- 5 fixes = 5 fragility points; a rebuild addresses the structural causes
+- Backup snapshot at `_ARCHIVE/pre-rebuild-2026-05-10/` allows instant total rollback
 
-## Consecințe
-- ✅ 4 module `lib/` reutilizabile (`atomic-write`, `platform`, `flags`, `validate`)
-- ✅ Lazy require redus latency hot-path 146ms cold-load → ~5ms warm
-- ✅ 4 test suite regression cu 24 verificări (era 0)
-- ⚠️ State SAFLA pierdut (133 feedback → 45 valid restaurate din backup)
+## Consequences
+- ✅ 4 reusable `lib/` modules (`atomic-write`, `platform`, `flags`, `validate`)
+- ✅ Lazy require reduced hot-path latency 146ms cold-load → ~5ms warm
+- ✅ 4 regression test suites with 24 checks (was 0)
+- ⚠️ SAFLA state lost (133 feedbacks → 45 valid restored from backup)
 
-## Verificare
+## Verification
 - v3.0.0 audit: 38/38 PASS, 0 WARN, 0 FAIL
 - v3.0.0 tests: 24/24 PASS
 
-## Referințe
+## References
 - Backup: `_ARCHIVE/pre-rebuild-2026-05-10/`
 - CHANGELOG: `## [3.0.0]`
