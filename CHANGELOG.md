@@ -6,6 +6,23 @@
 
 ---
 
+## [3.8.1] — 2026-05-10 — System audit + AgentDB sync + honor bridge patch
+
+### Highlights
+- **WASM fix** — `sql-wasm.wasm` lipsea din cache `2ed56890` → copiat din `09002f`; AgentDB operațional
+- **AgentDB sync** — 25 fișiere memorie (Obsidian + auto-memory) → 26 entries în AgentDB
+- **Honor coop_agent patch** — 2 buguri rezolvate: `h_status` crash pe `str.get()` + `[HEALTH]`/`[SECURITY:]` false-dispatch
+- **Status audit** — raport complet toate prioritățile → `_MEMORY/sessions/` + GitHub
+
+### Fișiere modificate
+- `.npm/_npx/2ed56890c96f58f7/node_modules/sql.js/dist/sql-wasm.wasm` (copiat)
+- `~/.claude/bridge/coop_agent.py` pe Honor (patch livrat via scp)
+- `_MEMORY/consiliu_qnapgx_proiect.md` (creat)
+- `memory/project_consiliu_qnapgx.md` (creat)
+- `_MEMORY/sessions/audit-2026-05-10.md` (creat)
+
+---
+
 ## [3.8.0] — 2026-05-10 — Round 5 zone netouched: cross-process file-lock + bench + i18n
 
 ### Highlights
