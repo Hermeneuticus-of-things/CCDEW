@@ -12,7 +12,7 @@
       "obs_query": "project:Consiliu",
       "memory_tags": ["consiliu", "hermes", "qnap", "simbioza", "ai-agents"],
       "path_hint": "PROJECTS/Consiliu",
-      "description": "Simbioza AI 5-tier — Phone + QNAP + Think/Honor"
+      "description": "Simbioza AI 5-tier — Phone + QNAP + node-a/node-b"
     }
   },
 

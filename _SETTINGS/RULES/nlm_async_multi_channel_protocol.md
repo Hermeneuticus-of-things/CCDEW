@@ -62,7 +62,7 @@ Oricând faci queries către:
 ## Auto-login force (ÎNAINTE de orice NLM call în sesiune lungă)
 
 ```bash
-python C:\Users\Think\.claude\scripts\nlm_auto_login.py --force
+python ~/.claude/scripts/nlm_auto_login.py --force
 ```
 
 Verifică `AUTH_REFRESHED_OK` la final. Dacă auth expiră mid-session, rulează din nou (nu așteaptă 401).
