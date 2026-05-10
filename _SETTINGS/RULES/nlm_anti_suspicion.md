@@ -46,7 +46,7 @@ Google detectează pattern-uri "non-umane" și forțează logout pe sesiunea NLM
 
 ### Setup recomandat:
 ```
-1× setup:  python C:/Users/Think/.claude/scripts/nlm_auto_login.py
+1× setup:  python ~/.claude/scripts/nlm_auto_login.py
             → Login manual în Brave fereastra deschisă
             → cookies persistă în profil dedicat
 
@@ -93,4 +93,4 @@ Pentru **NotebookLM Enterprise** (Google Cloud cu API oficial) — această doct
 
 - AUTHENTICATION.md de la `notebooklm-mcp-cli` (jacob-bd) — confirmă: `NOTEBOOKLM_COOKIES` env BLOCHEAZĂ auto-refresh
 - Memory: `reference_nlm_anti_suspicion_strategy.md`
-- Script bootstrap: `C:/Users/Think/.claude/scripts/nlm_auto_login.py`
+- Script bootstrap: `~/.claude/scripts/nlm_auto_login.py`

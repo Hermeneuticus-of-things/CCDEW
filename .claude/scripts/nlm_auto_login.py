@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 
 CDP_PORT = 9222
-BRAVE_EXE = r"C:\Users\Think\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"
+BRAVE_EXE = os.environ.get('BRAVE_EXE') or os.path.expandvars(r"%LOCALAPPDATA%\BraveSoftware\Brave-Browser\Application\brave.exe")
 NLM_PROFILE_DIR = Path.home() / ".claude" / "nlm-auth-profile"
 EXTRACT_SCRIPT = Path.home() / ".claude" / "scripts" / "extract_cdp_cookies.py"
 COOKIES_FILE = Path(os.environ.get('TEMP', '/tmp')) / "nlm_cookies.txt"

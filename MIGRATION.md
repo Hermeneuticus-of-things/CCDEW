@@ -40,7 +40,7 @@ mv claude-code-eficient-workspace CCDEW
 ```
 
 External references that DO mention the old name:
-- Root `D:/Cloude Code/CHANGELOG.md` → keep as-is (historical commit SHAs)
+- Root `<workspace>/CHANGELOG.md` → keep as-is (historical commit SHAs)
 - GitHub upstream repo name remains `claude-code-eficient-workspace` (out of CCDEW's control)
 
 ---

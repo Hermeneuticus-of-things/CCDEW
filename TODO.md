@@ -108,7 +108,7 @@
 
 ### Optional (remaining)
 - [ ] Claude Code restart to activate MCP claude-flow (post-v3.1 fix)
-- [ ] Install onnxruntime-node in `D:/Cloude Code/ruflo/` for vector embeddings
+- [ ] Install onnxruntime-node in `<workspace>/ruflo/` for vector embeddings
 - [ ] Eventual split of intelligence.cjs + hook-handler.cjs (DEBT — see decisions/008)
 - [ ] CCDEW_LANG full propagation (currently only codeburn.unavailable uses t())
 

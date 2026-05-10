@@ -10,7 +10,7 @@ tags: [mcp, ruflo, integration, blocker]
 # MCP claude-flow `mcp start` arg fix
 
 ## Context
-`~/.claude.json::mcpServers["claude-flow"].args` was `["D:/Cloude Code/ruflo/bin/cli.js"]` — without the `mcp start` subcommand. Invoking ruflo CLI without args prints help and exits in 611ms. Claude Code attempts JSON-RPC handshake on stdin/stdout, receives help text + exit 0, marks MCP dead. **The user has to restart Claude Code each time hoping it works.**
+`~/.claude.json::mcpServers["claude-flow"].args` was `["<workspace>/ruflo/bin/cli.js"]` — without the `mcp start` subcommand. Invoking ruflo CLI without args prints help and exits in 611ms. Claude Code attempts JSON-RPC handshake on stdin/stdout, receives help text + exit 0, marks MCP dead. **The user has to restart Claude Code each time hoping it works.**
 
 ## Investigation
 - Manual handshake test: `echo '{"jsonrpc":"2.0",...}' | ruflo mcp start` → responds correctly with `{"name":"ruflo","version":"3.0.0","capabilities":{...}}`
@@ -29,12 +29,12 @@ tags: [mcp, ruflo, integration, blocker]
 - ⚠️ Requires **Claude Code restart** (config is read at startup)
 - ✅ After restart: `mcp__claude-flow__*` tools become available (`swarm_init`, `agent_spawn`, `memory_search`, etc.)
 - ✅ The 12 persisted Ruflo agents become spawn-able for real (they were idle due to missing MCP)
-- ⚠️ ONNX onnxruntime-node still missing in `D:/Cloude Code/ruflo/` — local vector embeddings disabled
+- ⚠️ ONNX onnxruntime-node still missing in `<workspace>/ruflo/` — local vector embeddings disabled
 
 ## Current status
 - Config patched: ✅
 - Restart needed for effect: ⏳ pending user action
-- ONNX install needed: `cd D:/Cloude Code/ruflo && npm install onnxruntime-node`
+- ONNX install needed: `cd <workspace>/ruflo && npm install onnxruntime-node`
 
 ## Manual post-restart verification
 ```bash

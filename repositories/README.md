@@ -13,7 +13,7 @@ git clone <your-repo-url>
 ```
 
 ## Active vs CCDEW root
-- **CCDEW root** (`D:/Cloude Code/CCDEW/`) — the workspace itself: helpers, skills, settings.
+- **CCDEW root** (`<workspace>/CCDEW/`) — the workspace itself: helpers, skills, settings.
 - **Sub-projects** under `PROJECTS/` — owned by you, integrated into CCDEW (CHANGELOG.md, TODO.md per project).
 - **External repos under `repositories/`** — third-party or standalone repos you want to work on with CCDEW tooling but **not commit into CCDEW's history**.
 

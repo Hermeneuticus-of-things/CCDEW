@@ -41,7 +41,7 @@
 ### `ruvnet/ruflo` & `ruvnet/claude-flow`
 - **Author:** ruvnet
 - **What we use:**
-  - MCP server `claude-flow` configured in `~/.claude.json` (stdio, points at `D:/Cloude Code/ruflo/bin/cli.js`)
+  - MCP server `claude-flow` configured in `~/.claude.json` (stdio, points at `<workspace>/ruflo/bin/cli.js`)
   - Agent topology patterns and the `swarm_init` concept (referenced in our `inject-workflow` AUTO-SWARM DIRECTIVE output)
   - Multi-agent orchestration ideas (we expose `/swarm-route` that returns `swarm_init_hint` JSON ready for ruflo's MCP `swarm_init` tool)
 - **Status:** External MCP, not part of CCDEW directly. CCDEW just emits hints compatible with ruflo's `swarm_init`. `mcp-health` command verifies the config.

@@ -175,7 +175,7 @@ Citeste acest fisier la inceputul fiecarei sesiuni.
 
 ### Export
 - Scrivener: `python export/build_scrivener.py` → .scrivx cu timestamp
-- Tema Scrivener: `Ionut 20205.scrtheme` din `_SETTINGS/`
+- Tema Scrivener: `tema-cititor.scrtheme` din `_SETTINGS/`
 - Formate: PDF, DOCX, EPUB, RTF, HTML, TXT (din Scrivener Compile)
 - Exporturile in `export/` cu timestamp in nume
 

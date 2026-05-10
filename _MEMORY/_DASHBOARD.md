@@ -59,7 +59,7 @@ related: [_INBOX.md, _PROTOCOL.md, _USER_NOTES.md, decisions/INDEX.md, sessions/
 
 - [ ] Structural DEBT: `intelligence.cjs` 979L + `hook-handler.cjs` 1024L over hard cap 500 — split deferred (reason: HIGH risk regression, 0 user-visible benefit) — see [decisions/008](decisions/008-debt-structural-split.md)
 - [ ] Ruflo MCP not active in current session — requires Claude Code restart so `~/.claude.json::claude-flow.args` with `mcp start` is consumed — see [decisions/003](decisions/003-mcp-claude-flow-fix.md)
-- [ ] ONNX onnxruntime-node missing in `D:/Cloude Code/ruflo/` — local vector embeddings disabled — see [decisions/003](decisions/003-mcp-claude-flow-fix.md)
+- [ ] ONNX onnxruntime-node missing in `<workspace>/ruflo/` — local vector embeddings disabled — see [decisions/003](decisions/003-mcp-claude-flow-fix.md)
 - [ ] 33 skills under `.claude/skills/`, none activated during the development session (skills-activator has description-overlap fallback since v3.7, but the existing skills are agentdb-*, browser, github-* etc. — keywords don't match CCDEW prompts)
 
 ## Memory Stats

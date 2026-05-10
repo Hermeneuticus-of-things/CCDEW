@@ -22,5 +22,5 @@ Final: **CCDEW**. Covers the "development workspace" scope more precisely than C
 - npm package name: `ccdew`
 
 ## External references NOT modified (intentional)
-- Root `D:/Cloude Code/CHANGELOG.md` keeps the historical name `claude-code-eficient-workspace` in commit-SHA mentions (these are historical references, not local paths)
+- Root `<workspace>/CHANGELOG.md` keeps the historical name `claude-code-eficient-workspace` in commit-SHA mentions (these are historical references, not local paths)
 - GitHub upstream repo remains `Hermeneuticus-of-things/claude-code-eficient-workspace` (no CCDEW control)
