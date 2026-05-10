@@ -64,6 +64,47 @@ A self-monitoring, self-archiving wrapper around Claude Code that:
 
 ---
 
+## How it looks (real output)
+
+**Statusline (every prompt):**
+```
+💰 $239.25/$100/d · 1185c ⚠   │   🤖 67% ok·63fb   │   📂 CCDEW   │
+```
+
+**`npm run burn` (live cost):**
+```
+[CODEBURN] ALERT | Today $239.25 (1185 calls) | Month $2538.88 (18338 calls)
+```
+
+**`npm run infer` (5-zoom audit):**
+```
+[INFER] 10 findings · HIGH:2 WARN:7 INFO:1
+
+MAHA:  [⚠] <tests> — Only 22 test suite(s) — below 50 expected for this LOC
+       [ℹ] <workspace> — 47 helpers · 22 test suites · 33 skills · 7500 LOC
+MACRO: [✗] hook-handler.cjs — 1024 lines — exceeds hard cap 500
+       [✗] intelligence.cjs — 979 lines — exceeds hard cap 500
+MICRO: [⚠] intelligence.cjs:325 — Function init() is 111 lines (>75)
+NANO:  (clean)
+```
+
+**`inject-workflow` hint at every prompt:**
+```
+[AUTO-SWARM DIRECTIVE] refactor the auth module across 5 files
+Node 7 (Innovator) | HEXAD | SSA:MAHA SAFLA:+0.05
+SPAWN: reviewer → researcher → backend-dev → sparc-orchestrator → analyst → architecture
+swarm_init(topology=hierarchical, maxAgents=6, strategy=specialized)
+[SKILLS] suggested: agentdb-vector-search, github-code-review
+[INSTINCT] you usually route this to node 7 (83% confidence over 6 similar prompts)
+```
+
+**`pre-edit` blocking secret leak:**
+```
+[BLOCKED] Secret leak risk: 1 secret pattern(s) detected: AWS Access Key
+```
+
+---
+
 ## Quick start
 
 ```bash
@@ -74,6 +115,136 @@ npm test                       # 147/147 PASS expected
 npm run audit                  # 38/38 PASS expected
 claude                         # start using
 ```
+
+## Configuration
+
+Edit `.claude/helpers/feature-flags.json` to tune behavior:
+
+```json
+{
+  "components": {
+    "enneagram": true, "ssa": true, "codeburn": true, "red_hat": true,
+    "safla": true, "graphify": true, "instincts": true, "secret_scan": true
+  },
+  "ssa": { "top_k": 12, "min_score": 0.15 },
+  "codeburn": {
+    "daily_budget_usd": 100.0,
+    "warn_at_pct": 0.75,
+    "alert_at_pct": 1.0,
+    "cost_per_call_warn": 0.05
+  },
+  "safla": { "weight_success": 0.05, "weight_failure": -0.10, "weight_clamp": 0.5 }
+}
+```
+
+Environment variables:
+- `CCDEW_LANG=ro` — Romanian UI strings (partial)
+- `HOOKS_SKIP=1` — bypass auto-`/verify` and auto-`/quality-gate` at git commit/push (emergency only)
+- `GITHUB_TOKEN` — raises `/skills-propose` rate limit from 60/h to 5000/h
+- `PYTHON_BIN` — explicit Python path (otherwise auto-detected)
+
+---
+
+## Walkthrough — a typical session
+
+```
+1. Open Claude Code in CCDEW/
+   → SessionStart hook runs: SAFLA.sessionStart() + auto-audit (24h cadence)
+   → Statusline shows: 💰 $X.XX/$100/d · Nc · 🤖 X% ok·Mfb · 📂 CCDEW
+
+2. You type: "refactor the auth module across 5 files"
+   → UserPromptSubmit fires inject-workflow + route hooks
+   → Output appears as system-reminder:
+     [AUTO-SWARM DIRECTIVE] Node 7 (Innovator) | HEXAD | SSA:MAHA SAFLA:+0.05
+     SPAWN: reviewer → researcher → ... → architecture
+     [INSTINCT] you usually route this to node 7 (83% confidence)
+
+3. Claude edits src/auth.ts
+   → pre-edit hook scans content with secret-scan.cjs
+   → No leak detected → [OK] Edit validated
+
+4. You commit: git commit -m "refactor auth"
+   → pre-bash hook runs auto-/verify (typecheck + test + lint + secret + dead)
+   → All pass → [AUTO-VERIFY] passed — proceeding with commit
+   → Commit succeeds
+
+5. You push: git push origin main
+   → pre-bash hook runs auto-/quality-gate (verify + npm audit + coverage + cost/call)
+   → All pass → [AUTO-QUALITY-GATE] passed
+   → Push succeeds
+
+6. You close Claude Code
+   → SessionEnd hook fires
+   → session-snapshot writes .claude-flow/sessions/session-<ts>.json
+   → Plus _MEMORY/sessions/session-<ts>.md (Obsidian frontmatter)
+   → perf-baseline records ssa.filterContext timing
+   → Graphify writes session report
+   → metricsUpdate refreshes _METRICS/_DASHBOARD.md
+```
+
+---
+
+## Comparison
+
+| Feature | CCDEW | [ECC](https://github.com/affaan-m/everything-claude-code) | [setup-evaluator](https://github.com/redhat-community-ai-tools/claude-code-setup-evaluator) | [ruflo](https://github.com/ruvnet/claude-flow) |
+|---|---|---|---|---|
+| Token reduction (SSA-style filter) | ✅ −76% | ✅ | — | — |
+| Adaptive routing per-task | ✅ Enneagram + SAFLA + Instincts | ✅ | — | ✅ |
+| Real-time cost tracking | ✅ codeburn + native fallback | — | — | — |
+| Secret-leak pre-edit block | ✅ 11 patterns | — | ✅ | — |
+| 5-zoom audit (Maha→Nano) | ✅ original | — | — | — |
+| Auto-`/verify` on git commit | ✅ | — | partial | — |
+| Cross-process race safety (file-lock) | ✅ | — | — | — |
+| Session auto-archival (JSON + Obsidian MD) | ✅ | — | — | — |
+| GitHub mature-skill scaffolding | ✅ no-code-copy | — | — | — |
+| Multi-platform detection | ✅ | ✅ | — | — |
+| Number of stars (community) | new | 140k+ | growing | growing |
+| Typical user | dev tuning own workflow | broad ecosystem adopters | enterprise audit teams | swarm orchestration |
+
+CCDEW positions as: **the depth-first integrator** — it picks ideas from all three above and builds on top with original layers (5-zoom audit, cross-process lock, session archival, mature-skill proposing). Honest attribution in [CREDITS.md](CREDITS.md).
+
+---
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `[CODEBURN] CLI unavailable` | codeburn not installed globally | `npm install -g codeburn` (or rely on native fallback — works without it) |
+| `Python was not found` on Windows | Windows Store alias trap | CCDEW v3.7+ auto-detects with `-V` probe; verify `npm run audit` shows real path |
+| `ToolSearch +swarm_init` returns nothing | MCP claude-flow not loaded | restart Claude Code; `~/.claude.json` must have `"args": [..., "mcp", "start"]` |
+| `[ONNX] onnxruntime-node not available` | vector embeddings disabled in ruflo | `cd D:/.../ruflo && npm install onnxruntime-node` (optional) |
+| Hooks don't fire / prompts unchanged | hook config not picked up | restart Claude Code (settings.json read at startup) |
+| `git commit` blocked unexpectedly | auto-`/verify` failed | run `npm run verify` standalone to see why; emergency: `HOOKS_SKIP=1 git commit ...` |
+| `[BLOCKED] Secret leak risk` on legitimate file | false-positive on hex/JWT-like string | edit the file content, or temporarily disable via `feature-flags.json::components.secret_scan: false` |
+| `safla.json` keeps showing `[object Object]` | bug from pre-v3.0 | run `node .claude/helpers/hook-handler.cjs safla-clean` |
+
+For deeper diagnostics: `node .claude/helpers/hook-handler.cjs errors` (last 20 logged errors, PII-redacted).
+
+---
+
+## Privacy
+
+- **No data leaves your machine** except what `codeburn` reads from `~/.claude/projects/` (your own LLM session logs) — used locally for cost computation, not transmitted.
+- **GitHub API calls** only when you explicitly run `/skills-propose <keyword>` (search public repos, no auth required, optional `GITHUB_TOKEN` for higher rate limit).
+- **All logs in `errors.jsonl`** are auto-redacted via `lib/redact.cjs` (emails, JWT, AWS/Anthropic/OpenAI keys, home paths → `~`). Safe to share for support.
+- **Session snapshots** in `_MEMORY/sessions/` and `.claude-flow/sessions/` contain cost numbers + audit results + workspace stats — they stay local, are git-ignored.
+- **Secret-scan** is local-only (regex patterns), no external service.
+
+---
+
+## Roadmap
+
+| Item | Status |
+|---|---|
+| Split `intelligence.cjs` (979L) and `hook-handler.cjs` (1024L) | DEBT — see [`decisions/008`](_MEMORY/decisions/008-debt-structural-split.md) |
+| ONNX integration (vector embeddings local) | depends on ruflo upstream |
+| Full `CCDEW_LANG` propagation (currently only `codeburn.unavailable`) | LOW priority |
+| `npm audit` periodic in CI | feasible — `lib/perf-baseline.cjs` pattern |
+| TypeScript migration via JSDoc | being explored — `lib/jsdoc-validator.cjs` validates exports |
+| MCP self-test (post-restart, validates `mcp__claude-flow__*` tools loaded) | possible via ToolSearch probe |
+| Skill description-overlap fallback (v3.7) usage stats | already tracked in `.claude-flow/data/skill-usage.jsonl` |
+
+The full architectural decisions (10 documented) live at [`_MEMORY/decisions/INDEX.md`](_MEMORY/decisions/INDEX.md).
 
 ---
 
