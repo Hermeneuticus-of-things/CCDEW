@@ -1,5 +1,5 @@
 {
-  "_comment": "v6.1 Micro feature flags — edit here to toggle components",
+  "_comment": "v3.2 feature flags — edit here to toggle components",
   "mode": "full",
   "components": {
     "enneagram":    true,
@@ -11,7 +11,9 @@
     "langraph":     true,
     "project_scope":true,
     "intelligence": true,
-    "auto_optimize":true
+    "auto_optimize":true,
+    "instincts":    true,
+    "secret_scan":  true
   },
   "ssa": {
     "max_context_tokens": 8000,
@@ -21,11 +23,18 @@
   "codeburn": {
     "warn_tokens": 50000,
     "alert_tokens": 100000,
-    "model_cost_per_1k_input": 0.003,
-    "model_cost_per_1k_output": 0.015
+    "daily_budget_usd": 100.0,
+    "warn_at_pct": 0.75,
+    "alert_at_pct": 1.0,
+    "cost_per_call_warn": 0.05
   },
   "red_hat": {
     "trigger_min_words": 10,
     "always_on_for_architecture": true
+  },
+  "safla": {
+    "weight_success": 0.05,
+    "weight_failure": -0.10,
+    "weight_clamp": 0.5
   }
 }

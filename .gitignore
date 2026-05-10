@@ -26,9 +26,14 @@ __pycache__/
 memory/*.md
 !memory/MEMORY.md
 
-# _MEMORY runtime files (keep templates)
+# _MEMORY runtime files (keep templates + decisions)
 _MEMORY/agents/*
 !_MEMORY/agents/.gitkeep
+# Session snapshots are per-machine (auto-generated at /exit + SessionEnd)
+_MEMORY/sessions/
+
+# .claude.json backups
+.claude.json.bak.*
 
 # Node modules and package locks (user installs locally)
 node_modules/

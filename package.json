@@ -1,0 +1,26 @@
+{
+  "name": "ccdew",
+  "version": "3.8.0",
+  "description": "Claude Code Efficient Workspace — Enneagram routing, SAFLA learning, codeburn, ECC + Red Hat layers",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node .claude/helpers/run-tests.cjs",
+    "audit": "node .claude/helpers/hook-handler.cjs evaluate-setup",
+    "audit:fix": "node .claude/helpers/hook-handler.cjs evaluate-setup --fix",
+    "burn": "node .claude/helpers/hook-handler.cjs burn",
+    "verify": "node .claude/helpers/hook-handler.cjs verify",
+    "review": "node .claude/helpers/hook-handler.cjs review",
+    "quality-gate": "node .claude/helpers/hook-handler.cjs quality-gate",
+    "mcp-health": "node .claude/helpers/hook-handler.cjs mcp-health",
+    "infer": "node .claude/helpers/hook-handler.cjs infer",
+    "optimize": "node .claude/helpers/hook-handler.cjs optimize",
+    "skills-propose": "node .claude/helpers/hook-handler.cjs skills-propose",
+    "exit": "node .claude/helpers/hook-handler.cjs exit",
+    "sessions-compare": "node .claude/helpers/hook-handler.cjs sessions-compare",
+    "bench": "node .claude/helpers/hook-handler.cjs bench"
+  },
+  "license": "MIT"
+}

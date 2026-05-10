@@ -50,12 +50,12 @@
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" inject-workflow'",
-            "timeout": 8000
+            "timeout": 5000
           },
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" route'",
-            "timeout": 10000
+            "timeout": 5000
           }
         ]
       }
@@ -72,6 +72,11 @@
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" import'",
             "timeout": 8000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" auto-audit'",
+            "timeout": 10000
           }
         ]
       }
@@ -176,11 +181,50 @@
       "Bash(npx @claude-flow*)",
       "Bash(npx claude-flow*)",
       "Bash(node .claude/*)",
+      "Bash(node .claude/helpers/*)",
       "mcp__claude-flow__:*"
     ],
     "deny": [
       "Read(./.env)",
-      "Read(./.env.*)"
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./**/credentials.json)",
+      "Read(./**/credentials.yml)",
+      "Read(./**/credentials.yaml)",
+      "Read(./**/secrets.json)",
+      "Read(./**/secrets.yml)",
+      "Read(./**/secrets.yaml)",
+      "Read(./**/id_rsa)",
+      "Read(./**/id_ed25519)",
+      "Read(./**/id_ecdsa)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.pfx)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.key)",
+      "Read(./**/.aws/credentials)",
+      "Read(./**/.ssh/id_*)",
+      "Read(./**/.kube/config)",
+      "Read(./**/.netrc)",
+      "Read(./**/.gnupg/**)",
+      "Read(./**/.docker/config.json)",
+      "Read(./**/.npmrc)",
+      "Read(./**/.pypirc)",
+      "Read(/etc/passwd)",
+      "Read(/etc/shadow)",
+      "Read(/etc/sudoers)",
+      "Read(/etc/ssh/**)",
+      "Read(/proc/**)",
+      "Read(C:\\Windows\\System32\\config\\**)",
+      "Read(C:\\Windows\\System32\\drivers\\**)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~/*)",
+      "Bash(rm -rf /)",
+      "Bash(format *)",
+      "Bash(del /s /q c:\\*)",
+      "Bash(mkfs.*)",
+      "Bash(:(){ :|:& };:)",
+      "Bash(dd if=* of=/dev/sd*)"
     ]
   },
   "attribution": {

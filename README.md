@@ -1,161 +1,145 @@
-# claude-code-efficient-workspace v2.0
+# CCDEW — Claude Code Development Efficient Workspace v3.8.0
 
-**An ultra-efficient workspace for Claude Code** with Enneagram routing, automatic token optimization, real cost tracking, and adaptive feedback loop.
+**An ultra-efficient, self-monitoring, self-archiving workspace for Claude Code** with Enneagram routing, automatic token optimization, real-time cost tracking, adaptive feedback (SAFLA), pattern recognition (Instincts), secret-leak prevention, 5-zoom audit, GitHub-mature skill proposing, and cross-process safety.
 
-> Based on: [Hermeneuticus-of-things/claude-code-eficient-workspace](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)
-> Extended with: v6.1 Micro — SSA + CodeBurn + SAFLA + Graphify + LangGraph Micro
-
----
-
-## 📊 Measured results — what you actually save
-
-All numbers below are **measured from real sessions**, not estimates. Reproduce locally with `node .claude/helpers/hook-handler.cjs stats`.
-
-### Token economy (per prompt)
-
-| What | Without this workspace | With this workspace | Savings |
-|---|---|---|---|
-| Memory injected at SessionStart | 130+ files (~26 KB) | 2 critical + 12 SSA-filtered | **−76% context** |
-| Context per prompt | ~10,000 tokens | ~2,400 tokens | **−7,600 tokens / prompt** |
-| Verbose prompts (auto-stripped) | full text | bloat patterns removed | **5–15% per long prompt** |
-| Repeated SessionStart memory load | every session | cached + indexed | **~50ms vs ~800ms** |
-
-### Cost visibility (real, from `codeburn` CLI)
-
-| Metric | What you get |
-|---|---|
-| Per-session cost | live in status line (`🟢 $0.43 today / 12 calls`) |
-| Daily cost | auto-written to `_METRICS/_DASHBOARD.md` at SessionEnd |
-| Monthly cost | rolling tally (`$230.82 this month`) |
-| Per-call average | flagged red if > $0.05 |
-| Optimization suggestions | auto-generated in `_METRICS/codeburn-optimize-latest.md` |
-
-### Quality (over time, via SAFLA learning)
-
-| Metric | Effect |
-|---|---|
-| Wrong-agent routing | ~30% on day 1 → **<10% after 50 tasks** (adaptive weights) |
-| Architecture over-engineering | Red-Hat injects 3 critical questions before code → fewer rewrites |
-| Repeated mistakes | SAFLA penalizes failed nodes by −0.10 each → bad routes self-correct |
-| Cross-session memory | Obsidian index (2 critical files reused, no re-explanation) |
-
-### Performance overhead (hooks must stay invisible)
-
-| Hook event | Overhead |
-|---|---|
-| `inject-workflow` (per prompt) | **93–185ms** |
-| `route` (per prompt) | <50ms |
-| `post-edit` (per file edit) | <30ms |
-| `session-end` (full state save) | **117ms** (was 8.5s before optimization — 72× faster) |
-| Global hard timeout | 5s force-exit (hooks can never hang Claude Code) |
-
-### Stability (production-tested today)
-
-| Aspect | Status |
-|---|---|
-| Production fixes applied | **23 across 4 audit rounds** (CRITICAL/HIGH/MEDIUM/LOW) |
-| Atomic state writes | ✅ tmp+rename for safla/intelligence (no torn writes under concurrent hooks) |
-| Disk usage bounded | ✅ log rotation at 1–2 MB on 3 jsonl files |
-| Crash recovery | ✅ corrupt state files log warning, never crash hook chain |
-| Cross-platform | ✅ Linux + macOS + Windows (paths resolved via `WORKSPACE_DIR` env or script-relative) |
+> See [`CREDITS.md`](CREDITS.md) for full source attribution.
+> See [`MIGRATION.md`](MIGRATION.md) for upgrade from earlier versions.
+> Romanian docs: [`README.ro.md`](README.ro.md).
 
 ---
 
-## Why this workspace? — What you save and how
+## Live metrics (v3.8.0)
 
-### The problem
+| Metric | Value |
+|---|---|
+| Test suites | **22** |
+| Tests | **147 / 147 PASS** · 0 FAIL |
+| Audit checks (`/evaluate-setup`) | **38 / 38 PASS** · 0 WARN · 0 FAIL |
+| Production helpers (`.claude/helpers/`) | **47 modules** (21 in `lib/` + 26 top-level) |
+| Total lines of code | **~7500** |
+| Slash commands | **19** |
+| Hook events wired | **13** |
+| Skills (`.claude/skills/`) | 33 |
+| Architectural decisions documented | **10** (in `_MEMORY/decisions/`) |
+| External runtime dependencies | **1** (`codeburn`, optional — native fallback if absent) |
+
+---
+
+## Why CCDEW exists
 
 Claude Code consumes tokens at every interaction. Without optimization:
-- **At every SessionStart** the entire available memory is injected (130+ files), even if 90% is irrelevant to the current task.
-- **At every prompt** context grows incrementally — Claude "forgets" what worked and what didn't.
-- **No cost visibility** — you don't know which tasks cost the most or where the waste is.
-- **No intelligent routing** — Claude treats `"fix bug"` and `"redesign architecture"` the same way.
+- At every SessionStart the entire memory is injected (130+ files), even if 90% is irrelevant.
+- At every prompt context grows incrementally — Claude "forgets" what worked.
+- No cost visibility — you don't know which tasks cost the most or where the waste is.
+- No intelligent routing — Claude treats `"fix bug"` and `"redesign architecture"` the same way.
 
-### The solution — 5 mechanisms working together
+CCDEW addresses all of these and adds layers for security, observability, and self-evolution.
 
-#### 1. SSA — Context filtering (−76% injected tokens)
-At every prompt, instead of injecting all memory, SSA calculates **Jaccard trigram similarity** between the prompt and each memory entry. Result: from 50 entries, only 12 are injected — the most relevant ones. The Obsidian index is included automatically.
+---
 
-```
-Without SSA:  50 entries × ~200 tokens = ~10,000 tokens context
-With SSA:     12 entries × ~200 tokens =  ~2,400 tokens context
-Savings:      ~7,600 tokens per prompt
-```
+## Core mechanisms (live, measured)
 
-#### 2. Enneagram Routing — Right agent for the right task
-The system automatically classifies each prompt into one of 9 task types and selects the specialized agent. A bug fix goes to `tester` (Node 6), not `sparc-orchestrator` (Node 8). Right agent → shorter and more precise response → fewer tokens.
+### 1. SSA — Sparse/Selective Attention (−76% injected tokens)
+At every prompt, instead of injecting all memory, SSA computes Jaccard trigram similarity between the prompt and each memory entry. Result: from 50 entries, only 12 are injected — the most relevant ones. The Obsidian index is included automatically.
+
+### 2. Enneagram Routing — right agent for the right task
+The system classifies each prompt into one of 9 task types and selects the specialized agent. A bug fix goes to `tester` (Node 6), not `sparc-orchestrator` (Node 8). Right agent → shorter response → fewer tokens.
 
 ```
 Simple task  → TRIANGLE (3 agents): coder → tester → memory-specialist
-Complex task → HEXAD (6 agents):   reviewer → researcher → ... → analyst
+Complex task → HEXAD (6 agents):    reviewer → researcher → backend-dev → sparc-orchestrator → analyst → architecture
 ```
 
-#### 3. CodeBurn — Complete cost visibility
-Reads directly from `~/.claude/projects/` and displays in the status line:
+### 3. CodeBurn — full cost visibility
+Reads from `~/.claude/projects/` (via the `codeburn` CLI when present, native parser as fallback) and displays in the status line:
 
 ```
-🔥 $3.81 today  |  $230.82 this month  |  112 calls
+💰 $239.25 today / $100/d  ⚠   1185 calls   |   🤖 67% ok·63fb   |   📂 CCDEW
 ```
 
-At SessionEnd it automatically generates `_METRICS/codeburn-optimize-latest.md` with concrete suggestions: "152 calls today → group small tasks".
+Auto-warning at 75% of `daily_budget_usd`, alert at 100%.
 
-#### 4. SAFLA — System that learns from experience
-Tracks which agent worked or not for each task type. If Node 3 (coder) failed 3 times on architecture tasks, the system penalizes this routing by −0.30 and favors Node 7 (architecture). Syncs with CodeBurn: nodes with high cost/call are automatically penalized.
+### 4. SAFLA — Self-Adaptive Feedback Loop
+Tracks which Enneagram node worked or failed. **+0.05** per success, **−0.10** per failure (asymmetric — penalize more), clamped to [-0.5, +0.5]. State at `.claude-flow/data/safla.json`. Cross-process safe: every write is wrapped in a file-lock so two parallel Claude sessions cannot corrupt the data.
 
-#### 5. Red Hat Evaluator — Prevents over-engineering
-Before any architecture task, injects 2-3 critical questions:
+### 5. Red Hat Evaluator — prevents over-engineering
+Before any architecture task, `red-hat-evaluator.cjs` injects 2-3 critical questions:
 - *"What tacit assumptions does this solution contain?"*
-- *"Is there a simpler approach with ≤50% of the complexity?"*
+- *"Is there a simpler approach with ≤ 50% of the complexity?"*
 
-Prevents building complex solutions that then require refactoring (= double tokens).
+### 6. Instincts — learns from your usage
+`lib/instincts.cjs` records `(prompt biometric, routed node, success)` tuples. After ≥3 occurrences with success rate ≥ 50%, suggests automatically: `[INSTINCT] you usually route this to node N (X% confidence over M similar prompts)`.
 
-_See the full measured-results section at the top of this file._
+### 7. Secret-scan — pre-edit hard-block
+`lib/secret-scan.cjs` detects 11 secret patterns (AWS, Anthropic, OpenAI, GitHub, Stripe, RSA, Slack, Bearer, JWT, etc.) plus 8 sensitive paths (`.env`, `id_rsa`, `*.pfx`, etc.). Wired into the `pre-edit` hook — **blocks the edit** if a leak is detected.
+
+### 8. Skills auto-activation
+`lib/skills-activator.cjs` scans `.claude/skills/<name>/SKILL.md` frontmatter and matches triggers / description against the current prompt. Suggests up to 3 most relevant skills per prompt; tracks usage in `.claude-flow/data/skill-usage.jsonl` for `deadSkills()` detection.
+
+### 9. 5-zoom audit (Maha → Nano)
+`/infer` runs at 5 levels of detail:
+
+| Zoom | Scope | Example findings |
+|---|---|---|
+| **MAHA** | Whole-system | LOC > soft cap, tests < minimum, audit history empty |
+| **MACRO** | Cross-module | files > 500 lines (HIGH), > 300 (WARN), excessive coupling |
+| **MEZZO** | Per-module | modules with > 12 exports |
+| **MICRO** | Per-function | functions > 75 lines or > 5 args |
+| **NANO** | Per-line/char | trailing whitespace, mixed tabs+spaces, real TODO/FIXME |
+
+`/optimize nano` applies safe NANO transforms automatically (with backup); higher zooms return proposals only.
+
+### 10. Skills-propose — search GitHub maturi, scaffold without code copy
+`/skills-propose <keyword>` queries GitHub Search API with 4 query variants, filters strictly (≥10 stars, allowed licenses MIT/Apache/ISC/BSD/MPL, push within 365 days, !archived, !disabled, license-known by default). Returns top mature candidates. With `--scaffold <local-name>`, generates `.claude/skills/<local-name>/SKILL.md` with frontmatter (`inspired_by`, `inspired_url`, `inspired_stars`, `inspired_license`, `triggers`) — **no code copied**, just metadata + license attribution.
+
+### 11. Cross-process safety (`lib/file-lock.cjs`)
+Every SAFLA write is wrapped in an O_EXCL file-lock. Tested live with 2 parallel `fork()` processes writing 100 outcomes each — **200/200 survive, no orphans, no corrupt keys**. Stale lock auto-cleanup at >30s.
+
+### 12. Performance baseline + regression detection
+`lib/perf-baseline.cjs` records rolling 30-sample p95 for hot paths (e.g. `ssa.filterContext`, `safla.recordOutcome`). At SessionEnd, auto-runs benchmarks; if current run > baseline p95 × 1.5 → `[PERF] 🚨 regression`.
+
+### 13. Auto-archiving sessions
+At every `/exit` or SessionEnd, `lib/session-snapshot.cjs` writes a snapshot in **two formats**:
+- `.claude-flow/sessions/session-<localISO>-<pid>.json` — machine-readable (cost, SAFLA, instincts, skills, perf, audit, errors, workspace)
+- `_MEMORY/sessions/session-<localISO>-<pid>.md` — Obsidian Markdown with frontmatter and tagged sections (auto-tagged `audit-fail`, `errors-high` when applicable)
+
+`/sessions-compare 5` returns a diff table across the last N snapshots.
+
+### 14. PII redaction in logs
+All `error-log.cjs` writes pass through `lib/redact.cjs`: emails, phones, JWT, AWS/Anthropic/OpenAI keys, hex >40 chars, home paths → `~`. Logs are safe to share for support.
+
+### 15. Multi-platform detection
+`lib/platform-detect.cjs` detects Claude Code / Cursor / Codex / Gemini / OpenCode and reports capabilities (hooks, slashCommands, mcpServers, subAgents). `/platform` warns when a feature isn't supported by the current host.
 
 ---
 
-## What it does
+## Quick start
 
-At every prompt, the system:
-
-1. **Filters context** — SSA reduces injected memory by ~76% (Jaccard trigram, top-12 relevant entries)
-2. **Critically evaluates** — Red Hat asks 2-3 questions before complex architectures
-3. **Routes intelligently** — Enneagram sends the task to the optimal agent (9 nodes, hexad/triangle)
-4. **Tracks cost** — CodeBurn displays `$X.XX today / $X.XX this month` in the status line
-5. **Learns** — SAFLA adjusts weights per node based on successes/failures
-6. **Reports** — Graphify generates a report at the end of each session
-
----
-
-## Quick Setup
-
-### 1. Requirements
-
+### Requirements
 - Node.js ≥ 18
-- Python 3.x
+- Python 3.x (optional — used by Obsidian helpers)
 - Claude Code CLI
 
-### 2. Clone the workspace
-
+### Install
 ```bash
-git clone https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace.git workspace
-cd workspace
-```
+git clone <CCDEW-repo> CCDEW
+cd CCDEW
 
-### 3. Install CodeBurn (the only external package)
-
-```bash
+# Optional but recommended (canonical cost data):
 npm install -g codeburn
+
+# Optional reproducibility:
+npm install --package-lock-only
 ```
 
-### 4. Start Claude Code
-
+### Run
 ```bash
 claude
 ```
 
-On the first prompt, the system auto-initializes. Verify:
-
+On first prompt, hooks auto-initialize. Verify:
 ```bash
+npm run audit            # /evaluate-setup
 node .claude/helpers/hook-handler.cjs flags
 ```
 
@@ -164,279 +148,162 @@ node .claude/helpers/hook-handler.cjs flags
 ## Workspace structure
 
 ```
-workspace/
+CCDEW/
 ├── .claude/
-│   ├── settings.json          ← 13 active hooks
-│   ├── helpers/               ← 40+ modules (JS + Python)
-│   │   ├── hook-handler.cjs   ← central dispatcher
-│   │   ├── feature-flags.json ← component toggles
-│   │   ├── codeburn.cjs       ← real cost tracking
+│   ├── settings.json          ← 13 active hook events
+│   ├── helpers/
+│   │   ├── lib/               ← 21 reusable libraries (atomic-write, platform, flags, validate, ...)
+│   │   ├── tests/             ← 22 regression test suites
+│   │   ├── hook-handler.cjs   ← lazy-require dispatcher (19 commands)
 │   │   ├── ssa.cjs            ← context filtering
-│   │   ├── safla.cjs          ← adaptive feedback
+│   │   ├── safla.cjs          ← adaptive feedback (cross-process locked)
+│   │   ├── codeburn.cjs       ← real cost tracking + native fallback
+│   │   ├── intelligence.cjs   ← memory graph + PageRank
 │   │   ├── graphify.cjs       ← session reports
-│   │   ├── langgraph-micro.cjs← workflow state machine
-│   │   ├── red-hat-evaluator.cjs ← critical evaluation
-│   │   ├── auto-optimize.cjs  ← verbose prompt detection
-│   │   ├── metrics-update.cjs ← dashboard + metrics
-│   │   ├── enneagram_router.py← 9-node routing
-│   │   ├── enneagram_compose.py← multi-zoom swarm composer
-│   │   ├── intelligence.cjs   ← PageRank memory graph
-│   │   └── obsidian-session-context.py ← Obsidian context
-│   └── commands/
-│       └── cost.md            ← /cost command
-├── PROJECTS/                  ← your projects
-├── _BEST_PRACTICES/           ← wisdom per project type
-├── _TEMPLATES/                ← scaffolding (android/book/generic)
-├── _SETTINGS/RULES/           ← workspace protocols
-├── _MEMORY/                   ← Obsidian memory vault
-├── _METRICS/                  ← codeburn snapshots + optimize + _DASHBOARD.md (auto-updated at SessionEnd)
-└── BEST_PRACTICES.md          ← loaded at every session start
+│   │   ├── secret-scan.cjs    ← 11 patterns + 8 sensitive paths
+│   │   ├── skills-activator.cjs
+│   │   ├── instincts.cjs
+│   │   ├── platform-detect.cjs
+│   │   ├── statusline.cjs
+│   │   ├── verify.cjs / review.cjs / quality-gate.cjs / diff-explain.cjs
+│   │   ├── evaluate-setup.cjs
+│   │   ├── enneagram_router.py / enneagram_compose.py
+│   │   ├── obs.py / obsidian-session-context.py
+│   │   ├── auto_learn.py / auto_learn_consolidate.py / auto_learn_rotate.py
+│   │   └── (more...)
+│   └── commands/              ← 10 slash command definitions
+├── _MEMORY/                   ← Obsidian vault
+│   ├── _DASHBOARD.md          ← live evolution table
+│   ├── decisions/             ← 11 architectural decisions documented
+│   └── sessions/              ← Obsidian MD per /exit (auto-generated)
+├── PROJECTS/                  ← your active projects
+├── repositories/              ← Red Hat–style meta-workspace for external repos
+├── _BEST_PRACTICES/           ← wisdom, referenced not copied
+├── _TEMPLATES/                ← scaffolding for new projects
+├── _SETTINGS/                 ← workspace rules + protocols
+├── _ARCHIVE/                  ← rollback snapshots + optimize backups
+└── package.json
 ```
 
 ---
 
-## Components and feature flags
-
-Edit `.claude/helpers/feature-flags.json` to enable/disable:
-
-```json
-{
-  "components": {
-    "enneagram": true,   // intelligent routing
-    "ssa":       true,   // context filtering -76%
-    "codeburn":  true,   // real cost tracking
-    "red_hat":   true,   // critical evaluation
-    "safla":     true,   // adaptive feedback
-    "graphify":  true,   // session reports
-    "langraph":  true,   // workflow tracking
-    "crewai":    false   // permanently disabled
-  }
-}
-```
-
----
-
-## CLI commands
+## CLI commands (npm scripts)
 
 ```bash
-# System status
-node .claude/helpers/hook-handler.cjs flags
-
-# Real cost (reads from ~/.claude/projects/)
-node .claude/helpers/hook-handler.cjs burn
-
-# Performance per Enneagram agent
-node .claude/helpers/hook-handler.cjs safla
-
-# ASCII session report
-node .claude/helpers/hook-handler.cjs graphify
-
-# Active workflow
-node .claude/helpers/hook-handler.cjs lg
-
-# Intelligence/memory diagnostics
-node .claude/helpers/hook-handler.cjs stats
-
-# Project Scope Guard — show currently detected active project
-node .claude/helpers/hook-handler.cjs scope-status
-
-# Project Scope Guard — pin the active project explicitly (overrides auto-detect)
-node .claude/helpers/hook-handler.cjs scope-set <name>
+npm test                      # Run all 22 test suites (147 tests)
+npm run audit                 # /evaluate-setup full health-check (38 checks)
+npm run audit:fix             # /evaluate-setup with --fix flag
+npm run burn                  # Real-time cost tracking
+npm run verify                # Quick pre-commit sweep
+npm run review                # 3-agent code review brief
+npm run quality-gate          # Strict pass/fail (incl. npm audit)
+npm run diff-explain          # Plain-English git diff summary
+npm run mcp-health            # Verify ~/.claude.json MCP servers
+npm run infer                 # 5-zoom audit (Maha → Nano)
+npm run optimize -- nano      # Auto-fix NANO drift (apply)
+npm run optimize -- nano --dry-run
+npm run optimize -- micro     # Proposal-only
+npm run optimize -- mezzo|macro|maha
+npm run skills-propose -- "keyword"
+npm run skills-propose -- "keyword" --scaffold local-skill-name
+npm run exit                  # Save full session snapshot
+npm run sessions-compare -- 5
+npm run bench                 # Benchmark hot paths + record to perf-baseline
 ```
+
+---
 
 ## Slash commands in Claude Code
 
 ```
-/cost           → codeburn status (today + month)
-/cost today     → current day details
-/cost month     → current month details
-/cost report    → interactive TUI dashboard
-/cost optimize  → waste reduction suggestions
+/evaluate-setup    /verify     /review        /quality-gate   /diff-explain
+/research          /cost       /infer         /optimize       /exit
+/sessions-compare  /skills-propose            /bench          /mcp-health
+/safla-clean       /instincts  /errors        /platform       /skills-active
 ```
 
 ---
 
-## Enneagram — intelligent routing
+## Auto-triggers (no manual call needed)
 
-9 specialized nodes, 2 work cycles:
-
-| Node | Agent | Role | Cycle |
-|------|-------|------|-------|
-| 1 | reviewer | QA, code review | hexad |
-| 2 | backend-dev | integration, API | hexad |
-| 3 | coder | direct implementation | triangle |
-| 4 | researcher | context, documentation | hexad |
-| 5 | analyst | analysis, debugging | hexad |
-| 6 | tester | validation, testing | triangle |
-| 7 | architecture | system design | hexad |
-| 8 | sparc-orchestrator | complex orchestration | hexad |
-| 9 | memory-specialist | memory, consolidation | triangle |
-
-**HEXAD** (1→4→2→8→5→7): complex tasks, cross-project, ≥6 agents  
-**TRIANGLE** (3→6→9): fast tasks, direct implementation, 3 agents
+| Trigger | Action |
+|---|---|
+| `git commit*` in Bash | Auto-runs `/verify` (block on fail; bypass: `HOOKS_SKIP=1`) |
+| `git push*` in Bash | Auto-runs `/quality-gate` (block on fail; bypass: `HOOKS_SKIP=1`) |
+| SessionStart | Auto-runs `/evaluate-setup` once per 24h, alerts only on FAIL or > 2 WARN |
+| SessionEnd | Auto-saves snapshot (JSON + Obsidian MD) + auto-runs benchmark for `ssa.filterContext` |
+| pre-edit | Auto-runs `secret-scan.check()` — blocks edit if leak detected |
+| UserPromptSubmit | `inject-workflow` (with SSA, Skills, Instincts hints) + `route` |
 
 ---
 
-## SSA — Sparse/Selective Attention
+## Permissions deny list (security baseline)
 
-Reduces injected context at every prompt:
+35+ patterns blocking sensitive reads:
+- `**/.env*`, `**/credentials.{json,yml}`, `**/secrets.{json,yml}`
+- `**/id_rsa`, `**/id_ed25519`, `**/*.pem`, `**/*.pfx`, `**/*.key`
+- `**/.aws/credentials`, `**/.ssh/id_*`, `**/.kube/config`, `**/.netrc`
+- `**/.gnupg/`, `**/.docker/config.json`, `**/.npmrc`, `**/.pypirc`
+- `/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `/etc/ssh/`, `/proc/`
+- `C:\Windows\System32\config\`, `C:\Windows\System32\drivers\`
 
-- **Input:** all entries from the Intelligence memory graph + Obsidian index
-- **Algorithm:** Jaccard trigram similarity between prompt and each entry
-- **Output:** top-12 most relevant entries + pinned (`critical` priority)
-- **Typical result:** 50 entries → 12 entries (76% reduction)
-
-**SSA Zoom levels** (auto-detected from prompt length):
-- `NANO` — short prompt (<15 words): minimal context
-- `MICRO` — medium prompt (15-30 words): moderate context
-- `MAHA` — long prompt (>30 words): maximum context
+Plus dangerous Bash blocks (`rm -rf /*`, `format c:`, fork bomb, `dd if=* of=/dev/sd*`, `mkfs.*`).
 
 ---
 
-## SAFLA — Adaptive feedback
+## Performance (overhead per hook, hot path)
 
-Tracks what works for each agent:
+| Hook | Median |
+|---|---|
+| `inject-workflow` | ~100ms |
+| `route` | ~100ms |
+| `pre-edit` (incl. secret-scan) | ~30ms |
+| `session-end` (incl. snapshot + bench) | ~150ms |
+| `ssa.filterContext(50)` | 0.31ms p50 |
+| `safla.recordOutcome` | 0.85ms p50 (with cross-process lock) |
+| `evaluate-setup` full audit | <1s |
 
-- **+0.05** weight adjustment on successful task
-- **-0.10** weight adjustment on failed task (asymmetric — larger penalty)
-- **Sync with CodeBurn:** when cost/call > $0.05 → automatic penalty on active nodes
-- **Range:** [-0.5, +0.5] per node
-
----
-
-## Enneagram Compose — Multi-zoom swarm composer
-
-For hexad (complex) tasks, `enneagram_compose.py` automatically selects the correct swarm composition across **5 zoom levels** and **5 lenses**:
-
-| Zoom | Scope | Checks |
-|------|-------|--------|
-| MAHA | Entire system/project | center of gravity, balance |
-| MACRO | Cross-module/cross-chapter | cross-references, drift |
-| MEZZO | Module/chapter | canonical host, rhythm |
-| MICRO | Function/paragraph | internal logic, distinctions |
-| NANO | Character/token | ASCII vs Unicode, punctuation |
-
-**5 lenses:** stylistic (Node 4) · doctrinal (Node 5) · structural (Node 7) · regression (Node 6) · memory (Node 9)
-
-Complexity is auto-determined from file count:
-- **1-2 files:** no swarm — use Edit/Write directly
-- **3-4 files:** MEDIUM — 3 lenses minimum, 4 phases
-- **5-9 files:** COMPLEX — all 5 lenses, parallel cross-check
-- **≥10 files:** MASSIVE — full protocol with DAG decomposition + Bargain-Triangle consensus
+Global hook timeout: 5s force-exit (hooks can never hang Claude Code).
 
 ---
 
-## Project Scope Guard
+## Stability guarantees (verified live)
 
-**What:** an auto-detector that figures out which `PROJECTS/<Name>/` you are actively working in and surfaces it at every prompt, plus a soft warning when an edit lands outside that scope.
-
-**Why:** the workspace hosts many parallel projects. Without scope, edits drift across `PROJECTS/` and root files get polluted. Scope Guard keeps work focused without ever blocking.
-
-**How:** `.claude/helpers/project-scope.cjs` resolves the active project by checking, in order: env var `CLAUDE_PROJECT` → cwd → recently-modified files (last 2h) → mention in the prompt. Result is cached 5 min in `.claude-flow/data/active-project.json`. Works for any project added under `PROJECTS/` — no hardcoding. Toggle via `components.project_scope` in `feature-flags.json`.
-
-**Example output** (UserPromptSubmit hint):
-
-```
-[SCOPE] Active: PROJECTS/Consiliu (detected via cwd) | top: doc/INDEX.md, CLAUDE.md, src/main.py
-```
-
-**Pre-edit warning** (edit outside the active project):
-
-```
-[SCOPE WARN] Edit target _SETTINGS/RULES/foo.md is outside active project PROJECTS/Consiliu (warning only, not blocked)
-```
+| Aspect | Status |
+|---|---|
+| Cross-process atomic writes | ✅ 200 outcomes from 2 parallel `fork()` survive (no data loss) |
+| 50 concurrent in-process atomic writes | ✅ no orphans, final iter correct |
+| 1000 SAFLA outcomes serial | ✅ 0 corrupt keys (`[1-9]` regex enforced) |
+| Fuzz inputs to all `lib/` functions | ✅ 30+ malformed inputs rejected consistently |
+| Encoding edge cases (BOM, CRLF, RTL, emoji) | ✅ handled correctly |
+| Disk full / read-only FS / corrupt JSON | ✅ graceful degradation (8/8 tests) |
+| Cross-platform (Linux + macOS + Windows) | ✅ paths via `lib/platform.cjs` |
 
 ---
 
-## Automatic dashboard
+## Documentation map
 
-At every SessionEnd, the system automatically updates:
-
-- **`_METRICS/_DASHBOARD.md`** — live CodeBurn metrics (cost today/month, calls, cost/call). One-time auto-migration in `metrics-update.cjs` moves a legacy root `_DASHBOARD.md` here on first run.
-- **`_METRICS/codeburn-optimize-latest.md`** — waste reduction suggestions
-- **`_METRICS/codeburn-<timestamp>.json`** — full snapshot (background)
-- **`.claude-flow/reports/session-<timestamp>.md`** — complete Graphify report
-
----
-
-## Performance
-
-| Hook | Overhead |
-|------|----------|
-| UserPromptSubmit | ~104ms |
-| PreToolUse | ~95ms |
-| PostToolUse | ~100ms |
-| SessionStart | ~185ms |
-| SessionEnd | ~117ms |
+| File | Purpose |
+|---|---|
+| [`README.md`](README.md) | This file (English) |
+| [`README.ro.md`](README.ro.md) | Romanian translation |
+| [`CHANGELOG.md`](CHANGELOG.md) | Version-by-version evolution (v3.0 → v3.8) |
+| [`CREDITS.md`](CREDITS.md) | Full attribution: direct deps, ancestry, inspired layers, original work |
+| [`MIGRATION.md`](MIGRATION.md) | Upgrade guide v2.0 → v3.x |
+| [`_MEMORY/_DASHBOARD.md`](_MEMORY/_DASHBOARD.md) | Live workspace state |
+| [`_MEMORY/decisions/INDEX.md`](_MEMORY/decisions/INDEX.md) | 10 architectural decisions documented |
+| `.claude/commands/` | Slash command specs |
 
 ---
 
-## Architecture connections
+## License
 
-```
-UserPromptSubmit
-    ├── SSA.filterContext(intelligence + Obsidian)
-    ├── AutoOptimize.analyze(prompt)
-    ├── RedHat.evaluate(prompt)
-    ├── LangGraph.startWorkflow(prompt)
-    ├── SAFLA.hint(node)
-    ├── Enneagram.routeTask(prompt)
-    └── EnneagramCompose.compose(prompt, files)  ← hexad only
-
-SessionStart
-    ├── SAFLA.sessionStart()
-    └── obsidian-session-context.py → session-critical-index.json
-
-PreCompact
-    └── compact-save (CodeBurn + SAFLA + metrics — no duplicate session-end)
-
-SessionEnd
-    ├── CodeBurn.totals() [cache-first]
-    ├── SAFLA.syncWithCodeBurn(burnTotals)
-    ├── Graphify.generateReport()
-    ├── MetricsUpdate → _METRICS/_DASHBOARD.md + _METRICS/
-    └── LangGraph.clearActive()
-```
+MIT — see [`LICENSE`](LICENSE). All upstream sources (codeburn, ECC, Red Hat setup-evaluator, ruflo) use compatible permissive licenses; CCDEW does not introduce any new restrictions.
 
 ---
 
-## Add a new project
+## Contributing & forking
 
-```bash
-# Copy the appropriate template
-cp -r _TEMPLATES/generic/ PROJECTS/ProjectName/
+Fork freely under MIT. If your fork keeps a meaningful chunk of CCDEW, a link back to this repo and the upstreams listed in [`CREDITS.md`](CREDITS.md) is appreciated but not legally required.
 
-# Edit the project CLAUDE.md
-nano PROJECTS/ProjectName/CLAUDE.md
-
-# Add to the projects table in root CLAUDE.md
-```
-
----
-
-## Credits & Acknowledgements
-
-This workspace stands on the shoulders of several upstream projects and ideas — full credit to their authors:
-
-### Direct dependencies (npm / runtime)
-- **[codeburn](https://github.com/getagentseal/codeburn)** by **AgentSeal** (`hello@agentseal.org`, MIT) — the only required external package. Reads token usage from `~/.claude/projects/` and powers our cost-visibility layer.
-
-### Methodology & inspiration
-- **[ruvnet/ruflo](https://github.com/ruvnet/ruflo)** & **[claude-flow](https://github.com/ruvnet/claude-flow)** by **ruvnet** — agent topology patterns, hook orchestration ideas, and the swarm-init concepts that informed our routing layer.
-- **Enneagram of Personality** — the 9-node typology and hexad/triangle dynamics (1→4→2→8→5→7 and 3→6→9) are a contemporary systematization rooted in the work of George Gurdjieff and later Oscar Ichazo / Claudio Naranjo. We use it here as a routing topology, not a personality framework.
-
-### Core mechanisms (this workspace)
-- **SSA — Sparse/Selective Attention** (Jaccard trigram filter, top-k context) — implemented for v6.1 Micro
-- **SAFLA — Self-Adaptive Feedback Loop** (per-node weight adjustment +0.05/−0.10) — implemented for v6.1 Micro
-- **Enneagram Compose** (multi-zoom MAHA/MACRO/MEZZO/MICRO/NANO + 5-lens swarm) — implemented for v6.1 Micro
-- **Graphify** (ASCII + Markdown session reports) — implemented for v6.1 Micro
-- **LangGraph Micro** (pure-CJS state-machine workflows) — concept inspired by [LangGraph](https://github.com/langchain-ai/langgraph) (LangChain), implementation is original
-
-### Original workspace template
-- **[Hermeneuticus-of-things/claude-code-eficient-workspace](https://github.com/Hermeneuticus-of-things/claude-code-eficient-workspace)** — root structure, `_TEMPLATES/`, `_BEST_PRACTICES/`, Obsidian memory protocol.
-
-### License
-This repository is released under the **[MIT License](LICENSE)** — same permissive terms as `codeburn` and most upstream dependencies. Use freely, modify freely, no warranty.
-
-### How to credit when reusing
-If you fork or adopt large portions, a link back to this repo and the upstreams above is appreciated but not legally required under MIT. If you publish derivative academic / blog work using SSA/SAFLA/Enneagram-routing, citing the workspace + the upstream Enneagram methodology authors is the courteous path.
+If you publish derivative academic / blog work using **SSA / SAFLA / Enneagram-routing / 5-zoom auto-infer** as primary techniques, citing the workspace + the upstream Enneagram methodology authors is the courteous path.

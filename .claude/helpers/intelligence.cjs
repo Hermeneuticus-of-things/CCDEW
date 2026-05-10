@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { writeAtomicJson } = require('./lib/atomic-write.cjs');
 
 const DATA_DIR = path.join(process.cwd(), '.claude-flow', 'data');
 const STORE_PATH = path.join(DATA_DIR, 'auto-memory-store.json');
@@ -66,11 +67,7 @@ function readJSON(filePath) {
 
 function writeJSON(filePath, data) {
   ensureDataDir();
-  // Atomic write with pid-suffixed tmp so concurrent hooks don't clobber
-  // each other's tmp file before rename.
-  const tmp = filePath + '.' + process.pid + '.' + Date.now() + '.tmp';
-  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8');
-  fs.renameSync(tmp, filePath);
+  writeAtomicJson(filePath, data);
 }
 
 function tokenize(text) {

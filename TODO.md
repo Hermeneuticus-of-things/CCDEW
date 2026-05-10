@@ -1,5 +1,31 @@
 # TODO — claude-code-eficient-workspace
 
+## Session 2026-05-10
+
+### Request: Rebuild from scratch with best-practices + ECC + Red Hat setup-evaluator integration
+- [x] Backup `.claude/` + `.claude-flow/` în `_ARCHIVE/pre-rebuild-2026-05-10/`
+- [x] `lib/atomic-write.cjs` — retry-with-backoff (50/100/200ms) + tmp cleanup on final fail
+- [x] `lib/platform.cjs` — findExecutable Win-aware (`.cmd|.exe|.bat` filter)
+- [x] `lib/flags.cjs` — 5s TTL cache loader
+- [x] `lib/validate.cjs` — isValidNodeId, asString, clampNumber
+- [x] Rewrite `safla.cjs` — validation regex + atomic write + clamp
+- [x] Rewrite `codeburn.cjs` — Win .cmd detection + shell:true (Node 22 CVE-2024-27980)
+- [x] Patch `intelligence.cjs` — uses `lib/atomic-write`
+- [x] Rewrite `graphify.cjs` — filters invalid SAFLA keys (no [object Object])
+- [x] Rewrite `hook-handler.cjs` — LAZY require (146ms cold → ~5ms)
+- [x] Add `secret-scan.cjs` — 11 patterns + 8 paths, integrated în pre-edit
+- [x] Add `evaluate-setup.cjs` — 37-check Red Hat-style audit
+- [x] Add `platform-detect.cjs` — Claude/Cursor/Codex/Gemini/OpenCode
+- [x] Add `skills-activator.cjs` — scan SKILL.md, match prompt
+- [x] 4 test suites: atomic-write (5/5), platform-detect (4/4), safla-validation (7/7), secret-scan (8/8) = **24/24 PASS**
+- [x] 5 slash commands: `/evaluate-setup`, `/verify`, `/review`, `/quality-gate`, `/diff-explain`
+- [x] `evaluate-setup` empiric: **37/37 PASS, 0 WARN, 0 FAIL**
+- [x] codeburn live data confirmed: $236.92 today (1173 calls)
+- [x] CHANGELOG bumped la v3.0.0
+- [x] TODO updated
+
+---
+
 ## Session 2026-05-08
 
 ### Request: v6.1 Micro — SSA + CodeBurn + SAFLA + Graphify + LangGraph + conexiuni holografice

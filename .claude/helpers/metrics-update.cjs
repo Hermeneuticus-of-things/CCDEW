@@ -9,30 +9,23 @@
 
 const fs             = require('fs');
 const path           = require('path');
-const { execSync, spawn } = require('child_process');
+const { spawn }      = require('child_process');
+const { findExecutable } = require('./lib/platform.cjs');
 
 const WORKSPACE     = process.cwd();
 const METRICS_DIR   = path.join(WORKSPACE, '_METRICS');
-// Dashboard lives under _METRICS/ to keep the workspace root clean.
-// Older versions wrote it at root; on first run we migrate the legacy file.
 const DASHBOARD_PATH      = path.join(WORKSPACE, '_METRICS', '_DASHBOARD.md');
 const LEGACY_DASHBOARD_AT_ROOT = path.join(WORKSPACE, '_DASHBOARD.md');
 const FLAGS_PATH    = path.join(__dirname, 'feature-flags.json');
 
-const CODEBURN_BIN  = (() => {
-  const home = process.env.HOME || process.env.USERPROFILE || '';
-  const candidates = [
-    path.join(home, '.npm-global', 'bin', 'codeburn'),
-    path.join(home, '.local', 'bin', 'codeburn'),
-    '/usr/local/bin/codeburn',
-    '/usr/bin/codeburn',
-  ];
-  for (const c of candidates) { if (fs.existsSync(c)) return c; }
-  try {
-    const finder = process.platform === 'win32' ? 'where' : 'which';
-    return execSync(`${finder} codeburn`, { encoding: 'utf-8', timeout: 2000 }).trim().split('\n')[0];
-  } catch { return null; }
-})();
+let _codeburnBin = null;
+let _codeburnResolved = false;
+function getCodeburnBin() {
+  if (_codeburnResolved) return _codeburnBin;
+  _codeburnResolved = true;
+  _codeburnBin = findExecutable('codeburn');
+  return _codeburnBin;
+}
 
 function loadFlags() {
   try { return JSON.parse(fs.readFileSync(FLAGS_PATH,'utf-8')); } catch { return {}; }
@@ -70,22 +63,23 @@ function pruneOldSnapshots(dir, prefix, keepN) {
 }
 
 function exportSnapshot() {
-  if (!CODEBURN_BIN) return;
+  const bin = getCodeburnBin();
+  if (!bin) return;
   ensureMetrics();
   const ts   = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
   const file = path.join(METRICS_DIR, `codeburn-${ts}.json`);
-  // Fix #5 — close the fd if spawn throws to avoid descriptor leak on 7/24.
   let fd = null;
   try {
     fd = fs.openSync(file, 'w');
-    const child = spawn(CODEBURN_BIN, ['export', '--format', 'json'], {
-      detached: true, stdio: ['ignore', fd, 'ignore'],
+    const isWinScript = /\.(cmd|bat)$/i.test(bin);
+    const child = spawn(bin, ['export', '--format', 'json'], {
+      detached: true, stdio: ['ignore', fd, 'ignore'], shell: isWinScript,
     });
     child.unref();
-    // child inherits the fd — safe to close ours
     fs.closeSync(fd);
-  } catch {
-    if (fd !== null) { try { fs.closeSync(fd); } catch { /* already closed */ } }
+  } catch (e) {
+    if (fd !== null) { try { fs.closeSync(fd); } catch {} }
+    try { require('./lib/error-log.cjs').logError('metrics-update.exportSnapshot', e); } catch {}
   }
 }
 

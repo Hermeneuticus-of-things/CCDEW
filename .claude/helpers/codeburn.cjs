@@ -1,144 +1,107 @@
 'use strict';
-/**
- * CodeBurn — integrare cu pachetul real codeburn@0.9.7 (getagentseal)
- * Citește date reale din ~/.claude/projects/ via CLI `codeburn status`
- * Fallback: estimare locală dacă CLI-ul nu e disponibil.
- */
+const fs = require('fs');
+const path = require('path');
+const { execFileSync } = require('child_process');
+const { writeAtomicJson } = require('./lib/atomic-write.cjs');
+const { isEnabled } = require('./lib/flags.cjs');
+const { findExecutable } = require('./lib/platform.cjs');
+const nativeEngine = require('./lib/codeburn-engine.cjs');
 
-const fs                       = require('fs');
-const path                     = require('path');
-const { execSync, execFileSync } = require('child_process');
-
-const FLAGS_PATH = path.join(__dirname, 'feature-flags.json');
 const DATA_DIR   = path.join(process.cwd(), '.claude-flow', 'data');
 const CACHE_PATH = path.join(DATA_DIR, 'codeburn-cache.json');
+const CACHE_TTL_MS = 60_000;
 
-// Calea CLI detectată la instalare
-const CODEBURN_BIN = (() => {
-  const home = process.env.HOME || process.env.USERPROFILE || '';
-  const candidates = [
-    path.join(home, '.npm-global', 'bin', 'codeburn'),
-    path.join(home, '.local', 'bin', 'codeburn'),
-    '/usr/local/bin/codeburn',
-    '/usr/bin/codeburn',
-  ];
-  for (const c of candidates) {
-    if (fs.existsSync(c)) return c;
-  }
-  try {
-    // POSIX → which, Windows → where
-    const finder = process.platform === 'win32' ? 'where' : 'which';
-    return execSync(`${finder} codeburn`, { encoding: 'utf-8', timeout: 2000 }).trim().split('\n')[0];
-  } catch { return null; }
-})();
+let resolvedBin = null;
+let resolveAttempted = false;
 
-function loadFlags() {
-  try { return JSON.parse(fs.readFileSync(FLAGS_PATH, 'utf-8')); } catch { return {}; }
+function getBin() {
+  if (resolveAttempted) return resolvedBin;
+  resolveAttempted = true;
+  resolvedBin = findExecutable('codeburn');
+  return resolvedBin;
 }
+
+function isAvailable() { return getBin() !== null || nativeEngine.isAvailable(); }
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// ── Real codeburn CLI calls ──────────────────────────────────────────────────
-
-/**
- * Rulează `codeburn status` și parsează output-ul.
- * Returnează { today_cost, month_cost, today_calls, month_calls } sau null.
- */
 function fetchRealStatus() {
-  if (!CODEBURN_BIN) return null;
+  const bin = getBin();
+  if (!bin) return null;
   try {
-    // execFileSync with array args — no shell, immune to path-injection if
-    // CODEBURN_BIN ever contains spaces or shell metacharacters.
-    const raw = execFileSync(CODEBURN_BIN, ['status'], { encoding: 'utf-8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] });
-    // Format: "  Today  $3.35  101 calls    Month  $230.37  2153 calls"
+    const { isSafeBinaryPath } = require('./lib/path-safe.cjs');
+    if (!isSafeBinaryPath(bin)) {
+      try { require('./lib/error-log.cjs').logError('codeburn.unsafe_path', new Error('shell metachar in bin path'), { bin }); } catch {}
+      return null;
+    }
+    const isWinScript = /\.(cmd|bat)$/i.test(bin);
+    const raw = execFileSync(bin, ['status'], {
+      encoding: 'utf-8', timeout: 5000,
+      stdio: ['ignore', 'pipe', 'ignore'],
+      shell: isWinScript,
+    });
     const todayMatch = raw.match(/Today\s+\$([0-9.]+)\s+(\d+)\s+calls/);
     const monthMatch = raw.match(/Month\s+\$([0-9.]+)\s+(\d+)\s+calls/);
     if (!todayMatch) return null;
     const result = {
-      today_cost:   parseFloat(todayMatch[1]),
-      today_calls:  parseInt(todayMatch[2]),
-      month_cost:   monthMatch ? parseFloat(monthMatch[1]) : 0,
-      month_calls:  monthMatch ? parseInt(monthMatch[2])   : 0,
-      source:       'real',
-      ts:           new Date().toISOString(),
+      version:     '1.0',
+      today_cost:  parseFloat(todayMatch[1]),
+      today_calls: parseInt(todayMatch[2], 10),
+      month_cost:  monthMatch ? parseFloat(monthMatch[1]) : 0,
+      month_calls: monthMatch ? parseInt(monthMatch[2], 10) : 0,
+      source: 'real',
+      ts: new Date().toISOString(),
     };
-    // Cache pentru statusline (evită exec la fiecare render)
     ensureDataDir();
-    fs.writeFileSync(CACHE_PATH, JSON.stringify(result, null, 2), 'utf-8');
+    try { writeAtomicJson(CACHE_PATH, result); } catch { /* non-fatal */ }
     return result;
   } catch { return null; }
 }
 
-/**
- * Citește cache-ul (maxim 60s vechi) pentru apeluri frecvente (statusline).
- */
 function readCache() {
   try {
     if (!fs.existsSync(CACHE_PATH)) return null;
-    const d = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'));
-    const age = Date.now() - new Date(d.ts).getTime();
-    if (age < 60000) return d; // Cache valid 60 secunde
-  } catch { /* ignore */ }
-  return null;
+    const cached = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'));
+    const age = Date.now() - new Date(cached.ts).getTime();
+    if (age > CACHE_TTL_MS) return null;
+    return cached;
+  } catch { return null; }
 }
 
-// ── Public API ───────────────────────────────────────────────────────────────
-
-/**
- * Status rapid — folosit de hook-handler și statusline.
- * Returnează string de o linie cu date reale.
- */
-function status() {
-  const flags = loadFlags();
-  if (!flags.components || !flags.components.codeburn) return '';
-
-  const cached = readCache() || fetchRealStatus();
-  if (!cached) return '🔥 BURN n/a (codeburn CLI unavailable)';
-
-  let badge = '🟢';
-  if (cached.today_cost > 10)  badge = '🔴';
-  else if (cached.today_cost > 5) badge = '🟡';
-
-  return `${badge} Today $${cached.today_cost.toFixed(2)} (${cached.today_calls} calls) | Month $${cached.month_cost.toFixed(2)}`;
-}
-
-/**
- * Date complete — cache-first (max 120s), fallback CLI.
- * La session-end cache e suficient — nu forțăm un CLI call lent.
- */
-function totals() {
-  // Cache valid 120s la session-end (nu avem nevoie de date live)
+function fetchNativeStatus() {
   try {
-    if (fs.existsSync(CACHE_PATH)) {
-      const d   = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'));
-      const age = Date.now() - new Date(d.ts).getTime();
-      if (age < 120000) return d; // 2 minute cache
-    }
-  } catch { /* ignore */ }
-  return fetchRealStatus() || { today_cost: 0, month_cost: 0, today_calls: 0, month_calls: 0, source: 'unavailable' };
+    if (!nativeEngine.isAvailable()) return null;
+    const t = nativeEngine.totals();
+    ensureDataDir();
+    try { writeAtomicJson(CACHE_PATH, t); } catch { /* non-fatal */ }
+    return t;
+  } catch { return null; }
 }
 
-/**
- * Rulează `codeburn report` interactiv în terminal (apelat manual de utilizator).
- */
-function openDashboard() {
-  if (!CODEBURN_BIN) { console.log('[CODEBURN] CLI not found'); return; }
-  try {
-    execFileSync(CODEBURN_BIN, ['report'], { stdio: 'inherit', timeout: 30000 });
-  } catch { /* user closed dashboard */ }
+function totals(opts = {}) {
+  if (!isEnabled('codeburn')) {
+    return { today_cost: 0, today_calls: 0, month_cost: 0, month_calls: 0, source: 'disabled' };
+  }
+  if (!opts.fresh) {
+    const c = readCache();
+    if (c) return c;
+  }
+  // Prefer external CLI (faster + canonical pricing); fall back to native engine.
+  const real = fetchRealStatus();
+  if (real) return real;
+  const native = fetchNativeStatus();
+  if (native) return native;
+  return { today_cost: 0, today_calls: 0, month_cost: 0, month_calls: 0, source: 'unavailable' };
 }
 
-/**
- * record() păstrat pentru compatibilitate — nu mai estimăm din file size.
- * Codeburn real citește direct din ~/.claude/projects/.
- */
-function record() { /* no-op — real codeburn tracks automatically */ }
+function statusLine() {
+  const t = totals();
+  if (t.source === 'unavailable') return '🔥 BURN n/a (codeburn CLI not installed)';
+  if (t.source === 'disabled')    return '';
+  const flag = (t.today_calls > 0 && t.today_cost / t.today_calls > 0.05) ? ' ⚠' : '';
+  return `🔥 $${t.today_cost.toFixed(2)} today | $${t.month_cost.toFixed(2)} month | ${t.today_calls} calls${flag}`;
+}
 
-/**
- * reset() nu are sens pentru codeburn real — datele sunt gestionate de CLI.
- */
-function reset() { console.log('[CODEBURN] Reset not applicable — real codeburn manages its own data.'); }
-
-module.exports = { status, totals, record, reset, openDashboard, fetchRealStatus };
+module.exports = { totals, statusLine, isAvailable };
