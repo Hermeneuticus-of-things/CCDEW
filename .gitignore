@@ -31,6 +31,10 @@ _MEMORY/agents/*
 !_MEMORY/agents/.gitkeep
 # Session snapshots are per-machine (auto-generated at /exit + SessionEnd)
 _MEMORY/sessions/
+# Personal project-specific memory (IPs, hostnames, per-machine state)
+_MEMORY/consiliu_*.md
+_MEMORY/qnap_*.md
+_MEMORY/audit-*.md
 
 # .claude.json backups
 .claude.json.bak.*
