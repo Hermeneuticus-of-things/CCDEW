@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
-gx_client_stub.py v2 — Simulator GX cu symbiotic + voice + role split.
+gx_client_stub.py v4 — GX agent cu gemma4 + detectie offline + flow SOUL.md corect.
 
-ROL GX: VORBESTE CU IONUT (chat conversational + voice).
-DELEGAȚIE: task complex → forward "exec: ..." la QnapGX prin bridge.
+ROL GX (SOUL.md):
+  - VORBESTE cu Ionut (chat + voice via gemma4-e2b-hauhaucs)
+  - ONLINE:  task tehnic → exec: la QnapGX prin bridge → primeste rezultat → TTS
+  - OFFLINE: gemma4 local izolat, exec: salvat in queue → flush la reconect
+
+LLM GX: gemma4-e2b-hauhaucs (SINGURUL — local pe telefon/Ollama)
 """
 import json
 import ssl
@@ -15,28 +19,25 @@ import urllib.error
 from datetime import datetime
 from pathlib import Path
 
-BRIDGE = os.environ.get("BRIDGE_URL", "http://100.97.220.9:9876")
+BRIDGE    = os.environ.get("BRIDGE_URL", "http://100.97.220.9:9876")
 SOUL_SYNC = os.environ.get("SOUL_SYNC_URL", "http://100.97.220.9:9878")
-SKILL_RUNNER = "http://100.97.220.9:9879"
-OLLAMA = os.environ.get("OLLAMA_HOST", "http://100.97.220.9:11434")  # via Tailscale
-TTS_URL = "http://100.97.220.9:8001/v1/audio/speech"
-DATA_DIR = Path(os.environ.get("GX_DATA_DIR", os.path.expanduser("~/.gx_stub")))
+OLLAMA    = os.environ.get("OLLAMA_HOST", "http://100.97.220.9:11434")  # via Tailscale
+TTS_URL   = "http://100.97.220.9:8001/v1/audio/speech"
+DATA_DIR  = Path(os.environ.get("GX_DATA_DIR", os.path.expanduser("~/.gx_stub")))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-STATE_FILE = DATA_DIR / "gx_state.json"
-QUEUE_FILE = DATA_DIR / "offline_queue.json"
-LOG_FILE = DATA_DIR / "gx.log"
+STATE_FILE    = DATA_DIR / "gx_state.json"
+QUEUE_FILE    = DATA_DIR / "offline_queue.json"
+LOG_FILE      = DATA_DIR / "gx.log"
 VOICE_OUT_DIR = DATA_DIR / "voice"
 VOICE_OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# Modele GX (warm-first, atunci capabil)
-GX_MODELS = [
-    "tinydolphin:latest",  # 636MB FAST warm pentru test E2E
-    "gemma4-e2b-hauhaucs:latest",  # 3.1GB primary RO multilingual
-    "fredrezones55/Gemma-4-Uncensored-HauhauCS-Aggressive:latest",  # 6.3GB final HQ
-]
+# GX are UN SINGUR LLM — gemma4-e2b-hauhaucs (multilingv + multimodal)
+GX_MODEL = os.environ.get("GX_MODEL", "gemma4-e2b-hauhaucs:latest")
 
-POLL_INTERVAL = 10
+POLL_INTERVAL       = 10
+BRIDGE_PING_TIMEOUT = 4   # secunde pentru detectie offline
+_bridge_online      = True  # stare curenta conectivitate bridge
 
 
 def log(msg):
@@ -140,43 +141,62 @@ def flush_offline_queue():
         log(f"[QUEUE] flushed {len(replayed)}, failed {len(failed)}")
 
 
-def get_first_available_model():
-    """Return first model from GX_MODELS that responds."""
-    for m in GX_MODELS:
-        try:
-            req = urllib.request.Request(f"{OLLAMA}/api/show",
-                data=json.dumps({"name": m}).encode(),
-                headers={"Content-Type": "application/json"}, method="POST")
-            urllib.request.urlopen(req, timeout=3).read()
-            return m
-        except Exception:
-            continue
-    return GX_MODELS[-1]
-
-
-def gx_llm_chat(user_text, history=None, max_tokens=200):
-    """LLM conversational. Returnează text natural în română."""
-    model = get_first_available_model()
-    system = (
-        "Esti GX, asistentul mobil al lui Ionut. Vorbesti ROMANA naturala. "
-        "Esti inima conversatiei — interpretezi cererile lui Ionut. "
-        "Daca task-ul cere COD/MATEMATICA/SISTEM (ex: 'verifica disc', 'instaleaza X', 'calculeaza Y'), "
-        "raspunzi STRICT cu 'FORWARD_QNAPGX: <task>' — eu (GX runtime) il trimit la QnapGX. "
-        "Pentru orice altceva (chat, salutari, intrebari simple) raspunzi conversational. "
-        "Refuzi doar daca task incalca SOUL.md_GX (privacy biometric, sterge SOUL, etc.)."
-    )
-    body = {"model": model, "prompt": user_text, "system": system, "stream": False,
-            "options": {"num_predict": max_tokens, "temperature": 0.7, "num_ctx": 4096}}
+def check_bridge_online() -> bool:
+    """Ping bridge /health — returneaza True daca accesibil."""
+    global _bridge_online
     try:
-        req = urllib.request.Request(f"{OLLAMA}/api/generate",
+        req = urllib.request.Request(f"{BRIDGE}/health", method="GET")
+        urllib.request.urlopen(req, timeout=BRIDGE_PING_TIMEOUT).read()
+        if not _bridge_online:
+            log("[ONLINE] Bridge reconectat — flush queue offline")
+        _bridge_online = True
+    except Exception:
+        if _bridge_online:
+            log("[OFFLINE] Bridge inaccesibil — mod offline activat")
+        _bridge_online = False
+    return _bridge_online
+
+
+def gx_llm_chat(user_text, max_tokens=300):
+    """gemma4-e2b-hauhaucs — singurul LLM al GX.
+
+    Online:  decide daca raspunde local sau forward exec: la QnapGX
+    Offline: raspunde local, nu poate forward
+    """
+    online = check_bridge_online()
+    system = (
+        "Esti GX, asistentul mobil al lui Ionut pe telefon. Vorbesti ROMANA naturala. "
+        "LLM-ul tau este gemma4 — multilingv si multimodal. "
+        "REGULA SOUL.md: daca Ionut cere ceva TEHNIC (cod, calcul, sistem, fisiere, retea), "
+        "raspunzi STRICT cu 'FORWARD_QNAPGX: <task exact>' — GX runtime il trimite la QnapGX. "
+    )
+    if not online:
+        system += (
+            "ATENTIE: esti OFFLINE acum — nu poti contacta QnapGX. "
+            "Daca primesti task tehnic, raspunde 'QUEUE_EXEC: <task>' — il salvez local pana la reconect. "
+            "Pentru chat normal raspunde conversational."
+        )
+    else:
+        system += "Pentru chat normal raspunde conversational fara FORWARD."
+
+    body = {
+        "model": GX_MODEL,
+        "prompt": user_text,
+        "system": system,
+        "stream": False,
+        "options": {"num_predict": max_tokens, "temperature": 0.7, "num_ctx": 4096},
+    }
+    try:
+        req = urllib.request.Request(
+            f"{OLLAMA}/api/generate",
             data=json.dumps(body).encode(),
             headers={"Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(req, timeout=300) as r:
             raw = json.loads(r.read()).get("response", "").strip()
             raw = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
-        return raw, model
+        return raw, GX_MODEL
     except Exception as e:
-        return f"[GX-LLM-ERR: {e}]", model
+        return f"[GX-LLM-ERR: {e}]", GX_MODEL
 
 
 def speak(text, voice="alloy"):
@@ -203,20 +223,31 @@ def forward_to_qnapgx(task):
 
 
 def handle_user_message(user_text):
-    """Pipeline: user → LLM GX → decide local/forward → response (text + voice)."""
+    """Pipeline GX (SOUL.md):
+    gemma4 local → FORWARD_QNAPGX (online) / QUEUE_EXEC (offline) / raspuns direct
+    """
     log(f"[USER] {user_text}")
     response, model = gx_llm_chat(user_text)
-    log(f"[GX-LLM/{model.split('/')[-1][:30]}] {response[:120]}")
+    log(f"[GX/{model.split('/')[-1][:25]}] {response[:120]}")
 
     if response.startswith("FORWARD_QNAPGX:"):
         task = response[len("FORWARD_QNAPGX:"):].strip()
-        log(f"[FORWARD] task='{task[:80]}' → QnapGX")
+        log(f"[FORWARD→QnapGX] '{task[:80]}'")
         forward_to_qnapgx(task)
-        ack = f"Am trimis task-ul către QnapGX. Te anunț când răspunde."
+        ack = "Am trimis task-ul către QnapGX. Te anunț când răspunde."
         speak(ack)
         return ack
+
+    elif response.startswith("QUEUE_EXEC:"):
+        # Offline — salvez task pentru mai tarziu
+        task = response[len("QUEUE_EXEC:"):].strip()
+        log(f"[QUEUE_EXEC offline] '{task[:80]}'")
+        queue_offline("bridge_send", {"to": "QnapGX", "message": f"exec: {task}"})
+        ack = "Sunt offline. Am salvat task-ul — îl trimit la QnapGX când revin online."
+        speak(ack)
+        return ack
+
     else:
-        # Direct response — TTS in romana
         speak(response)
         return response
 
@@ -246,8 +277,8 @@ def handle_qnapgx_result(m):
 
 
 def main():
-    log(f"[GX-stub v3] start, polling {BRIDGE} la {POLL_INTERVAL}s")
-    log(f"[GX-stub v3] LLM candidates: {[m.split('/')[-1] for m in GX_MODELS]}")
+    log(f"[GX-stub v4] start, polling {BRIDGE} la {POLL_INTERVAL}s")
+    log(f"[GX-stub v4] LLM: {GX_MODEL}")
     log(f"[GX-stub v3] TTS: {TTS_URL}")
     log(f"[GX-stub v3] data: {DATA_DIR}")
 
@@ -261,8 +292,9 @@ def main():
         iteration += 1
         if iteration % 6 == 0:  # flush queue la fiecare minut
             flush_offline_queue()
+        check_bridge_online()  # detectie online/offline la fiecare iteratie
         try:
-            new_msgs = bridge_poll(state)
+            new_msgs = bridge_poll(state) if _bridge_online else []
             for m in new_msgs:
                 log(f"[MSG #{m['id']}] {m.get('from')}: {m.get('message','')[:100]}")
                 frm = m.get("from", "")
