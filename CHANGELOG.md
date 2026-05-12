@@ -6,7 +6,7 @@
 
 ---
 
-## [3.9.3] — 2026-05-12 — SSA Efficiency Fix + New Templates + Scheduled Tasks
+## [3.9.3] — 2026-05-12 — SSA Token Metrics + Devcontainer + GitHub Actions + Scheduled Tasks + Dashboard v5
 
 ### SSA Efficiency Fix
 - **Token metrics added:** entries, chars, tokens (all three measured)
@@ -14,9 +14,11 @@
 - **Per-call metrics:** avg_entries_per_call, avg_tokens_saved_per_call
 - **Real-world expectation:** 25-35% token reduction (diverse content), 60-80% (homogeneous)
 
-### New Templates Added
-- `_TEMPLATES/devcontainer/` — devcontainer.json + README (Node 20, Python 3, codeburn post-create)
-- `_TEMPLATES/github-workflows/` — ccdew-quality-gate.yml (runs audit + tests on push/PR)
+### Dashboard v5
+- **Complete rewrite** — all 12 sections explicit: Audit, Metrics, Modules, Hooks, Commands, Feature Flags, SOP Engine, Enneagram, MCP, Templates, Obsidian, Tests, Security
+- **Quick Reference** — all commands in one place
+- **5-Zoom Canon** — audit levels documented
+- **Template sync** — all 7 templates with status
 
 ### Scheduled Tasks Support
 - Added `ScheduledTask` hook → `hook-handler scheduled-task`
