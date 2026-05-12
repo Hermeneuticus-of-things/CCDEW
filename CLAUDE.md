@@ -1,5 +1,5 @@
 # Claude Workspace — Root
-## Updated: <!-- update date when you clone this template -->
+## Updated: 2026-05-12
 
 > **Parent:** N/A (workspace root)
 > **Cross-project rules:** [`_SETTINGS/RULES/INDEX.md`](_SETTINGS/RULES/INDEX.md)
@@ -76,6 +76,8 @@ Details: [`_SETTINGS/RULES/obsidian_context_protocol.md`](_SETTINGS/RULES/obsidi
 | Standard technical requirements | `_SETTINGS/CERINTE_TEHNICE_STANDARD.md` |
 | CHANGELOG format guide | `_SETTINGS/CHANGELOG-FORMAT.md` |
 | Root CHANGELOG/TODO (META) | `CHANGELOG.md` / `TODO.md` |
+| CCDEW v6.1 SLIM | Enneagram, SSA Layer, SAFLA, CodeBurn, Ruflo, SOP Engine, Auto-Profile |
+| Enneagram Topology | [`_MEMORY/enneagram_topology.md`](_MEMORY/enneagram_topology.md) | 9 types, arc weights, SSA scoring, SAFLA feedback |
 
 ## Active projects
 
@@ -113,6 +115,46 @@ Add project details → `PROJECTS/<Name>/CLAUDE.md` + `BEST_PRACTICES.md` + `doc
 **Preview servers:** copy `_TEMPLATES/preview-live-server/serve_md.py` into project; `.claude/launch.json` in workspace; DO NOT start servers from another project.
 
 **Scope routing:** task on project → work in `PROJECTS/<N>/`; meta task → root or `_SETTINGS/`/`_BEST_PRACTICES/`/`_TEMPLATES/`. "Remember for the future" → write in physical `.md` files (if not on disk, it's lost).
+
+## Anthropic → OpenRouter proxy (fallback automat credite)
+
+Dacă Anthropic rămâne fără credite, proxy-ul local preia automat cu OpenRouter gratuit:
+
+```bash
+# Terminal 1 — porneste proxy (ruleaza in background)
+python3 PROJECTS/Consiliu/anthropic_proxy.py &
+
+# Terminal 2 — spune Claude Code sa foloseasca proxy-ul
+export ANTHROPIC_BASE_URL=http://localhost:8082
+claude  # porneste Claude Code normal, dar cu fallback automat
+```
+
+Proxy-ul ascultă pe `:8082`. Când Anthropic returnează 402 (credit epuizat) → waterfall OpenRouter automat.
+Claude Code nu știe diferența — primește răspuns în format Anthropic identic.
+Log: `/tmp/anthropic_proxy.log` | Status: `curl http://localhost:8082/health`
+
+---
+
+## OpenRouter CLI (Think local)
+
+Fallback automat: **Anthropic → OpenRouter** (dacă Anthropic nu e disponibil):
+
+```bash
+# Recomandatt: incearca Anthropic, fallback automat pe OpenRouter
+python3 PROJECTS/Consiliu/think_ai.py "orice intrebare"
+python3 PROJECTS/Consiliu/think_ai.py --verbose "code: ..."   # vede ce backend foloseste
+python3 PROJECTS/Consiliu/think_ai.py --force-or "sare direct pe OpenRouter"
+
+# Doar OpenRouter (fara Anthropic)
+python3 PROJECTS/Consiliu/think_openrouter.py "calc: ..."
+python3 PROJECTS/Consiliu/think_openrouter.py --list          # modele disponibile
+```
+
+Logica: Anthropic (claude-haiku) → daca pica (429/down/no key) → OpenRouter waterfall:
+`qwen3-coder:free` → `glm-4.5-air:free` → `gpt-oss-120b:free` → `nemotron-120b:free` → `llama-3.3-70b:free` → `hermes-405b:free` → `gemma-4-31b:free` → `qwen3-80b:free` → `gpt-4o-mini`.
+Keys: `ANTHROPIC_API_KEY` env var (optional) + `OPENROUTER_KEY` hardcodat în script.
+
+---
 
 ## What Claude does NOT do at workspace root
 
