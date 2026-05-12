@@ -30,6 +30,9 @@
 - `_TEMPLATES/devcontainer/README.md`
 - `_TEMPLATES/github-workflows/ccdew-quality-gate.yml`
 - `_TEMPLATES/github-workflows/README.md`
+- `_TEMPLATES/opencode-desktop/APP.md` — OpenCode Desktop mobile dashboard (ASCII UI)
+- `_TEMPLATES/opencode-desktop/README.md` — OpenCode Desktop integration guide
+- `.opencode.json` — OpenCode Desktop config for CCDEW
 
 ### Files Modified
 - `.claude/helpers/ssa.cjs` — weights tuned for better efficiency

@@ -1,0 +1,28 @@
+{
+  "provider": "anthropic",
+  "model": "claude-opus-4-7",
+  "rules": [
+    ".claude/rules/"
+  ],
+  "agents": [
+    ".claude/agents/"
+  ],
+  "skills": [
+    ".claude/skills/"
+  ],
+  "mcp": {
+    "claude-flow": {
+      "command": "npx",
+      "args": ["-y", "ruflo@latest", "mcp", "start"],
+      "env": {
+        "CLAUDE_FLOW_MODE": "v3",
+        "CLAUDE_FLOW_HOOKS_ENABLED": "true"
+      }
+    }
+  },
+  "themes": ["dark"],
+  "permissions": {
+    "allow": ["Bash(npx @claude-flow*)", "Bash(node .claude/*)"],
+    "deny": ["Bash(rm -rf /*)", "Read(./.env)"]
+  }
+}
