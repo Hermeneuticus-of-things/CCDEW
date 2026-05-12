@@ -6,6 +6,64 @@
 
 ---
 
+## [3.9.2] — 2026-05-12 — enneagram_topology.md documentation
+
+### Highlights
+- **enneagram_topology.md** — documented CCDEW's enneagram adaptive topology system (9 types, arc weights, scoring, SSA integration, SAFLA feedback loop)
+
+### Files Added
+- `_MEMORY/enneagram_topology.md` — full documentation: types, stress/growth arrows, arc topology, SSA scoring, SAFLA integration, JSON format
+
+---
+
+## [3.9.1] — 2026-05-12 — SOP Engine + Auto-Profile + MetaGPT patterns
+
+### Highlights
+- **SOP Engine** (`sop-engine.cjs`) — MetaGPT-style Standard Operating Procedures with 5 pre-built SOPs: refactor, audit, multi-file-refactor, research, security-audit
+- **Auto-Profile Switching** — Automatic profile switch based on daily budget usage (>90% → ssa-max, >75% → lite)
+- **SOP Commands** — `sop list`, `sop <name>`, `sop-execute <name>`
+- **Enhanced inject-workflow** — Auto-profile check + Ruflo swarm init + SOP suggestion
+
+### Files Added
+- `.claude/helpers/sop-engine.cjs` — SOP engine with 5 default workflows
+- `.claude/helpers/ruflo.cjs` — Updated with federation functions
+
+### Tests
+- `sop list`: 5 SOPs available
+- `sop-execute audit`: 4 phases completed
+- `evaluate-setup`: **37/37 PASS**
+
+---
+
+## [3.9.0] — 2026-05-12 — v6.1 SLIM Implementation Complete
+
+### Highlights
+- **SSA Layer Enhanced** — 5-dimensional scoring (semantic, enneagram, holographic, recency, pinned) replaces simple Jaccard
+- **Ruflo Integration** — Complete MCP wrapper with `swarmInit()`, `agentSpawn()`, `memoryStore()`, `federation*()` functions
+- **Feature Profiles** — 3 modes: Lite (3/13 components), Full (13/13), SSA-Max (9/13 with aggressive filtering)
+- **Auto-swarm in inject-workflow** — Complex tasks (3+ agents) auto-trigger `ruflo.swarmInit()`
+- **Profile switch command** — `/profile lite|full|ssa-max` for instant mode switching
+
+### Components Added/Modified
+| File | Change |
+|---|---|
+| `.claude/helpers/ssa.cjs` | Enhanced 5D scoring + `getSSAEfficiency()` |
+| `.claude/helpers/feature-flags.json` | Added profiles + ruflo component |
+| `.claude/helpers/ruflo.cjs` | New — 10 Ruflo MCP functions |
+| `.claude/helpers/hook-handler.cjs` | +ruflo integration, +profile, +ruflo-status |
+| `.claude/commands/profile.md` | New — `/profile` command docs |
+
+### Metrics
+- `evaluate-setup`: **37/37 PASS**
+- `bench`: SSA 1.31ms, SAFLA 0.77ms
+- SSA Efficiency: **~40%** (tokens_saved/total, target <25%)
+- Profile modes: 3 available (lite/full/ssa-max)
+
+### Tests
+- 22 suites · **147/147 PASS** · 0 FAIL
+
+---
+
 ## [3.8.1] — 2026-05-10 — System audit + AgentDB sync + honor bridge patch
 
 ### Highlights
