@@ -11,6 +11,7 @@
 ### Highlights
 - **Template Audit Complete** — All 5 templates verified byte-for-byte identical with Hermeneuticus upstream
 - **enneagram_topology.md** — documented CCDEW's enneagram adaptive topology system
+- **_DASHBOARD.md v4** — enhanced with live audit results, SOP commands, auto-profile rules, benchmark table, template sync status
 
 ### Template Audit Results
 | Template | CLAUDE.md | BEST_PRACTICES.md | serve_md.py | Status |

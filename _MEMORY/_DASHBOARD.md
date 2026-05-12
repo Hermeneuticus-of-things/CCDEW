@@ -5,7 +5,7 @@ type: reference
 tags: [dashboard, session-start, ccdew, evolution]
 project: ccdew
 priority: high
-_version: 3
+_version: 4
 _created: 2026-05-10
 _modified: 2026-05-12
 _modified_by: claude
@@ -20,7 +20,25 @@ related: [_INBOX.md, _PROTOCOL.md, _USER_NOTES.md, decisions/INDEX.md, sessions/
 
 **CCDEW v3.9.2** · 22 test suites · **37/37 PASS** · enneagram_topology.md + Template Sync Audit
 
-## Quick evolution (v3.0 → v3.9.1)
+---
+
+## Audit Results (live)
+
+| Check Suite | Result | Details |
+|---|---|---|
+| A. CONFIGURATION | ✅ PASS | settings.json, feature-flags.json, permissions deny |
+| B. MODULES | ✅ PASS | 10 helper modules, hook-handler wiring |
+| C. PERFORMANCE | ✅ PASS | SSA 1.31ms, SAFLA 0.77ms |
+| D. STATE | ✅ PASS | safla.json, instincts.json, decisions/ |
+| E. COST | ✅ PASS | CodeBurn: $764/lună, 9759 apeluri |
+| F. SECURITY | ✅ PASS | 40 deny patterns, secret-scan 11 patterns |
+| G. CROSS-PLATFORM | ✅ PASS | linux, Python /usr/bin/python3, Node /usr/bin/node |
+
+**Total: 37/37 PASS · 0 WARN · 0 FAIL**
+
+---
+
+## Quick evolution (v3.0 → v3.9.2)
 
 | v | Date | Tests | LOC | Modules | Features |
 |---|---|---|---|---|---|
@@ -33,41 +51,110 @@ related: [_INBOX.md, _PROTOCOL.md, _USER_NOTES.md, decisions/INDEX.md, sessions/
 | 3.6 | 2026-05-10 | 133 | ~7200 | 19 | skills-propose + snapshots |
 | 3.7 | 2026-05-10 | 140 | ~7250 | 19 | Python detect + NANO fix |
 | 3.8 | 2026-05-10 | 147 | ~7500 | 21 | file-lock + race fix |
-| **3.9** | **2026-05-12** | **147** | **~8000** | **23** | **v6.1 SLIM: SSA 5D + Ruflo + Profiles** |
+| 3.9 | 2026-05-12 | 147 | ~8000 | 23 | v6.1 SLIM: SSA 5D + Ruflo + Profiles |
+| 3.9.1 | 2026-05-12 | 147 | ~8100 | 24 | SOP Engine + Auto-Profile + MetaGPT |
 | **3.9.2** | **2026-05-12** | **147** | **~8200** | **25** | **enneagram_topology.md + Template Sync Audit** |
-| **3.9.1** | **2026-05-12** | **147** | **~8100** | **24** | **SOP Engine + Auto-Profile + MetaGPT** |
+
+---
 
 ## v6.1 SLIM Components
 
-| Component | Status | Description |
+| Component | Status | Version | Description |
+|---|---|---|---|
+| Enneagram | ✅ | 9 types | 9-node routing + stress/growth arcs + adaptive topology |
+| SSA Layer | ✅ | 5D | semantic + enneagram + holographic + recency + pinned scoring |
+| SAFLA | ✅ | v3 | 30 sessions, 23 feedbacks, efficiency ~40% (target <25%) |
+| CodeBurn | ✅ | CLI+native | $764/lună, 9759 apeluri, cache-first 117ms |
+| Ruflo | ✅ | MCP | swarmInit, agentSpawn, memoryStore, federation, hooks_route |
+| SOP Engine | ✅ | MetaGPT-style | 5 SOPs: refactor, audit, multi-file-refactor, research, security-audit |
+| Auto-Profile | ✅ | budget-based | lite (3/13) / full (13/13) / ssa-max (9/13) auto-switch |
+| Red Hat Evaluator | ✅ | 38-check | 37/37 PASS |
+
+---
+
+## SOP Engine Commands
+
+| Command | Action |
+|---|---|
+| `sop list` | List all available SOPs |
+| `sop <name>` | Show SOP details (phases, tools, agents) |
+| `sop-execute <name>` | Execute SOP workflow |
+
+**Available SOPs:** refactor · audit · multi-file-refactor · research · security-audit
+
+---
+
+## Auto-Profile Switch Rules
+
+| Budget Used | Profile | Components Active |
 |---|---|---|
-| Enneagram | ✅ | 9-node routing + workflow selection |
-| SSA Layer | ✅ | 5-dimensional scoring (semantic, enneagram, holographic, recency, pinned) |
-| SAFLA | ✅ | Self-Adaptive Feedback Loop (30 sessions, 23 feedbacks) |
-| CodeBurn | ✅ | $764/lună, 9759 apeluri |
-| Ruflo | ✅ | MCP tools: swarmInit, agentSpawn, memoryStore, federation |
-| SOP Engine | ✅ | 5 SOPs: refactor, audit, multi-file-refactor, research, security-audit |
-| Auto-Profile | ✅ | Budget-based auto-switch (lite/full/ssa-max) |
-| Red Hat Evaluator | ✅ | 37/37 PASS |
+| >90% daily | `ssa-max` | 9/13 (aggressive filtering) |
+| >75% daily | `lite` | 3/13 (minimal) |
+| <75% daily | `full` | 13/13 (all features) |
+
+---
+
+## Enneagram Topology
+
+**9 Types:** Reformer, Helper, Achiever, Individualist, Investigator, Loyalist, Enthusiast, Challenger, Peacemaker
+
+**Default weights:** All types start at 1.0. Achiever (type 3) has weight 3.0 by default.
+
+**Arc topology:** 72 arcs (9×8 source→target). Stress/growth lines get 1.5x weight.
+
+**Documentation:** See [_MEMORY/enneagram_topology.md](enneagram_topology.md) — types, arcs, SSA scoring, SAFLA integration.
+
+---
+
+## Template Sync Status (vs Hermeneuticus upstream)
+
+| Template | CLAUDE.md | BEST_PRACTICES.md | serve_md.py | Status |
+|---|---|---|---|---|
+| android | IDENTICAL | IDENTICAL | — | ✅ synced |
+| generic | IDENTICAL | IDENTICAL | — | ✅ synced |
+| research | IDENTICAL | IDENTICAL | — | ✅ synced |
+| carte | IDENTICAL | — | — | ✅ synced |
+| preview-live-server | IDENTICAL | — | IDENTICAL | ✅ synced |
+
+**CCDEW-unique directories:** `_MEMORY/` · `_BEST_PRACTICES/` · `_SETTINGS/`
+
+---
+
+## Benchmark Summary
+
+| Metric | Value | Target | Status |
+|---|---|---|---|
+| SSA filter latency | 1.31ms | <5ms | ✅ |
+| SAFLA feedback latency | 0.77ms | <2ms | ✅ |
+| SSA Efficiency | ~40% | <25% | ⚠️ |
+| evaluate-setup | 37/37 | 37/37 | ✅ |
+| Test suites | 147/147 | 147/147 | ✅ |
+
+---
 
 ## Obsidian indexes
 
 - [Decisions Index](decisions/INDEX.md) — architectural decisions
+- [Enneagram Topology](enneagram_topology.md) — 9 types + arc weights + SSA integration
 - `sessions/` — Obsidian MD per `/exit` (auto-generated)
 - [Inbox](_INBOX.md) — manual user→Claude drop zone
 - [User Notes](_USER_NOTES.md) — user-only space
 - [Protocol](_PROTOCOL.md) — bidirectional vault rules
 
+---
+
 ## Recent Changes (auto-updated)
 
+- 2026-05-12: v3.9.2 → enneagram_topology.md + Template Sync Audit (all 5 templates IDENTICAL)
+- 2026-05-12: v3.9.2 → CLAUDE.md sync + _DASHBOARD.md v4 + TODO.md session log
 - 2026-05-12: v3.9.1 → SOP Engine (MetaGPT-style) + Auto-Profile + profile command
 - 2026-05-12: v3.9.0 → v6.1 SLIM complete: SSA 5D + Ruflo + Profiles
 - 2026-05-10: v3.8.0 → cross-process file-lock + race fix
 - 2026-05-10: v3.7.0 → Python detection real path + skills fallback
 - 2026-05-10: v3.6.0 → skills-propose GitHub + /exit snapshot + /sessions-compare
 - 2026-05-10: v3.5.0 → 7/10 round-4 zones repaired + stability 5-zoom
-- 2026-05-10: v3.4.0 → 5-zoom audit + auto-infer + auto-optimize
-- 2026-05-10: v3.3.0 → perf-baseline + PII redact + auto-triggers
+
+---
 
 ## Memory Stats
 
