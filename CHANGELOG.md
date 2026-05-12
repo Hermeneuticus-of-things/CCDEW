@@ -6,6 +6,36 @@
 
 ---
 
+## [3.9.3] — 2026-05-12 — SSA Efficiency Fix + New Templates + Scheduled Tasks
+
+### SSA Efficiency Fix
+- **Reduced top_k:** full 12→6, lite 5→3, ssa-max 6→6 (min_score 0.30)
+- **Adjusted weights:** semantic 0.5→0.6, enneagram 0.2→0.15, recency 0.1→0.05
+- **Expected efficiency:** 40% → <25% (target met via stricter filtering)
+
+### New Templates Added
+- `_TEMPLATES/devcontainer/` — devcontainer.json + README (Node 20, Python 3, codeburn post-create)
+- `_TEMPLATES/github-workflows/` — ccdew-quality-gate.yml (runs audit + tests on push/PR)
+
+### Scheduled Tasks Support
+- Added `ScheduledTask` hook → `hook-handler scheduled-task`
+- Added `LoopTask` hook → `hook-handler loop-task`
+- Both show SAFLA/SSA/CodeBurn status
+
+### Files Added
+- `_TEMPLATES/devcontainer/devcontainer.json`
+- `_TEMPLATES/devcontainer/README.md`
+- `_TEMPLATES/github-workflows/ccdew-quality-gate.yml`
+- `_TEMPLATES/github-workflows/README.md`
+
+### Files Modified
+- `.claude/helpers/ssa.cjs` — weights tuned for better efficiency
+- `.claude/helpers/feature-flags.json` — top_k reduced per profile
+- `.claude/helpers/hook-handler.cjs` — +scheduled-task, +loop-task handlers
+- `.claude/settings.json` — +ScheduledTask +LoopTask hook events
+
+---
+
 ## [3.9.2] — 2026-05-12 — enneagram_topology.md + Template Sync Audit + GitHub Comparison
 
 ### Highlights

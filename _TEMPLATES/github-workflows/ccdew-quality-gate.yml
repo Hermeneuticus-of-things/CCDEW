@@ -1,0 +1,49 @@
+name: CCDEW Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install codeburn
+        run: npm install -g codeburn@0.9.7
+
+      - name: Run CCDEW evaluation
+        run: |
+          node .claude/helpers/evaluate-setup.cjs
+
+      - name: Run test suites
+        run: |
+          node .claude/helpers/run-tests.cjs || true
+
+      - name: Check cost
+        run: |
+          node .claude/helpers/hook-handler.cjs burn || true
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccdew-audit-report
+          path: .claude-flow/reports/
+
+  quality:
+    runs-on: ubuntu-latest
+    needs: audit
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run verify
+        run: |
+          node .claude/helpers/verify.cjs || true

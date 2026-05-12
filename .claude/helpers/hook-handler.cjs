@@ -472,11 +472,64 @@ async function main() {
       const safla = lazy('safla');
       const projectScope = lazy('project-scope');
 
+      // AUTO-PROFILE SWITCHER — based on token budget and task complexity
+      const currentFlags = loadFlags();
+      const currentMode = currentFlags.mode || 'full';
+      const todayCost = (() => {
+        const cb = lazy('codeburn');
+        if (cb) try { return cb.totals().today_cost || 0; } catch {}
+        return 0;
+      })();
+      const budget = currentFlags.codeburn?.daily_budget_usd || 100;
+      
+      // Auto-switch logic
+      let autoProfile = null;
+      if (todayCost > budget * 0.9 && currentMode !== 'ssa-max') {
+        autoProfile = 'ssa-max';
+      } else if (todayCost > budget * 0.75 && currentMode === 'full') {
+        autoProfile = 'lite';
+      }
+      
+      if (autoProfile && autoProfile !== currentMode) {
+        const profile = currentFlags.profiles?.[autoProfile];
+        if (profile) {
+          try {
+            const FLAGS_PATH = path.join(helpersDir, 'feature-flags.json');
+            const updated = JSON.parse(fs.readFileSync(FLAGS_PATH, 'utf-8'));
+            updated.mode = autoProfile;
+            updated.components = profile.components;
+            if (profile.ssa) updated.ssa = profile.ssa;
+            fs.writeFileSync(FLAGS_PATH, JSON.stringify(updated, null, 2));
+            console.log(`[AUTO-PROFILE] Switched from ${currentMode} → ${autoProfile} (budget ${Math.round(todayCost/budget*100)}% used)`);
+          } catch {}
+        }
+      }
+
+      // Ruflo integration — auto-swarm for complex tasks
+      const rufloEnabled = currentFlags.components?.ruflo;
+      let rufloHint = '';
+      if (rufloEnabled && wf.confidence === 'high' && wf.agents.length >= 3) {
+        const ruflo = lazy('ruflo');
+        if (ruflo && ruflo.swarmInit) {
+          try {
+            const swarm = ruflo.swarmInit({
+              topology: 'hierarchical',
+              maxAgents: wf.type === 'hexad' ? 6 : 3,
+              strategy: 'specialized',
+              agents: wf.agents,
+            });
+            if (swarm.ok) {
+              rufloHint = ` [RUFLO:${swarm.swarmId}]`;
+            }
+          } catch { /* non-fatal */ }
+        }
+      }
+
       let ssaZoom = 'nano';
       if (words.length > 30) ssaZoom = 'maha';
       else if (words.length > 15) ssaZoom = 'micro';
-      const ssaHint = ssa ? `SSA:${ssaZoom.toUpperCase()}` : '';
-      const saflaAdj = safla ? safla.getWeightAdj(result.node) : 0;
+      const ssaHint = currentFlags.components?.ssa ? `SSA:${ssaZoom.toUpperCase()}` : '';
+      const saflaAdj = currentFlags.components?.safla ? (safla ? safla.getWeightAdj(result.node) : 0) : 0;
       const saflaHint = saflaAdj !== 0 ? ` SAFLA:${saflaAdj > 0 ? '+' : ''}${saflaAdj.toFixed(2)}` : '';
 
       const seq = wf.agents.join(' → ');
@@ -514,7 +567,7 @@ async function main() {
 
       const lines = wf.confidence === 'high' ? [
         `[AUTO-SWARM DIRECTIVE] ${prompt.substring(0, 65)}`,
-        `Node ${result.node} (${result.node_name || result.agent}) | ${wf.type.toUpperCase()} | ${ssaHint}${saflaHint}`,
+        `Node ${result.node} (${result.node_name || result.agent}) | ${wf.type.toUpperCase()} | ${ssaHint}${saflaHint}${rufloHint}`,
         `SPAWN: ${seq}`,
         `swarm_init(topology=hierarchical, maxAgents=${maxA}, strategy=specialized)`,
         `BFS: ${bfs}`,
@@ -1004,6 +1057,132 @@ async function main() {
       if (!langGraph) { console.log('[WARN] LangGraph not available'); return; }
       if (langGraph.printStatus) langGraph.printStatus();
       else console.log(JSON.stringify(langGraph.getActive ? langGraph.getActive() : null, null, 2));
+    },
+
+    'profile': () => {
+      const profileName = args[0] || args.find(a => ['lite', 'full', 'ssa-max'].includes(a)) || '';
+      const flags = loadFlags();
+      const profiles = flags.profiles || {};
+
+      if (!profileName || profileName === 'status') {
+        const current = flags.mode || 'full';
+        console.log(`[PROFILE] Current mode: ${current}`);
+        console.log('Available profiles: lite, full, ssa-max');
+        console.log('\nProfile components:');
+        for (const [name, cfg] of Object.entries(profiles)) {
+          const active = Object.values(cfg.components || {}).filter(Boolean).length;
+          const total = Object.keys(cfg.components || {}).length;
+          console.log(`  ${name}: ${active}/${total} components active`);
+        }
+        return;
+      }
+
+      if (!profiles[profileName]) {
+        console.log(`[PROFILE] Unknown profile: ${profileName}`);
+        console.log('Available: lite, full, ssa-max');
+        return;
+      }
+
+      const newProfile = profiles[profileName];
+      const FLAGS_PATH = path.join(helpersDir, 'feature-flags.json');
+      try {
+        const currentFlags = JSON.parse(fs.readFileSync(FLAGS_PATH, 'utf-8'));
+        currentFlags.mode = profileName;
+        currentFlags.components = newProfile.components;
+        if (newProfile.ssa) currentFlags.ssa = newProfile.ssa;
+        if (newProfile.codeburn) currentFlags.codeburn = { ...currentFlags.codeburn, ...newProfile.codeburn };
+        fs.writeFileSync(FLAGS_PATH, JSON.stringify(currentFlags, null, 2));
+        const activeCount = Object.values(newProfile.components || {}).filter(Boolean).length;
+        console.log(`[PROFILE] Switched to ${profileName} (${activeCount} components active)`);
+      } catch (e) {
+        console.log(`[PROFILE] Error: ${e.message}`);
+      }
+    },
+
+    'ruflo-status': () => {
+      const ruflo = lazy('ruflo');
+      if (!ruflo) { console.log('[RUFLO] module unavailable'); return; }
+      if (ruflo.status) {
+        const s = ruflo.status();
+        console.log('[RUFLO] Status: ' + (s.status || 'unknown'));
+        if (s.swarm_id) console.log('  Swarm: ' + s.swarm_id);
+        if (s.agents) console.log('  Agents: ' + (typeof s.agents === 'object' ? JSON.stringify(s.agents) : s.agents));
+      } else if (ruflo.health) {
+        const h = ruflo.health();
+        console.log('[RUFLO] Health: ' + JSON.stringify(h));
+      } else {
+        console.log('[RUFLO] No status method available');
+      }
+    },
+
+    'scheduled-task': () => {
+      const safla = lazy('safla');
+      const ssa = lazy('ssa');
+      const cb = lazy('codeburn');
+      const i18n = require('./lib/i18n.cjs');
+      const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      console.log(`[SCHEDULED] Task started at ${now}`);
+      if (safla) {
+        const stats = safla.stats();
+        console.log('[SCHEDULED] SAFLA: ' + stats.total_outcomes + ' outcomes, efficiency: ' + Math.round(stats.efficiency * 100) + '%');
+      }
+      if (ssa) {
+        const eff = ssa.getSSAEfficiency();
+        console.log('[SCHEDULED] SSA: ' + eff.tokens_saved + '/' + eff.total_tokens + ' tokens saved (' + Math.round(eff.ratio * 100) + '%)');
+      }
+      if (cb) {
+        cb.totals().then(t => {
+          console.log('[SCHEDULED] CodeBurn: $' + (t.today?.total_cost || 0).toFixed(2) + ' today, $' + (t.month?.total_cost || 0).toFixed(2) + ' this month');
+        }).catch(() => console.log('[SCHEDULED] CodeBurn: unavailable'));
+      }
+    },
+
+    'loop-task': () => {
+      const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      console.log(`[LOOP] Loop task at ${now}`);
+      const flags = loadFlags();
+      const cfg = flags.ssa || {};
+      const topK = cfg.top_k || 6;
+      console.log('[LOOP] SSA top_k: ' + topK + ', min_score: ' + (cfg.min_score || 0.25));
+      if (flags.mode) console.log('[LOOP] Profile: ' + flags.mode);
+      console.log('[LOOP] Loop active — monitoring for optimization opportunities');
+    },
+
+    'sop': () => {
+      const sop = require('./sop-engine.cjs');
+      const sopName = args[0] || '';
+      if (!sopName || sopName === 'list') {
+        const sops = sop.listSOPs();
+        console.log('[SOP] Available SOPs:');
+        console.log('  Default:', sops.default.join(', '));
+        if (sops.custom.length > 0) console.log('  Custom:', sops.custom.join(', '));
+        return;
+      }
+      const s = sop.loadSOP(sopName);
+      if (!s) {
+        console.log(`[SOP] '${sopName}' not found. Run 'sop list' for available SOPs.`);
+        return;
+      }
+      console.log(`[SOP] ${s.name}`);
+      console.log(`  Phases: ${s.phases.map(p => p.name).join(' → ')}`);
+      console.log(`  Agents: ${s.agents.join(', ')}`);
+    },
+
+    'sop-execute': () => {
+      const sop = require('./sop-engine.cjs');
+      const sopName = args[0];
+      if (!sopName) {
+        console.log('Usage: hook-handler.cjs sop-execute <sop-name>');
+        return;
+      }
+      const result = sop.executeSOP(sopName, { prompt, args });
+      if (result.error) {
+        console.log(`[SOP] Error: ${result.error}`);
+        return;
+      }
+      console.log(`[SOP] Executed: ${result.sop}`);
+      console.log(`  Duration: ${result.totalDuration}`);
+      console.log(`  Phases: ${result.phases.map(p => `${p.name}[${p.status}]`).join(' → ')}`);
     },
   };
 

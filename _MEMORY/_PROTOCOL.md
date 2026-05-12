@@ -6,8 +6,8 @@ tags: [protocol, session-start, memory]
 project: workspace
 priority: critical
 _version: 1
-_created: <!-- fill in date -->
-_modified: <!-- fill in date -->
+_created: 2026-05-10
+_modified: 2026-05-12
 _modified_by: claude
 related: [_INBOX.md, _DASHBOARD.md, _USER_NOTES.md]
 ---

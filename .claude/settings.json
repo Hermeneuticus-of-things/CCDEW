@@ -170,6 +170,28 @@
           }
         ]
       }
+    ],
+    "ScheduledTask": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" scheduled-task'",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "LoopTask": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" loop-task'",
+            "timeout": 60000
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

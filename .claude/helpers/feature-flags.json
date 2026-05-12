@@ -1,5 +1,10 @@
 {
-  "_comment": "v3.2 feature flags — edit here to toggle components",
+  "_comment": "v6.1 SLIM feature flags — 3 profiles: lite/full/ssa-max",
+  "_profiles": {
+    "lite": "Minimal overhead — only core routing",
+    "full": "All components active",
+    "ssa_max": "Focus on maximum token efficiency"
+  },
   "mode": "full",
   "components": {
     "enneagram":    true,
@@ -13,12 +18,13 @@
     "intelligence": true,
     "auto_optimize":true,
     "instincts":    true,
-    "secret_scan":  true
+    "secret_scan":  true,
+    "ruflo":        true
   },
   "ssa": {
     "max_context_tokens": 8000,
-    "top_k": 12,
-    "min_score": 0.15
+    "top_k": 8,
+    "min_score": 0.10
   },
   "codeburn": {
     "warn_tokens": 50000,
@@ -36,5 +42,62 @@
     "weight_success": 0.05,
     "weight_failure": -0.10,
     "weight_clamp": 0.5
+  },
+  "profiles": {
+    "lite": {
+      "components": {
+        "enneagram":    true,
+        "ssa":          false,
+        "codeburn":     true,
+        "red_hat":      false,
+        "safla":        false,
+        "graphify":     false,
+        "langraph":     false,
+        "project_scope":false,
+        "intelligence": false,
+        "auto_optimize":false,
+        "instincts":    false,
+        "secret_scan":  true,
+        "ruflo":        false
+      },
+      "ssa": { "top_k": 3, "min_score": 0.35 }
+    },
+    "full": {
+      "components": {
+        "enneagram":    true,
+        "ssa":          true,
+        "codeburn":     true,
+        "red_hat":      true,
+        "safla":        true,
+        "graphify":     true,
+        "langraph":     true,
+        "project_scope":true,
+        "intelligence": true,
+        "auto_optimize":true,
+        "instincts":    true,
+        "secret_scan":  true,
+        "ruflo":        true
+      },
+      "ssa": { "top_k": 6, "min_score": 0.30 }
+    },
+    "ssa_max": {
+      "components": {
+        "enneagram":    true,
+        "ssa":          true,
+        "codeburn":     true,
+        "red_hat":      true,
+        "safla":        true,
+        "graphify":     false,
+        "langraph":     false,
+        "project_scope":true,
+        "intelligence": true,
+        "auto_optimize":true,
+        "instincts":    false,
+        "secret_scan":  true,
+        "ruflo":        false
+      },
+      "ssa": { "top_k": 6, "min_score": 0.25 },
+      "codeburn": { "daily_budget_usd": 50.0 }
+    }
   }
 }
