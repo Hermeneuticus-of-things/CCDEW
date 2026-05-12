@@ -6,29 +6,17 @@
 
 ---
 
-## [3.9.2] — 2026-05-12 — enneagram_topology.md + Template Sync Audit
+## [3.9.2] — 2026-05-12 — enneagram_topology.md + Template Sync Audit + GitHub Comparison
 
 ### Highlights
 - **Template Audit Complete** — All 5 templates verified byte-for-byte identical with Hermeneuticus upstream
 - **enneagram_topology.md** — documented CCDEW's enneagram adaptive topology system
 - **_DASHBOARD.md v4** — enhanced with live audit results, SOP commands, auto-profile rules, benchmark table, template sync status
-
-### Template Audit Results
-| Template | CLAUDE.md | BEST_PRACTICES.md | serve_md.py | Status |
-|---|---|---|---|---|
-| android | IDENTICAL | IDENTICAL | — | ✅ synced |
-| generic | IDENTICAL | IDENTICAL | — | ✅ synced |
-| research | IDENTICAL | IDENTICAL | — | ✅ synced |
-| carte | IDENTICAL | — | — | ✅ synced |
-| preview-live-server | IDENTICAL | — | IDENTICAL | ✅ synced |
-
-### CCDEW Unique Directories (vs Hermeneuticus)
-- `_MEMORY/` — Obsidian vault, agent state, enneagram topology, sessions, decisions
-- `_BEST_PRACTICES/` — Growth log (populated from practice)
-- `_SETTINGS/` — CERINTE_TEHNICE, CHANGELOG-FORMAT, QUICK-START-CONFIG, RULES/
+- **GitHub Comparison Audit** — compared CCDEW with shanraisshan (52k stars), cretiq, language-specific workspaces. CCDEW is the only self-hosting workspace with: Enneagram 9-node routing, SAFLA cost-aware feedback, 5D SSA, Auto-Profile, SOP Engine, 22 test suites, 38-check Red Hat evaluator
 
 ### Files Added
 - `_MEMORY/enneagram_topology.md` — full documentation: types, stress/growth arrows, arc topology, SSA scoring, SAFLA integration, JSON format
+- `_MEMORY/AUDIT-GITHUB-COMPARISON.md` — comprehensive audit + GitHub comparison (CCDEW vs 3 repos)
 
 ---
 
