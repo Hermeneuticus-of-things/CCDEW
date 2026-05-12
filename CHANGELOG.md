@@ -6,10 +6,25 @@
 
 ---
 
-## [3.9.2] — 2026-05-12 — enneagram_topology.md documentation
+## [3.9.2] — 2026-05-12 — enneagram_topology.md + Template Sync Audit
 
 ### Highlights
-- **enneagram_topology.md** — documented CCDEW's enneagram adaptive topology system (9 types, arc weights, scoring, SSA integration, SAFLA feedback loop)
+- **Template Audit Complete** — All 5 templates verified byte-for-byte identical with Hermeneuticus upstream
+- **enneagram_topology.md** — documented CCDEW's enneagram adaptive topology system
+
+### Template Audit Results
+| Template | CLAUDE.md | BEST_PRACTICES.md | serve_md.py | Status |
+|---|---|---|---|---|
+| android | IDENTICAL | IDENTICAL | — | ✅ synced |
+| generic | IDENTICAL | IDENTICAL | — | ✅ synced |
+| research | IDENTICAL | IDENTICAL | — | ✅ synced |
+| carte | IDENTICAL | — | — | ✅ synced |
+| preview-live-server | IDENTICAL | — | IDENTICAL | ✅ synced |
+
+### CCDEW Unique Directories (vs Hermeneuticus)
+- `_MEMORY/` — Obsidian vault, agent state, enneagram topology, sessions, decisions
+- `_BEST_PRACTICES/` — Growth log (populated from practice)
+- `_SETTINGS/` — CERINTE_TEHNICE, CHANGELOG-FORMAT, QUICK-START-CONFIG, RULES/
 
 ### Files Added
 - `_MEMORY/enneagram_topology.md` — full documentation: types, stress/growth arrows, arc topology, SSA scoring, SAFLA integration, JSON format
