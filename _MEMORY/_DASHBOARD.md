@@ -26,13 +26,13 @@ related: [_INBOX.md, _PROTOCOL.md, _USER_NOTES.md, decisions/INDEX.md, sessions/
 
 | Check Suite | Result | Details |
 |---|---|---|
-| A. CONFIGURATION | ✅ PASS | settings.json, feature-flags.json, permissions deny |
-| B. MODULES | ✅ PASS | 10 helper modules, hook-handler wiring |
-| C. PERFORMANCE | ✅ PASS | SSA 1.31ms, SAFLA 0.77ms |
-| D. STATE | ✅ PASS | safla.json, instincts.json, decisions/ |
-| E. COST | ✅ PASS | CodeBurn: $764/lună, 9759 apeluri |
-| F. SECURITY | ✅ PASS | 40 deny patterns, secret-scan 11 patterns |
-| G. CROSS-PLATFORM | ✅ PASS | linux, Python /usr/bin/python3, Node /usr/bin/node |
+| A. CONFIGURATION | OK PASS | settings.json, feature-flags.json, permissions deny |
+| B. MODULES | OK PASS | 10 helper modules, hook-handler wiring |
+| C. PERFORMANCE | OK PASS | SSA 1.31ms, SAFLA 0.77ms |
+| D. STATE | OK PASS | safla.json, instincts.json, decisions/ |
+| E. COST | OK PASS | CodeBurn: $764/lună, 9759 apeluri |
+| F. SECURITY | OK PASS | 40 deny patterns, secret-scan 11 patterns |
+| G. CROSS-PLATFORM | OK PASS | linux, Python /usr/bin/python3, Node /usr/bin/node |
 
 **Total: 37/37 PASS · 0 WARN · 0 FAIL**
 
@@ -61,14 +61,14 @@ related: [_INBOX.md, _PROTOCOL.md, _USER_NOTES.md, decisions/INDEX.md, sessions/
 
 | Component | Status | Version | Description |
 |---|---|---|---|
-| Enneagram | ✅ | 9 types | 9-node routing + stress/growth arcs + adaptive topology |
-| SSA Layer | ✅ | 5D | semantic + enneagram + holographic + recency + pinned scoring |
-| SAFLA | ✅ | v3 | 30 sessions, 23 feedbacks, efficiency ~40% (target <25%) |
-| CodeBurn | ✅ | CLI+native | $764/lună, 9759 apeluri, cache-first 117ms |
-| Ruflo | ✅ | MCP | swarmInit, agentSpawn, memoryStore, federation, hooks_route |
-| SOP Engine | ✅ | MetaGPT-style | 5 SOPs: refactor, audit, multi-file-refactor, research, security-audit |
-| Auto-Profile | ✅ | budget-based | lite (3/13) / full (13/13) / ssa-max (9/13) auto-switch |
-| Red Hat Evaluator | ✅ | 38-check | 37/37 PASS |
+| Enneagram | OK | 9 types | 9-node routing + stress/growth arcs + adaptive topology |
+| SSA Layer | OK | 5D | semantic + enneagram + holographic + recency + pinned scoring |
+| SAFLA | OK | v3 | 30 sessions, 23 feedbacks, efficiency ~40% (target <25%) |
+| CodeBurn | OK | CLI+native | $764/lună, 9759 apeluri, cache-first 117ms |
+| Ruflo | OK | MCP | swarmInit, agentSpawn, memoryStore, federation, hooks_route |
+| SOP Engine | OK | MetaGPT-style | 5 SOPs: refactor, audit, multi-file-refactor, research, security-audit |
+| Auto-Profile | OK | budget-based | lite (3/13) / full (13/13) / ssa-max (9/13) auto-switch |
+| Red Hat Evaluator | OK | 38-check | 37/37 PASS |
 
 ---
 
@@ -110,11 +110,11 @@ related: [_INBOX.md, _PROTOCOL.md, _USER_NOTES.md, decisions/INDEX.md, sessions/
 
 | Template | CLAUDE.md | BEST_PRACTICES.md | serve_md.py | Status |
 |---|---|---|---|---|
-| android | IDENTICAL | IDENTICAL | — | ✅ synced |
-| generic | IDENTICAL | IDENTICAL | — | ✅ synced |
-| research | IDENTICAL | IDENTICAL | — | ✅ synced |
-| carte | IDENTICAL | — | — | ✅ synced |
-| preview-live-server | IDENTICAL | — | IDENTICAL | ✅ synced |
+| android | IDENTICAL | IDENTICAL | — | OK synced |
+| generic | IDENTICAL | IDENTICAL | — | OK synced |
+| research | IDENTICAL | IDENTICAL | — | OK synced |
+| carte | IDENTICAL | — | — | OK synced |
+| preview-live-server | IDENTICAL | — | IDENTICAL | OK synced |
 
 **CCDEW-unique directories:** `_MEMORY/` · `_BEST_PRACTICES/` · `_SETTINGS/`
 
@@ -124,11 +124,11 @@ related: [_INBOX.md, _PROTOCOL.md, _USER_NOTES.md, decisions/INDEX.md, sessions/
 
 | Metric | Value | Target | Status |
 |---|---|---|---|
-| SSA filter latency | 1.31ms | <5ms | ✅ |
-| SAFLA feedback latency | 0.77ms | <2ms | ✅ |
-| SSA Efficiency | ~40% | <25% | ⚠️ |
-| evaluate-setup | 37/37 | 37/37 | ✅ |
-| Test suites | 147/147 | 147/147 | ✅ |
+| SSA filter latency | 1.31ms | <5ms | OK |
+| SAFLA feedback latency | 0.77ms | <2ms | OK |
+| SSA Efficiency | ~40% | <25% | WARN |
+| evaluate-setup | 37/37 | 37/37 | OK |
+| Test suites | 147/147 | 147/147 | OK |
 
 ---
 
