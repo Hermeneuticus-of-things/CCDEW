@@ -1,5 +1,43 @@
 # TODO — CCDEW (Claude Code Development Efficient Workspace)
 
+## Session 2026-05-12 — CCDEW v6.1 SLIM Finalization
+
+### Request: Complete v6.1 SLIM implementation + verify Hermeneuticus compatibility
+
+**Hermeneuticus rules adoption**
+- [x] Evaluated: CHANGELOG/ TODO/ EPILOG — CCDEW has superset
+- [x] Rules confirmed: 4 rules (CCDEW) vs 3 (Hermeneuticus) + 1 extra MEMORY CHECK
+
+**Template sync audit**
+- [x] android: CLAUDE.md IDENTICAL, BEST_PRACTICES.md IDENTICAL
+- [x] generic: CLAUDE.md IDENTICAL, BEST_PRACTICES.md IDENTICAL
+- [x] research: CLAUDE.md IDENTICAL, BEST_PRACTICES.md IDENTICAL
+- [x] carte: CLAUDE.md IDENTICAL
+- [x] preview-live-server: CLAUDE.md IDENTICAL, serve_md.py IDENTICAL
+
+**enneagram_topology.md documentation**
+- [x] Created `_MEMORY/enneagram_topology.md` — 9 types, arc weights, SSA scoring, SAFLA feedback
+
+**Workspace sync**
+- [x] CLAUDE.md: Updated date to 2026-05-12, added v6.1 SLIM + Enneagram Topology to workspace map
+- [x] _DASHBOARD.md: Updated to v3.9.2
+
+**Git push + tag**
+- [x] git pull --rebase origin main
+- [x] git push origin main
+- [x] git tag v6.1-slim-baseline
+- [x] git push origin v6.1-slim-baseline
+
+**Remaining (optional)**
+- [ ] .claude/helpers/feature-flags.json — commit v6.1 SLIM feature flags
+- [ ] .claude/helpers/hook-handler.cjs — commit Ruflo + SOP integration
+- [ ] .claude/helpers/ssa.cjs — commit 5D scoring
+- [ ] .claude/helpers/ruflo.cjs — commit (new file)
+- [ ] .claude/helpers/sop-engine.cjs — commit (new file)
+- [ ] .claude/commands/profile.md — commit (new file)
+
+---
+
 ## Session 2026-05-10
 
 ### Request: Full rebuild with best-practices + ECC + Red Hat setup-evaluator integration (v3.0 → v3.8 in single session)
