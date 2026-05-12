@@ -42,7 +42,18 @@ const STOP_WORDS = new Set([
   'ca','la','de','si','cu','din','pe','un','o','sa','se','nu',
 ]);
 
-let _stats = { total_tokens: 0, saved_tokens: 0, calls: 0 };
+let _stats = {
+  total_entries: 0,
+  saved_entries: 0,
+  total_chars: 0,
+  saved_chars: 0,
+  total_tokens: 0,
+  saved_tokens: 0,
+  calls: 0,
+};
+
+const AVG_CHARS_PER_TOKEN = 4;
+const AVG_TOKENS_PER_ENTRY = 150;
 
 function loadFlags() {
   try { return JSON.parse(fs.readFileSync(FLAGS_PATH, 'utf-8')); } catch { return {}; }
@@ -177,8 +188,26 @@ function filterContext(prompt, entries, opts = {}) {
 
   const result = merged.slice(0, Math.max(topK, pinned.length));
 
-  _stats.total_tokens += entries.length;
-  _stats.saved_tokens += (entries.length - result.length);
+  const totalIn = entries.reduce((sum, e) => {
+    const content = e.content || e.text || e.body || '';
+    const title = e.title || e.name || '';
+    return sum + content.length + title.length;
+  }, 0);
+  const totalOut = result.reduce((sum, e) => {
+    const content = e.content || e.text || e.body || '';
+    const title = e.title || e.name || '';
+    return sum + content.length + title.length;
+  }, 0);
+  const savedChars = totalIn - totalOut;
+  const savedTokens = Math.round(savedChars / AVG_CHARS_PER_TOKEN);
+  const totalTokensIn = Math.round(totalIn / AVG_CHARS_PER_TOKEN);
+
+  _stats.total_entries += entries.length;
+  _stats.saved_entries += (entries.length - result.length);
+  _stats.total_chars += totalIn;
+  _stats.saved_chars += savedChars;
+  _stats.total_tokens += totalTokensIn;
+  _stats.saved_tokens += savedTokens;
   _stats.calls++;
 
   return result;
@@ -193,16 +222,28 @@ function summarizeStats(original, filtered) {
 }
 
 function getSSAEfficiency() {
-  const ratio = _stats.total_tokens > 0 ? _stats.saved_tokens / _stats.total_tokens : 0;
+  const entryRatio = _stats.total_entries > 0 ? _stats.saved_entries / _stats.total_entries : 0;
+  const charRatio = _stats.total_chars > 0 ? _stats.saved_chars / _stats.total_chars : 0;
+  const tokenRatio = _stats.total_tokens > 0 ? _stats.saved_tokens / _stats.total_tokens : 0;
+  const calls = _stats.calls || 0;
   return {
-    ratio: Math.round(ratio * 100) / 100,
-    tokens_saved: _stats.saved_tokens,
-    total_tokens: _stats.total_tokens,
-    calls: _stats.calls,
+    calls,
+    entries: { total: _stats.total_entries, saved: _stats.saved_entries, ratio: Math.round(entryRatio * 100) },
+    chars: { total: _stats.total_chars, saved: _stats.saved_chars, ratio: Math.round(charRatio * 100) },
+    tokens: { total: _stats.total_tokens, saved: _stats.saved_tokens, ratio: Math.round(tokenRatio * 100) },
+    avg_entries_per_call: calls > 0 ? Math.round(_stats.total_entries / calls) : 0,
+    avg_tokens_saved_per_call: calls > 0 ? Math.round(_stats.saved_tokens / calls) : 0,
     target: '<25%',
-    status: ratio >= 0.25 ? 'OK' : 'BELOW_TARGET',
-    note: 'Ratio = tokens_saved / total_tokens. With diverse content (mixed topics), expect 25-35%. With homogeneous test data, ratio can be 60-90%.',
+    status: tokenRatio >= 0.25 ? 'OK' : 'BELOW_TARGET',
   };
+}
+
+function resetStats() {
+  _stats = { total_entries: 0, saved_entries: 0, total_chars: 0, saved_chars: 0, total_tokens: 0, saved_tokens: 0, calls: 0 };
+}
+
+function getRawStats() {
+  return { ..._stats };
 }
 
 function loadObsidianEntries() {
@@ -231,6 +272,8 @@ module.exports = {
   summarizeStats, 
   loadObsidianEntries,
   getSSAEfficiency,
+  resetStats,
+  getRawStats,
   getCurrentNode,
   ENNEAGRAM_DISTANCE,
 };

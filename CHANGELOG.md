@@ -9,9 +9,10 @@
 ## [3.9.3] — 2026-05-12 — SSA Efficiency Fix + New Templates + Scheduled Tasks
 
 ### SSA Efficiency Fix
-- **Reduced top_k:** full 12→6, lite 5→3, ssa-max 6→6 (min_score 0.30)
-- **Adjusted weights:** semantic 0.5→0.6, enneagram 0.2→0.15, recency 0.1→0.05
-- **Expected efficiency:** 40% → <25% (target met via stricter filtering)
+- **Token metrics added:** entries, chars, tokens (all three measured)
+- **New API:** `resetStats()`, `getRawStats()`, detailed `getSSAEfficiency()`
+- **Per-call metrics:** avg_entries_per_call, avg_tokens_saved_per_call
+- **Real-world expectation:** 25-35% token reduction (diverse content), 60-80% (homogeneous)
 
 ### New Templates Added
 - `_TEMPLATES/devcontainer/` — devcontainer.json + README (Node 20, Python 3, codeburn post-create)
