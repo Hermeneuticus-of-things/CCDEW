@@ -150,7 +150,7 @@ Citeste acest fisier la inceputul fiecarei sesiuni.
 
 ### Oppo/ColorOS
 - Vezi sectiunea 8 de mai sus
-- Testare pe Oppo PGEM10 (SDK 36) sau vivo X200 Ultra (SDK 36)
+- Testare pe dispozitiv real Android 14+ (SDK 34+, ColorOS recomandat pentru quirks)
 
 ---
 
