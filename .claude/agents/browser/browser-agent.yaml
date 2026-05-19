@@ -39,80 +39,33 @@ capabilities:
   - session-management
   - multi-tab-coordination
 
-# Available tools (MCP tools with browser/ prefix)
+# Tool execution: Bash tool + agent-browser CLI (npm install -g agent-browser)
+# Daemon persists between Bash calls — no restart overhead.
+# Refs (@e1, @e2...) reset on each snapshot — always snapshot before acting.
+#
+# Core pattern:
+#   agent-browser open <url>
+#   agent-browser snapshot -i          # get refs
+#   agent-browser click @e2            # act by ref
+#   agent-browser get text body        # extract
+#
+# Full reference: .claude/skills/agent-browser/SKILL.md
+
 tools:
-  navigation:
-    - browser/open
-    - browser/back
-    - browser/forward
-    - browser/reload
-    - browser/close
-  snapshot:
-    - browser/snapshot
-    - browser/screenshot
-    - browser/pdf
-  interaction:
-    - browser/click
-    - browser/fill
-    - browser/type
-    - browser/press
-    - browser/hover
-    - browser/select
-    - browser/check
-    - browser/uncheck
-    - browser/scroll
-    - browser/upload
-  info:
-    - browser/get-text
-    - browser/get-html
-    - browser/get-value
-    - browser/get-attr
-    - browser/get-title
-    - browser/get-url
-    - browser/get-count
-  state:
-    - browser/is-visible
-    - browser/is-enabled
-    - browser/is-checked
-  wait:
-    - browser/wait
-  eval:
-    - browser/eval
-  storage:
-    - browser/cookies-get
-    - browser/cookies-set
-    - browser/cookies-clear
-    - browser/localstorage-get
-    - browser/localstorage-set
-  network:
-    - browser/network-route
-    - browser/network-unroute
-    - browser/network-requests
-  tabs:
-    - browser/tab-list
-    - browser/tab-new
-    - browser/tab-switch
-    - browser/tab-close
-    - browser/session-list
-  settings:
-    - browser/set-viewport
-    - browser/set-device
-    - browser/set-geolocation
-    - browser/set-offline
-    - browser/set-media
-  debug:
-    - browser/trace-start
-    - browser/trace-stop
-    - browser/console
-    - browser/errors
-    - browser/highlight
-    - browser/state-save
-    - browser/state-load
-  find:
-    - browser/find-role
-    - browser/find-text
-    - browser/find-label
-    - browser/find-testid
+  primary: Bash  # all agent-browser commands run via Bash tool
+  cli: agent-browser
+  key_commands:
+    - "open <url>"
+    - "snapshot -i"
+    - "click @eN"
+    - "fill @eN <text>"
+    - "get text body"
+    - "screenshot [--annotate]"
+    - "eval <js>"
+    - "wait <ms|selector>"
+    - "find role <role> click --name <name>"
+    - "tab new | tab N"
+    - "--json snapshot -i"
 
 # Memory configuration
 memory:
