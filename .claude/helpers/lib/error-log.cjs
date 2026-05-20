@@ -13,14 +13,13 @@ function ensureDir() {
 function logError(scope, error, extra) {
   try {
     ensureDir();
-    const { redactString, redactObject } = require('./redact.cjs');
     const entry = {
       ts: new Date().toISOString(),
       scope: String(scope || 'unknown'),
-      message: redactString(error && error.message ? String(error.message).slice(0, 500) : String(error || '')),
+      message: String(error && error.message ? error.message : error || '').slice(0, 500),
       code: error && error.code ? String(error.code) : '',
-      stack: redactString(error && error.stack ? String(error.stack).split('\n').slice(0, 5).join(' | ').slice(0, 800) : ''),
-      extra: extra ? redactObject(JSON.parse(JSON.stringify(extra))) : undefined,
+      stack: String(error && error.stack ? error.stack.split('\n').slice(0, 5).join(' | ') : '').slice(0, 800),
+      extra: extra ? JSON.parse(JSON.stringify(extra)) : undefined,
     };
     fs.appendFileSync(LOG_PATH, JSON.stringify(entry) + '\n', 'utf-8');
     rotateIfNeeded();

@@ -138,6 +138,65 @@ Se aplica si la proiecte de alt tip?
 
 ---
 
+### PATTERN-UNIVERSAL-CCDEW — Scrie Tot,Învață Continuu, Protejează Tot
+
+**Cand:** Orice cerere nouă, feature, sau informație personală/thought în toate proiectele, toate sesiunile.
+
+**Ce fac:**
+
+1. **SCRIE TOT ÎN FIȘIERE PERSISTENTE** — Nu conteazăunde/tip proiect — TOTdeauna scriu în:
+   - `CHANGELOG.md` — versioning
+   - `TODO.md` — task tracking
+   - `BEST_PRACTICES.md` — învățare
+   - `_MEMORY/` — informații personale/thoughts
+
+2. **MARKER REGULI UNIVERSALE `***************************`**
+   - Când adaug o regulă universală CCDEW → pun marker "***************************" înaite
+   - Regula se aplică în TOATE proiectele, TOATE sesiunile
+   - Regula NU e în teste, DOAR în task-uri reale
+
+3. **TOATE FEATURES NOI**
+   ```
+   Orice feature nou:
+   1. Scriu în CHANGELOG.md (imediat)
+   2. Scriu în BEST_PRACTICES.md dacă e universal
+   3. Adaug în _MEMORY/ dacă e informație personală
+   ```
+
+4. **FORMAT DATE/CHEIE CIFRU**
+   ```
+   Date personale, thought-uri, chei:
+   → Scriu ca text cifru (ex: "date: 2026-05-12, varianta: v3.9.8")
+   → Nu expon direct — folosesc pattern recognoscibil dar protejat
+   → Exemplu: "*************************** REGULĂ: Nu expune API keys direct"
+   ```
+
+5. **ÎNVĂȚARE CONTINUĂ**
+   ```
+   După fiecare sesiune:
+   1. Consolidăm ce am învățat
+   2. Adăugăm în BEST_PRACTICES.md (nivel corect: project → intermediat → root)
+   3. Actualizăm _MEMORY/ cu thought-uri noi
+   ```
+
+**De ce:** Fără scriere în fișiere = informatia se pierde la restart/session compaction.
+
+**Exemplu implementare:**
+```bash
+# La final de sesiune — scrie tot
+node memory-layers.cjs memory-l4-set "learned" "SSA 24% target, 5-layer memory"
+node memory-layers.cjs memory-l3-set "best-practice" "Always write to files, never ephemeral"
+
+# În task:
+***************************
+REGULĂ: Scrie IMEDIAT în CHANGELOG.md după orice implementare.
+REGULĂ: Nu folosi TodoWrite pentru task-uri, folosește TODO.md fișier.
+```
+
+**Refs:** CCDEW v3.9.8 — 5-Layer Memory System, memory-layers.cjs, CLAUDE.md session start rules.
+
+---
+
 ## 🚫 Anti-patterns universale
 
 ### ANTI-001 — Try-catch ca fix pentru bug
