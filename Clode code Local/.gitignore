@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.claude/helpers/hermes-a0/__pycache__/
+node_modules/
+.env
+.env.*
