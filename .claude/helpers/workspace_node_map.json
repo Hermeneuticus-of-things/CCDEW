@@ -1,7 +1,7 @@
 {
-  "_comment": "Workspace Enneagram Node Map — v2.0 with proper workflow templates",
-  "_version": 2,
-  "_updated": "2026-05-08",
+  "_comment": "Workspace Enneagram Node Map — v3.0 with hermes-workspace swarm agents",
+  "_version": 3,
+  "_updated": "2026-06-03",
 
   "projects": {
     "Consiliu": {
@@ -13,19 +13,41 @@
       "memory_tags": ["consiliu", "hermes", "qnap", "simbioza", "ai-agents"],
       "path_hint": "PROJECTS/Consiliu",
       "description": "Simbioza AI 5-tier — Phone + QNAP + node-a/node-b"
+    },
+    "Hermes": {
+      "node": 9,
+      "node_name": "Orchestrator",
+      "agent": "orchestrator",
+      "cycle": "hexad",
+      "memory_tags": ["hermes", "ccdew", "email", "intelligence", "swarm"],
+      "path_hint": "PROJECTS/Hermes",
+      "description": "AI Agent Workspace — hermes-workspace GitHub"
     }
   },
 
+  "swarm_agents": {
+    "reviewer":        {"node": 1, "role": "Code Review / Quality Gate",        "wrapper": "reviewer:gate",      "profile": "~/CCDEW/agents/reviewer-profile.md"},
+    "inbox-triage":    {"node": 2, "role": "Email / Support Triage",            "wrapper": "inbox:triage",       "profile": "~/CCDEW/agents/inbox-triage-profile.md"},
+    "builder":         {"node": 3, "role": "Implementation / Build",            "wrapper": "builder:task",       "profile": "~/CCDEW/agents/builder-profile.md"},
+    "strategist":      {"node": 4, "role": "Strategy / Planning",               "wrapper": "strategist:review",  "profile": "~/CCDEW/agents/strategist-profile.md"},
+    "researcher":      {"node": 5, "role": "Deep Research / Analysis",          "wrapper": "researcher:quick",   "profile": "~/CCDEW/agents/researcher-profile.md"},
+    "ops-watch":       {"node": 6, "role": "Monitoring / Security",             "wrapper": "ops:health",         "profile": "~/CCDEW/agents/ops-watch-profile.md"},
+    "qa":              {"node": 6, "role": "Testing / Validation",              "wrapper": "qa:smoke",           "profile": "~/CCDEW/agents/qa-profile.md"},
+    "km-agent":        {"node": 7, "role": "Knowledge Management",              "wrapper": "km:health",          "profile": "~/CCDEW/agents/km-agent-profile.md"},
+    "maintainer":      {"node": 8, "role": "Maintenance / Decisive Actions",   "wrapper": "maintainer:check",   "profile": "~/CCDEW/agents/maintainer-profile.md"},
+    "orchestrator":    {"node": 9, "role": "Mission Orchestration / Dispatch",  "wrapper": "orchestrator:plan",  "profile": "~/CCDEW/agents/orchestrator-profile.md"}
+  },
+
   "node_memory_tags": {
-    "1": ["review", "quality", "audit", "security"],
-    "2": ["api", "integration", "backend"],
-    "3": ["code", "build", "implementation"],
-    "4": ["research", "docs", "context"],
-    "5": ["debug", "analysis", "profiling", "bottleneck"],
-    "6": ["testing", "validation", "regression"],
-    "7": ["design", "architecture", "planning"],
-    "8": ["workflow", "coordination", "orchestration"],
-    "9": ["memory", "consolidation", "sync"]
+    "1": ["review", "quality", "audit", "security", "reviewer"],
+    "2": ["api", "integration", "backend", "inbox", "triage", "support"],
+    "3": ["code", "build", "implementation", "builder"],
+    "4": ["research", "docs", "context", "strategy", "planning"],
+    "5": ["debug", "analysis", "profiling", "bottleneck", "researcher"],
+    "6": ["testing", "validation", "regression", "ops", "monitor", "qa"],
+    "7": ["design", "architecture", "planning", "knowledge", "km"],
+    "8": ["workflow", "coordination", "orchestration", "maintainer"],
+    "9": ["memory", "consolidation", "sync", "orchestrator", "dispatch"]
   },
 
   "workflow_templates": {
@@ -36,11 +58,8 @@
         "cross", "complex", "multiple", "investigate", "evaluate"
       ],
       "path": [1, 4, 2, 8, 5, 7],
-      "agents": [
-        "reviewer", "researcher", "backend-dev",
-        "sparc-orchestrator", "analyst", "architecture"
-      ],
-      "description": "Complex cross-project task — 6-agent hexad cycle (1→4→2→8→5→7)"
+      "agents": ["reviewer", "researcher", "inbox-triage", "maintainer", "ops-watch", "km-agent"],
+      "description": "Complex cross-project task — 6-agent hexad cycle (reviewer→researcher→triage→maintainer→ops→km)"
     },
     "triangle": {
       "trigger_keywords": [
@@ -48,8 +67,27 @@
         "update", "test", "check", "run", "generate", "make", "patch"
       ],
       "path": [3, 6, 9],
-      "agents": ["coder", "tester", "memory-specialist"],
-      "description": "Fast direct implementation — 3-agent triangle cycle (3→6→9)"
+      "agents": ["builder", "qa", "orchestrator"],
+      "description": "Fast direct implementation — builder→qa→orchestrator"
+    },
+    "support": {
+      "trigger_keywords": ["help", "support", "issue", "bug", "problem", "question", "how-to"],
+      "path": [2, 8],
+      "agents": ["inbox-triage", "maintainer"],
+      "description": "Suport utilizator — inbox-triage→maintainer"
+    },
+    "research": {
+      "trigger_keywords": ["research", "investigate", "learn", "study", "explore", "analyze"],
+      "path": [5, 7],
+      "agents": ["researcher", "km-agent"],
+      "description": "Cercetare — researcher→km-agent"
+    },
+    "review": {
+      "trigger_keywords": ["review", "audit", "verify", "validate", "approve"],
+      "path": [1, 6],
+      "agents": ["reviewer", "qa"],
+      "description": "Code review — reviewer→qa"
     }
-  }
+  },
+  "swarm_file": "~/CCDEW/swarm.yaml"
 }

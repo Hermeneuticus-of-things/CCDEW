@@ -1,0 +1,21 @@
+{
+  "name": "ccdew-core",
+  "version": "3.9.7",
+  "description": "CCDEW Core - Reusable AI development tools (SSA, SAFLA, CodeBurn, etc)",
+  "main": "lib/index.js",
+  "bin": {
+    "ccdew-ssa": "bin/ccdew-ssa",
+    "ccdew-safla": "bin/ccdew-safla",
+    "ccdew-audit": "bin/ccdew-audit"
+  },
+  "scripts": {
+    "test": "node lib/ssa.cjs && node lib/safla.cjs"
+  },
+  "keywords": ["ai", "claude", "opencode", "ssa", "safla", "codeburn"],
+  "author": "CCDEW",
+  "license": "MIT",
+  "dependencies": {},
+  "peerDependencies": {
+    "opencode": "*"
+  }
+}

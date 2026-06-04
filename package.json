@@ -1,7 +1,7 @@
 {
   "name": "ccdew",
-  "version": "3.8.0",
-  "description": "Claude Code Efficient Workspace — Enneagram routing, SAFLA learning, codeburn, ECC + Red Hat layers",
+  "version": "3.9.8",
+  "description": "Claude Code Efficient Workspace v6.1 — Enneagram routing, SAFLA, Circuit 9, 5-Layer Memory, SSA 24%",
   "private": true,
   "engines": {
     "node": ">=18.0.0"
@@ -20,7 +20,8 @@
     "skills-propose": "node .claude/helpers/hook-handler.cjs skills-propose",
     "exit": "node .claude/helpers/hook-handler.cjs exit",
     "sessions-compare": "node .claude/helpers/hook-handler.cjs sessions-compare",
-    "bench": "node .claude/helpers/hook-handler.cjs bench"
+    "bench": "node .claude/helpers/hook-handler.cjs bench",
+    "memory": "node .claude/helpers/memory-layers.cjs memory-status"
   },
   "license": "MIT"
 }

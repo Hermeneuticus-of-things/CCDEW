@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+/**
+ * ccdew-safla — SAFLA CLI
+ * Usage: ccdew-safla [stats|learn|clean]
+ */
+'use strict';
+const path = require('path');
+
+let safla;
+try { safla = require(path.join(__dirname, '..', 'lib', 'safla.cjs')); }
+catch { safla = require('./safla.cjs'); }
+
+const args = process.argv.slice(2);
+const cmd = args[0] || 'stats';
+
+if (cmd === 'stats') {
+  const dataPath = path.join(process.cwd(), '.claude-flow', 'data', 'safla.json');
+  const fs = require('fs');
+  let data = { nodes: {}, total_feedbacks: 0 };
+  try { if (fs.existsSync(dataPath)) data = JSON.parse(fs.readFileSync(dataPath, 'utf-8')); } catch {}
+  console.log('SAFLA Status:');
+  console.log('  Nodes: ' + Object.keys(data.nodes || {}).length);
+  console.log('  Feedbacks: ' + (data.total_feedbacks || 0));
+  console.log('  Sessions: ' + (data.sessions || 0));
+} else if (cmd === 'learn') {
+  console.log('Learning from feedback...');
+} else if (cmd === 'clean') {
+  console.log('Cleaning invalid nodes...');
+} else {
+  console.log('Usage: stats|learn|clean');
+}

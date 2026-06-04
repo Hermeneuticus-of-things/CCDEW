@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+/**
+ * ccdew-ssa — SSA CLI
+ * Usage: ccdew-ssa filter <prompt> [entries...]
+ */
+'use strict';
+const path = require('path');
+
+// Load from ccdew-core or fallback to local
+let ssa;
+try { ssa = require(path.join(__dirname, '..', 'lib', 'ssa.cjs')); }
+catch { ssa = require('./ssa.cjs'); }
+
+const args = process.argv.slice(2);
+if (!args.length) {
+  console.log('Usage: ccdew-ssa <filter|stats> [args...]');
+  console.log('  filter <prompt> <json>  — Filter entries by prompt');
+  console.log('  stats                  — Show SSA statistics');
+  process.exit(1);
+}
+
+const cmd = args[0];
+if (cmd === 'filter') {
+  const prompt = args[1] || '';
+  let entries = [];
+  if (args[2]) {
+    try { entries = JSON.parse(args[2]); } catch(e) { console.log('Invalid JSON'); process.exit(1); }
+  }
+  const filtered = ssa.filterContext(prompt, entries);
+  console.log(JSON.stringify(filtered, null, 2));
+} else if (cmd === 'stats') {
+  const stats = ssa.getSSAEfficiency();
+  console.log('SSA Statistics:');
+  console.log('  Calls: ' + stats.calls);
+  console.log('  Ratio: ' + stats.ratio + '% (target: <25%)');
+  console.log('  Entries: ' + stats.entries.saved + '/' + stats.entries.total);
+  console.log('  Status: ' + stats.status);
+} else {
+  console.log('Unknown: ' + cmd);
+}

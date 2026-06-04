@@ -91,3 +91,6 @@ memory/project_*.md
 memory/user_*.md
 memory/feedback_*.md
 memory/reference_*.md
+
+# Sensitive: email passwords backup
+_MEMORY/secrets/

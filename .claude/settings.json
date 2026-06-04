@@ -54,11 +54,6 @@
           },
           {
             "type": "command",
-            "command": "sh -c 'exec python3 /home/think/.local/bin/ccdew-email-alert.py'",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" route'",
             "timeout": 5000
           }
@@ -87,6 +82,26 @@
             "type": "command",
             "command": "sh -c 'python3 /home/think/.local/bin/ccdew-email-watch.py >/dev/null 2>&1 &'",
             "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'python3 /home/think/.local/bin/ccdew-impact-alert.py >/dev/null 2>&1 &'",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'python3 /home/think/.local/bin/ccdew-notify-daemon.py >/dev/null 2>&1 &'",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'sleep 5 && xdg-open http://localhost:8765/dashboard >/dev/null 2>&1 &'",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'sleep 6 && xdg-open http://localhost:8766 >/dev/null 2>&1 &'",
+            "timeout": 2000
           }
         ]
       }

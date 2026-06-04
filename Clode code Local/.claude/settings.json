@@ -1,0 +1,195 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" pre-bash'",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" pre-edit'",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" post-edit'",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" post-bash'",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" inject-workflow'",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" route'",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" session-restore'",
+            "timeout": 15000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" auto-init'",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" dashboard 2>/dev/null &'",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'python3 /home/think/.local/bin/ccdew-email-watch.py >/dev/null 2>&1 &'",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'python3 /home/think/.local/bin/ccdew-impact-alert.py >/dev/null 2>&1 &'",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'python3 /home/think/.local/bin/ccdew-notify-daemon.py >/dev/null 2>&1 &'",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'sleep 5 && xdg-open http://localhost:8765/dashboard >/dev/null 2>&1 &'",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" session-end'",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'bash /home/think/.local/bin/ccdew-email-watch-stop.sh'",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" sync'",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" compact-manual'"
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" compact-save'",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" compact-auto'"
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/hook-handler.cjs\" compact-save'",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "sh -c 'exec node \"/home/think/CCDEW/.claude/helpers/statusline.cjs\"'"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npx @claude-flow*)",
+      "Bash(npx claude-flow*)",
+      "Bash(node /home/think/CCDEW/.claude/*)",
+      "Bash(node /home/think/CCDEW/.claude/helpers/*)",
+      "mcp__claude-flow__:*"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./**/credentials.json)",
+      "Read(./**/secrets.json)",
+      "Read(./**/*.key)",
+      "Read(./**/*.pem)",
+      "Read(/etc/shadow)",
+      "Read(/etc/sudoers)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~/*)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_FLOW_V3_ENABLED": "true",
+    "CLAUDE_FLOW_HOOKS_ENABLED": "true",
+    "CCDEW_ROOT": "/home/think/CCDEW"
+  }
+}

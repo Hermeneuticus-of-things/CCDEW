@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "CCDEW Email Intelligence",
+  "version": "3.0.0",
+  "description": "La deschiderea Betterbird — vezi direct alertele de impact. Click pe alertă = deschide emailul.",
+  "icons": {
+    "48": "icons/ccdew-48.png",
+    "96": "icons/ccdew-96.png"
+  },
+  "permissions": [
+    "tabs",
+    "messagesRead",
+    "accountsRead",
+    "messageDisplay"
+  ],
+  "host_permissions": [
+    "http://localhost:8766/"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "sidebar_action": {
+    "default_icon": {
+      "48": "icons/ccdew-48.png"
+    },
+    "default_title": "CCDEW Impact Alerts",
+    "default_panel": "sidebar.html"
+  }
+}

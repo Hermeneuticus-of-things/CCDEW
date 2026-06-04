@@ -59,6 +59,32 @@ node .claude/helpers/evaluate-setup.cjs --json
 node .claude/helpers/intelligence.cjs stats --json
 ```
 
+### Hermes Agent (OpenCode Desktop)
+**OpenCode Desktop** este orchestratorul care expune tool-urile `hermes_*` pentru toate LLM-urile.
+
+**Hermes Autonomous Agent** - Agent Zero-style cu loop reflexiv:
+- Loop: `THINK → ACT → OBSERVE → REFLECT → CORRECT`
+- Memory persistent în `~/.hermes/memories/autonomous.json`
+- Self-correction automată la erori
+- Tool autonomy - folosește tool-urile fără confirmare
+- **Auto-Evoluție** - învață din Agent Zero și se îmbunătățește continuu
+
+**Prima sarcină Hermes**: Studiază Agent Zero (github.com/agent0ai/agent-zero) și extrage pattern-urile pentru auto-evoluție.
+
+Tool-urile disponibile (doar în OpenCode Desktop):
+- `hermes conversations_list` - Lista conversații active
+- `hermes conversation_get [key]` - Detalii conversație
+- `hermes messages_read [key] [lim]` - Citește mesaje
+- `hermes messages_send [tgt] [msg]` - Trimite mesaj
+- `hermes channels_list` - Lista canale disponibile
+- `hermes events_poll [cursor]` - Poll pentru evenimente
+- `hermes events_wait` - Long-poll pentru evenimente
+- `hermes attachments_fetch` - Preia attachmente
+- `hermes permissions_list_open` - Lista permisiuni pending
+- `hermes permissions_respond` - Răspunde la permisiune
+
+**Configurare:** `~/.config/opencode/mcp.json` → Hermes MCP server se spawn-ează automat.
+
 ## Comenzi Rapide
 
 | Comanda | Descriere |

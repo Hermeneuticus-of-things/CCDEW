@@ -1,0 +1,133 @@
+# CCDEW Swarm — 10 agenți specializați din hermes-workspace
+# Mapare Enneagram: 9 noduri → 10 agenți (QA e secundar nod-6)
+version: 2
+updated: "2026-06-03"
+source: hermes-workspace (github.com/outsourc-e/hermes-workspace)
+
+workers:
+  - id: reviewer
+    enneagram_node: 1
+    name: Reviewer
+    role: Code Review / Quality Gate / Audit
+    profile: ~/CCDEW/agents/reviewer-profile.md
+    wrapper: reviewer:gate
+    tools: [terminal, file, web, gbrain, session_search, skills]
+    skills: [reviewer-core, requesting-code-review, github-code-review, systematic-debugging, gstack-for-hermes, gbrain, codebase-inspection]
+    triggers: [review, audit, verify, quality, gate, lint]
+
+  - id: inbox-triage
+    enneagram_node: 2
+    name: Inbox Triage
+    role: Email Classification / Support Triage / Notifications
+    profile: ~/CCDEW/agents/inbox-triage-profile.md
+    wrapper: inbox:triage
+    tools: [gbrain, web, file, session_search, todo, skills, terminal]
+    skills: [inbox-triage-core, gbrain, obsidian-markdown, gstack-for-hermes, defuddle, youtube-content]
+    triggers: [email, triage, inbox, notification, alert, classify, support]
+
+  - id: builder
+    enneagram_node: 3
+    name: Builder
+    role: Implementation / Code / Build
+    profile: ~/CCDEW/agents/builder-profile.md
+    wrapper: builder:task
+    tools: [terminal, file, browser, web, gbrain, session_search, skills, todo]
+    skills: [builder-core, gstack-for-hermes, test-driven-development, systematic-debugging, github-pr-workflow, requesting-code-review, codebase-inspection]
+    triggers: [build, implement, code, create, write, add, feature, refactor]
+
+  - id: strategist
+    enneagram_node: 4
+    name: Strategist
+    role: Strategy / Planning / Creative Decisions
+    profile: ~/CCDEW/agents/strategist-profile.md
+    wrapper: strategist:review
+    tools: [gbrain, web, session_search, file, skills, todo, clarify]
+    skills: [strategist-core, gstack-for-hermes, gbrain, writing-plans, polymarket]
+    triggers: [plan, strategy, design, architecture, roadmap, decide]
+
+  - id: researcher
+    enneagram_node: 5
+    name: Researcher
+    role: Deep Research / Analysis / Investigation
+    profile: ~/CCDEW/agents/researcher-profile.md
+    wrapper: researcher:quick
+    tools: [gbrain, web, browser, terminal, file, vision, session_search, skills, todo]
+    skills: [researcher-core, gbrain, autoresearch, browser-harness-power-use, gstack-for-hermes, researcher-quick, researcher-autoresearch, arxiv, youtube-content]
+    triggers: [research, analyze, investigate, search, study, deep-dive]
+
+  - id: ops-watch
+    enneagram_node: 6
+    name: Ops Watch
+    role: Monitoring / Security / Stability
+    profile: ~/CCDEW/agents/ops-watch-profile.md
+    wrapper: ops:health
+    tools: [terminal, cronjob, file, gbrain, skills, session_search, web]
+    skills: [ops-watch-core, gbrain, hermes-agent, systematic-debugging, webhook-subscriptions]
+    triggers: [monitor, health, security, watch, alerting, cron]
+
+  - id: qa
+    enneagram_node: 6
+    name: QA
+    role: Testing / Smoke Tests / Validation
+    profile: ~/CCDEW/agents/qa-profile.md
+    wrapper: qa:smoke
+    tools: [browser, terminal, file, vision, gbrain, session_search, skills, web]
+    skills: [qa-core, browser-harness-power-use, dogfood, gstack-for-hermes]
+    triggers: [test, smoke, validate, qa, verify-behavior]
+
+  - id: km-agent
+    enneagram_node: 7
+    name: KM Agent
+    role: Knowledge Management / Exploration / Documentation
+    profile: ~/CCDEW/agents/km-agent-profile.md
+    wrapper: km:health
+    tools: [gbrain, file, terminal, session_search, skills, todo, cronjob, web]
+    skills: [km-agent-core, gbrain, obsidian-markdown, obsidian-cli, obsidian-bases, json-canvas, gstack-for-hermes]
+    triggers: [knowledge, explore, document, learn, wiki, obsidian]
+
+  - id: maintainer
+    enneagram_node: 8
+    name: Maintainer
+    role: Maintenance / Decisive Actions / Repo Management
+    profile: ~/CCDEW/agents/maintainer-profile.md
+    wrapper: maintainer:check
+    tools: [terminal, file, web, browser, gbrain, session_search, skills]
+    skills: [maintainer-core, github-repo-management, github-pr-workflow, github-issues, github-code-review, gbrain, gstack-for-hermes, hermes-agent]
+    triggers: [maintain, cleanup, fix, patch, manage, github]
+
+  - id: orchestrator
+    enneagram_node: 9
+    name: Orchestrator
+    role: Mission Orchestration / Coordination / Dispatch
+    profile: ~/CCDEW/agents/orchestrator-profile.md
+    wrapper: orchestrator:plan
+    tools: [todo, kanban, delegation, terminal, file, gbrain, session_search, cronjob, skills, clarify, web]
+    skills: [orchestrator-core, gstack-for-hermes, gbrain, kanban-orchestrator, subagent-driven-development, writing-plans, requesting-code-review, workspace-dispatch]
+    triggers: [orchestrate, coordinate, dispatch, plan-mission, decompose, workflow]
+
+# Flow patterns
+flows:
+  hexad:
+    description: Complex cross-project — 6-agent cycle
+    path: [reviewer, researcher, builder, orchestrator, ops-watch, strategist]
+    trigger_keywords: [architecture, design, review, research, analyze, integrate, debug, refactor, migrate, audit, system, distributed, cross, complex, multiple]
+
+  triangle:
+    description: Rapid fix/build — 3-agent cycle
+    path: [builder, qa, maintainer]
+    trigger_keywords: [fix, build, implement, add, create, write, update, test, check, run, generate, make, patch]
+
+  support:
+    description: Suport utilizator — 2-agent cycle
+    path: [inbox-triage, maintainer]
+    trigger_keywords: [help, support, issue, bug, problem, question, how-to]
+
+  research:
+    description: Cercetare — 2-agent cycle  
+    path: [researcher, km-agent]
+    trigger_keywords: [research, investigate, learn, study, explore, analyze]
+
+  review:
+    description: Code review — 2-agent cycle
+    path: [reviewer, qa]
+    trigger_keywords: [review, audit, verify, validate, approve]

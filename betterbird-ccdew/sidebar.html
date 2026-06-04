@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCDEW Email Intelligence</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#c9d1d9;font-size:12px;overflow-y:auto;overflow-x:hidden;min-height:100vh;width:480px;max-height:640px}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 12px;position:sticky;top:0;z-index:10}
+.header h1{font-size:14px;color:#58a6ff;display:flex;align-items:center;gap:6px}
+.header h1 .count{background:#58a6ff22;color:#58a6ff;padding:1px 8px;border-radius:10px;font-size:11px}
+.header .subtitle{font-size:10px;color:#8b949e;margin-top:2px}
+.filters{display:flex;gap:6px;padding:8px 10px;background:#161b22;border-bottom:1px solid #21262d;flex-wrap:wrap;position:sticky;top:46px;z-index:9}
+.filter-btn{font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#8b949e;cursor:pointer;white-space:nowrap;transition:.1s}
+.filter-btn.active{background:#1f6feb33;border-color:#1f6feb;color:#58a6ff}
+.group-header{background:#21262d;padding:6px 10px;font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:86px;z-index:5;border-bottom:1px solid #30363d}
+.alert{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px 10px;margin:6px;cursor:pointer;transition:.15s;border-left:3px solid;position:relative}
+.alert:hover{border-color:#58a6ff;background:#1c2128;transform:translateX(2px)}
+.alert.critical{border-left-color:#f85149}
+.alert.high{border-left-color:#d29922}
+.alert.medium{border-left-color:#58a6ff}
+.alert.low{border-left-color:#8b949e}
+.alert .top{display:flex;gap:4px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
+.alert .icon{font-size:14px}
+.alert .urgency{font-size:9px;font-weight:600;text-transform:uppercase;padding:1px 6px;border-radius:8px}
+.urgency.immediate{background:#f8514922;color:#f85149}
+.urgency.today{background:#d2992222;color:#d29922}
+.urgency.this_week{background:#58a6ff22;color:#58a6ff}
+.urgency.no_deadline{background:#8b949e22;color:#8b949e}
+.alert .ts-badge{font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px;background:#3fb95022;color:#3fb950}
+.alert .ts-badge.no{background:#8b949e22;color:#8b949e}
+.alert .subject{font-size:12px;font-weight:600;color:#f0f6fc;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alert .meta{font-size:9px;color:#484f58;margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.alert .specific{font-size:10px;color:#3fb950;margin-bottom:2px}
+.alert .specific::before{content:"→ "}
+.alert .phish-warn{font-size:9px;color:#f85149;background:#f8514911;border-radius:4px;padding:2px 6px;margin-top:4px;display:inline-block}
+.alert .priority{font-size:9px;color:#d29922;margin-top:2px}
+.alert .actions{display:none;gap:4px;margin-top:6px;flex-wrap:wrap}
+.alert:hover .actions{display:flex}
+.alert .action-btn{font-size:9px;padding:2px 8px;border-radius:4px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;cursor:pointer;transition:.1s}
+.alert .action-btn:hover{background:#1f6feb33;border-color:#1f6feb;color:#58a6ff}
+.alert .action-btn.primary{background:#1f6feb22;border-color:#1f6feb44;color:#58a6ff}
+.alert .action-btn.danger{background:#f8514922;border-color:#f8514944;color:#f85149}
+.loading{text-align:center;padding:30px;color:#8b949e;font-size:12px}
+.error{background:#f8514911;border:1px solid #f8514944;border-radius:6px;padding:10px;margin:8px;font-size:11px;color:#f85149}
+.refresh{position:fixed;bottom:12px;right:12px;background:#161b22;border:1px solid #30363d;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#58a6ff;z-index:100;transition:.2s}
+.refresh:hover{background:#1c2128;transform:scale(1.1)}
+.refresh.loading{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:20px;color:#8b949e;font-size:11px}
+.entity-tag{font-size:9px;color:#d29922;background:#d2992211;border-radius:4px;padding:1px 5px;margin-right:3px;display:inline-block}
+.open-hint{position:absolute;right:8px;top:8px;font-size:10px;color:#484f58;opacity:0;transition:.2s}
+.alert:hover .open-hint{opacity:1}
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:#161b22;border-top:1px solid #30363d;padding:4px 10px;font-size:10px;color:#8b949e;z-index:90;display:flex;gap:10px}
+.status-bar .item{display:flex;gap:4px;align-items:center}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📧 Email Intelligence <span class="count" id="count">0</span></h1>
+  <div class="subtitle">Click = deschide direct în BetterBird | Filtre rapid</div>
+</div>
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Toate</button>
+  <button class="filter-btn" data-filter="immediate" onclick="setFilter('immediate')">🚨 Imediat</button>
+  <button class="filter-btn" data-filter="today" onclick="setFilter('today')">⏰ Azi</button>
+  <button class="filter-btn" data-filter="security" onclick="setFilter('security')">🔒 Securitate</button>
+  <button class="filter-btn" data-filter="financial" onclick="setFilter('financial')">💰 Financiar</button>
+  <button class="filter-btn" data-filter="phishing" onclick="setFilter('phishing')">⚠️ Phishing</button>
+</div>
+<div id="alerts"><div class="loading">Se încarcă alertele...</div></div>
+<div class="refresh" id="refreshBtn" title="Reîncarcă">↻</div>
+<div class="status-bar" id="statusBar">
+  <span class="item">🟢 Server: <span id="srvStatus">conectare...</span></span>
+  <span class="item">📊 Total: <span id="totalStat">0</span></span>
+</div>
+
+<script>
+var SERVER='http://localhost:8766'
+var currentFilter='all'
+
+function api(path){
+  return fetch(SERVER+path,{cache:'no-cache'}).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status)
+    return r.json()
+  })
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function setFilter(f){
+  currentFilter=f
+  document.querySelectorAll('.filter-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.filter===f)
+  })
+  renderAlerts(window._lastData)
+}
+
+function renderAlerts(data){
+  var el=document.getElementById('alerts')
+  var countEl=document.getElementById('count')
+  var totalStat=document.getElementById('totalStat')
+  if(!data){ el.innerHTML='<div class="loading">Se încarcă...</div>'; return }
+  window._lastData=data
+  var alerts=data.alerts||[]
+  totalStat.textContent=data.total_alerts||alerts.length
+
+  if(currentFilter!=='all'){
+    alerts=alerts.filter(function(a){
+      if(currentFilter==='phishing') return (a.phishing_risk||'')==='HIGH' || (a.phishing_risk||'')==='MEDIUM'
+      return a.urgency===currentFilter || a.nature===currentFilter
+    })
+  }
+
+  var total=alerts.length
+  countEl.textContent=total
+
+  if(total===0){
+    el.innerHTML='<div class="empty">Nicio alertă pentru filtrul selectat</div>'
+    return
+  }
+
+  var urgencyLabels={immediate:'🚨 IMEDIAT',today:'⏰ AZI',this_week:'📅 SĂPT',no_deadline:'📁 INFO'}
+  var severityLabels={critical:'CRITIC',high:'RIDICAT',medium:'MEDIU',low:'SCĂZUT'}
+
+  var groups={}
+  alerts.forEach(function(a){
+    var g=(a.urgency||'no_deadline')+'|'+(a.nature||'other')+'|'+(a.severity||'low')
+    if(!groups[g]) groups[g]={urgency:a.urgency,nature:a.nature,severity:a.severity,alerts:[]}
+    groups[g].alerts.push(a)
+  })
+  var gkeys=Object.keys(groups).sort(function(a,b){
+    var ao=urgencyOrder(a.split('|')[0])-urgencyOrder(b.split('|')[0])
+    if(ao!==0) return ao
+    var no=natureOrder(a.split('|')[1])-natureOrder(b.split('|')[1])
+    if(no!==0) return no
+    return severityOrder(a.split('|')[2])-severityOrder(b.split('|')[2])
+  })
+
+  var html=''
+  gkeys.forEach(function(gk){
+    var g=groups[gk]
+    html+='<div class="group-header">'+esc(urgencyLabels[g.urgency]||g.urgency)+' · '+esc((g.nature||'other').toUpperCase())+' · '+esc(severityLabels[g.severity]||g.severity)+'</div>'
+    g.alerts.forEach(function(a){
+      var sev=a.severity||'medium'
+      var dataAttrs = 'data-subject="'+esc(a.subject||'').replace(/'/g,"\\'")+'" data-from="'+esc(a.from||'').replace(/'/g,"\\'")+'" data-date="'+esc(a.date||'')+'"'
+      html+='<div class="alert '+sev+'" '+dataAttrs+' onclick="openEmailCard(this)">'
+      html+='<span class="open-hint">Click pentru a deschide →</span>'
+      html+='<div class="top">'
+      html+='<span class="icon">'+esc(a.icon||a.nature_icon||'📋')+'</span>'
+      html+='<span class="urgency '+(a.urgency||'no_deadline')+'">'+(urgencyLabels[a.urgency]||a.urgency)+'</span>'
+      if(a.time_sensitive==='yes') html+='<span class="ts-badge">⏱ TIME SENSITIVE</span>'
+      else html+='<span class="ts-badge no">fără deadline</span>'
+      if(a.phishing_risk==='HIGH') html+='<span style="font-size:9px;color:#f85149">⚠️ PHISHING</span>'
+      if(a.priority_score>=70) html+='<span style="font-size:9px;color:#d29922">★ PRIORITAR</span>'
+      html+='</div>'
+
+      html+='<div class="subject">'+esc(a.subject)+'</div>'
+
+      if(a.entities && (a.entities.amounts||[]).length>0){
+        html+='<div style="margin-top:2px">'
+        a.entities.amounts.slice(0,3).forEach(function(am){ html+='<span class="entity-tag">'+esc(am)+'</span>' })
+        html+='</div>'
+      }
+      if(a.entities && (a.entities.deadlines||[]).length>0){
+        html+='<div style="margin-top:2px">'
+        a.entities.deadlines.slice(0,2).forEach(function(d){ html+='<span class="entity-tag" style="color:#3fb950;background:#3fb95011">📅 '+esc(d)+'</span>' })
+        html+='</div>'
+      }
+
+      var action = a.suggested_action || a.action_hint || ''
+      if(action && action !== 'Nimic') html+='<div class="specific">'+esc(action)+'</div>'
+
+      if(a.phishing_risk==='HIGH' || a.phishing_risk==='MEDIUM'){
+        html+='<div class="phish-warn">Phishing '+esc(a.phishing_risk)+' (scor: '+esc(a.phishing_score||0)+')</div>'
+      }
+      if(a.priority_score) html+='<div class="priority">Priority Score: '+esc(a.priority_score)+'/100</div>'
+
+      html+='<div class="meta">'+esc(a.account||'')+' · '+esc(a.date||'')+' · '+esc((a.nature_label||a.nature||'').toUpperCase())+'</div>'
+
+      html+='<div class="actions" onclick="event.stopPropagation()">'
+      html+='<button class="action-btn primary" onclick="openEmailCard(this.parentNode.parentNode)">📧 Deschide</button>'
+      html+='<button class="action-btn danger" onclick="sendAction(\'archive\',this.parentNode.parentNode)">🗑 Arhivează</button>'
+      if(a.time_sensitive==='yes') html+='<button class="action-btn" onclick="sendAction(\'snooze\',this.parentNode.parentNode)">⏰ Amână</button>'
+      html+='</div>'
+      html+='</div>'
+    })
+  })
+
+  el.innerHTML=html
+}
+
+function urgencyOrder(u){ var o={immediate:0,today:1,this_week:2,no_deadline:3}; return o[u]!==undefined?o[u]:9 }
+function severityOrder(s){ var o={critical:0,high:1,medium:2,low:3}; return o[s]!==undefined?o[s]:9 }
+function natureOrder(n){ var o={security:0,financial:1,legal:2,medical:3,health:4,account:5,personal:6,administrative:7,technical:8,business:9,commercial:10,travel:11,logistics:12,vehicle:13,education:14,professional:15,other:99}; return o[n]!==undefined?o[n]:99 }
+
+// === Deep Link: deschide email direct în BetterBird ===
+function openEmailCard(card){
+  if(!card) return
+  var subject = card.getAttribute('data-subject') || ''
+  var fromAddr = card.getAttribute('data-from') || ''
+  var date = card.getAttribute('data-date') || ''
+
+  // Trimite mesaj la background.js pentru a deschide emailul în BetterBird
+  if(typeof browser !== 'undefined' && browser.runtime && browser.runtime.sendMessage){
+    browser.runtime.sendMessage({
+      action: 'openEmail',
+      subject: subject,
+      fromAddr: fromAddr,
+      date: date
+    }).then(function(response){
+      if(response && response.success){
+        showToast('✅ Email deschis în BetterBird: '+subject.substring(0,40))
+      } else {
+        showToast('⚠️ Email nu a fost găsit local. Încercare fallback...')
+        fallbackOpen(subject)
+      }
+    }).catch(function(e){
+      // Fallback dacă messaging nu e disponibil (ex: deschis în browser normal)
+      fallbackOpen(subject)
+    })
+  } else {
+    fallbackOpen(subject)
+  }
+}
+
+function fallbackOpen(subject){
+  fetch(SERVER+'/api/bb-open?q='+encodeURIComponent(subject))
+  showToast('📧 Betterbird deschis — subiect: '+subject.substring(0,40))
+}
+
+function sendAction(action, card){
+  if(!card) return
+  var subject = card.getAttribute('data-subject') || ''
+  fetch(SERVER+'/api/bb-open?q='+encodeURIComponent('['+action+'] '+subject))
+  showToast('✅ Acțiune înregistrată: '+action)
+  card.style.opacity='0.4'
+  setTimeout(function(){ card.style.display='none' }, 300)
+}
+
+function showToast(msg){
+  var el=document.getElementById('alerts')
+  var toast=document.createElement('div')
+  toast.style.cssText='background:#3fb95022;border:1px solid #3fb95044;border-radius:6px;padding:8px;margin:6px;font-size:11px;color:#3fb950;position:sticky;top:86px;z-index:50'
+  toast.textContent=msg
+  el.insertBefore(toast,el.firstChild)
+  setTimeout(function(){toast.remove()},4000)
+}
+
+function load(){
+  var srvStatus=document.getElementById('srvStatus')
+  api('/api/impact-alerts?v='+Date.now()).then(function(data){
+    srvStatus.textContent='online'
+    srvStatus.style.color='#3fb950'
+    renderAlerts(data)
+  }).catch(function(e){
+    srvStatus.textContent='offline'
+    srvStatus.style.color='#f85149'
+    document.getElementById('alerts').innerHTML='<div class="error">Nu pot conecta la serverul CCDEW.<br>Verifică că rulează pe portul 8766.<br><br>'+esc(e.message)+'</div>'
+  })
+}
+
+document.getElementById('refreshBtn').addEventListener('click',function(){
+  var btn=this
+  btn.classList.add('loading')
+  load()
+  setTimeout(function(){btn.classList.remove('loading')},500)
+})
+
+load()
+setInterval(load,60000)
+</script>
+</body>
+</html>
