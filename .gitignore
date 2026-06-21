@@ -96,3 +96,5 @@ memory/reference_*.md
 _MEMORY/secrets/
 
 .private/
+/Open-Cload/
+/hermes-workspace/
