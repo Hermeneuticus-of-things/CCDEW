@@ -1,0 +1,14 @@
+{
+  "version": "2.0",
+  "updated": "2026-06-03T10:54:11.188Z",
+  "nodes": {
+    "3": {
+      "success": 2,
+      "failure": 0,
+      "last_task": "audit-perf-bench",
+      "weight_adj": 0.1
+    }
+  },
+  "sessions": 0,
+  "total_feedbacks": 2
+}

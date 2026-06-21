@@ -1,0 +1,15 @@
+{
+  "id": "session-1780645156610",
+  "startedAt": "2026-06-05T07:39:16.610Z",
+  "cwd": "/home/think/CCDEW/Clode code Local",
+  "context": {},
+  "metrics": {
+    "edits": 185,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "restoredAt": "2026-06-05T18:12:46.517Z",
+  "endedAt": "2026-06-05T18:12:56.570Z",
+  "duration": 38019960
+}

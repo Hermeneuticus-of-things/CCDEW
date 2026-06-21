@@ -35,17 +35,21 @@
     "qa":              {"node": 6, "role": "Testing / Validation",              "wrapper": "qa:smoke",           "profile": "~/CCDEW/agents/qa-profile.md"},
     "km-agent":        {"node": 7, "role": "Knowledge Management",              "wrapper": "km:health",          "profile": "~/CCDEW/agents/km-agent-profile.md"},
     "maintainer":      {"node": 8, "role": "Maintenance / Decisive Actions",   "wrapper": "maintainer:check",   "profile": "~/CCDEW/agents/maintainer-profile.md"},
-    "orchestrator":    {"node": 9, "role": "Mission Orchestration / Dispatch",  "wrapper": "orchestrator:plan",  "profile": "~/CCDEW/agents/orchestrator-profile.md"}
+    "orchestrator":    {"node": 9, "role": "Mission Orchestration / Dispatch",  "wrapper": "orchestrator:plan",  "profile": "~/CCDEW/agents/orchestrator-profile.md"},
+    "analyst":         {"node": 5, "role": "Deep Research / Data Analysis",      "wrapper": "researcher:deep",    "profile": "~/CCDEW/agents/analyst-profile.md"},
+    "writer":          {"node": 7, "role": "Content Writing / Documentation",    "wrapper": "km:write",           "profile": "~/CCDEW/agents/writer-profile.md"},
+    "marketer":        {"node": 4, "role": "Marketing / Growth Strategy",        "wrapper": "strategist:growth",  "profile": "~/CCDEW/agents/marketer-profile.md"},
+    "coder":           {"node": 3, "role": "Full Stack Development",             "wrapper": "builder:dev",        "profile": "~/CCDEW/agents/coder-profile.md"}
   },
 
   "node_memory_tags": {
     "1": ["review", "quality", "audit", "security", "reviewer"],
     "2": ["api", "integration", "backend", "inbox", "triage", "support"],
-    "3": ["code", "build", "implementation", "builder"],
-    "4": ["research", "docs", "context", "strategy", "planning"],
-    "5": ["debug", "analysis", "profiling", "bottleneck", "researcher"],
+    "3": ["code", "build", "implementation", "builder", "coder"],
+    "4": ["research", "docs", "context", "strategy", "planning", "marketer"],
+    "5": ["debug", "analysis", "profiling", "bottleneck", "researcher", "analyst"],
     "6": ["testing", "validation", "regression", "ops", "monitor", "qa"],
-    "7": ["design", "architecture", "planning", "knowledge", "km"],
+    "7": ["design", "architecture", "planning", "knowledge", "km", "writer", "content"],
     "8": ["workflow", "coordination", "orchestration", "maintainer"],
     "9": ["memory", "consolidation", "sync", "orchestrator", "dispatch"]
   },

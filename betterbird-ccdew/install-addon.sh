@@ -85,7 +85,7 @@ addons.append({
   "descriptor": desc, "installDate": now, "updateDate": now, "applyBackgroundUpdates": 1,
   "location": "app-profile", "seen": True, "hasBinaryComponents": False,
   "dependencies": [], "hasEmbeddedWebExtension": False, "softDisabled": False,
-  "userPermissions": {"permissions": ["tabs","accountsRead","messagesRead","messagesUpdate","http://localhost:8766/*"],
+  "userPermissions": {"permissions": ["tabs","accountsRead","messagesRead","http://localhost:8766/*"],
                       "origins": ["http://localhost:8766/*"]},
   "optionalPermissions": [], "blocklistState": 0, "manifestVersion": 2,
   "multiprocessCompatible": True,

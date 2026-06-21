@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "CCDEW Email Intelligence",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "La deschiderea Betterbird — vezi direct alertele de impact. Click pe alertă = deschide emailul.",
   "applications": {
     "gecko": {
@@ -19,18 +19,41 @@
     "tabs",
     "accountsRead",
     "messagesRead",
-    "messagesUpdate",
-    "http://localhost:8766/*"
+    "storage",
+    "notifications",
+    "http://localhost:8766/*",
+    "http://127.0.0.1:8766/*",
+    "menus"
   ],
+  "content_security_policy": "script-src 'self'; object-src 'none';",
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E"
+      },
+      "description": "Deschide CCDEW Email Intelligence"
+    }
+  },
+  "message_display_action": {
+    "default_icon": {
+      "16": "icons/ccdew-16.png",
+      "32": "icons/ccdew-32.png"
+    },
+    "default_title": "CCDEW — Analiză email",
+    "default_popup": "msgview.html"
   },
   "browser_action": {
     "default_icon": {
       "16": "icons/ccdew-16.png",
       "32": "icons/ccdew-32.png"
     },
-    "default_title": "CCDEW Impact Alerts",
+    "default_title": "📧 Email Intelligence",
+    "default_popup": "sidebar.html",
     "default_area": "maintoolbar"
   }
 }

@@ -6,6 +6,7 @@ const { writeAtomicJson } = require('./lib/atomic-write.cjs');
 const { isEnabled } = require('./lib/flags.cjs');
 const { findExecutable } = require('./lib/platform.cjs');
 const nativeEngine = require('./lib/codeburn-engine.cjs');
+const openRouterPricing = require('./lib/openrouter-pricing.cjs');
 
 const DATA_DIR   = path.join(process.cwd(), '.claude-flow', 'data');
 const CACHE_PATH = path.join(DATA_DIR, 'codeburn-cache.json');
@@ -80,7 +81,75 @@ function fetchNativeStatus() {
   } catch { return null; }
 }
 
-function totals(opts = {}) {
+async function fetchOpenRouterStatus(opts = {}) {
+  try {
+    // Check if we're using OpenRouter
+    const apiKey = process.env.OPENROUTER_API_KEY || 
+                   process.env.OPENROUTER_API_KEY_FILE && fs.readFileSync(process.env.OPENROUTER_API_KEY_FILE, 'utf-8').trim();
+    if (!apiKey) return null;
+    
+    const openRouterPricing = require('./lib/openrouter-pricing.cjs');
+    const balanceCachePath = path.join(require('os').homedir(), '.ccdew', 'cache', 'openrouter-balance.json');
+    
+    // Try cache first
+    if (!opts.fresh) {
+      const cached = openRouterPricing.readCache(balanceCachePath, 5 * 60 * 1000);
+      if (cached) {
+        return {
+          today_cost: 0,
+          today_calls: 0,
+          month_cost: 0,
+          month_calls: 0,
+          source: 'openrouter',
+          credits: cached.credits,
+          ts: new Date().toISOString(),
+        };
+      }
+    }
+    
+    // Fetch fresh balance and cache it
+    try {
+      const balance = await openRouterPricing.getBalance();
+      if (balance && balance.credits !== undefined) {
+        openRouterPricing.writeCache(balanceCachePath, balance);
+        return {
+          today_cost: 0,
+          today_calls: 0,
+          month_cost: 0,
+          month_calls: 0,
+          source: 'openrouter',
+          credits: balance.credits,
+          ts: new Date().toISOString(),
+        };
+      }
+    } catch (e) {
+      console.warn('[codeburn] OpenRouter balance fetch failed:', e.message);
+    }
+    return null;
+  } catch { return null; }
+}
+
+function readCache() {
+  try {
+    if (!fs.existsSync(CACHE_PATH)) return null;
+    const cached = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'));
+    const age = Date.now() - new Date(cached.ts).getTime();
+    if (age > CACHE_TTL_MS) return null;
+    return cached;
+  } catch { return null; }
+}
+
+function fetchNativeStatus() {
+  try {
+    if (!nativeEngine.isAvailable()) return null;
+    const t = nativeEngine.totals();
+    ensureDataDir();
+    try { writeAtomicJson(CACHE_PATH, t); } catch { /* non-fatal */ }
+    return t;
+  } catch { return null; }
+}
+
+async function totals(opts = {}) {
   if (!isEnabled('codeburn')) {
     return { today_cost: 0, today_calls: 0, month_cost: 0, month_calls: 0, source: 'disabled' };
   }
@@ -88,6 +157,12 @@ function totals(opts = {}) {
     const c = readCache();
     if (c) return c;
   }
+  
+  // Priority: OpenRouter (if using OpenRouter) > External CLI > Native Engine
+  // Check if using OpenRouter
+  const openRouterStatus = await fetchOpenRouterStatus(opts);
+  if (openRouterStatus) return openRouterStatus;
+  
   // Prefer external CLI (faster + canonical pricing); fall back to native engine.
   const real = fetchRealStatus();
   if (real) return real;
@@ -96,10 +171,13 @@ function totals(opts = {}) {
   return { today_cost: 0, today_calls: 0, month_cost: 0, month_calls: 0, source: 'unavailable' };
 }
 
-function statusLine() {
-  const t = totals();
+async function statusLine() {
+  const t = await totals();
   if (t.source === 'unavailable') return '🔥 BURN n/a (codeburn CLI not installed)';
   if (t.source === 'disabled')    return '';
+  if (t.source === 'openrouter') {
+    return `🔥 OpenRouter: ${t.credits?.toFixed(2) || '?'} credits remaining`;
+  }
   const flag = (t.today_calls > 0 && t.today_cost / t.today_calls > 0.05) ? ' ⚠' : '';
   return `🔥 $${t.today_cost.toFixed(2)} today | $${t.month_cost.toFixed(2)} month | ${t.today_calls} calls${flag}`;
 }

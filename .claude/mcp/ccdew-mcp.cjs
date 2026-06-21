@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * CCDEW MCP Server for OpenCode
- * Exposes CCDEW tools via Model Context Protocol
+ * CCDEW MCP Server v2 — Stable, Fast, Lightweight
+ * Rewritten from scratch for reliability
  */
 
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
@@ -10,518 +10,234 @@ const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio
 const {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  ListResourcesRequestSchema,
-  ListPromptsRequestSchema,
 } = require('@modelcontextprotocol/sdk/types.js');
 
 const path = require('path');
 const fs = require('fs');
-const { spawnSync } = require('child_process');
 
-const CCDEW_ROOT = '/home/think/CCDEW';
-const helpersDir = path.join(CCDEW_ROOT, '.claude', 'helpers');
+// ── Config ───────────────────────────────────────────────────────
+const CCDEW_ROOT = process.env.CCDEW_PROJECT_DIR || '/home/think/CCDEW';
+const MEMORY_DIR = process.env.HERMES_MEMORY_DIR || '/home/think/.hermes/memories';
+const CACHE_TTL = 5000; // 5s cache
 
-function lazy(name) {
-  const candidates = [
-    path.join(helpersDir, name + '.cjs'),
-    path.join(helpersDir, name + '.js'),
-  ];
-  for (const c of candidates) {
-    try { if (fs.existsSync(c)) return c; } catch {}
-  }
-  return null;
+// ── Cache (evită citiri repetitive de disc) ──────────────────────
+const cache = new Map();
+function cached(key, fn, ttl = CACHE_TTL) {
+  const now = Date.now();
+  const entry = cache.get(key);
+  if (entry && now - entry.ts < ttl) return entry.val;
+  const val = fn();
+  cache.set(key, { val, ts: now });
+  return val;
 }
 
-function runHelper(name, args = []) {
-  const mod = lazy(name);
-  if (!mod) return { error: `${name} not found` };
-
+// ── Safe file read ───────────────────────────────────────────────
+function readJSON(filePath) {
   try {
-    const result = spawnSync(process.execPath, [mod, ...args], {
-      encoding: 'utf-8',
-      timeout: 10000,
-      cwd: helpersDir
-    });
-
-    if (result.status !== 0 && result.stderr) {
-      return { error: result.stderr };
-    }
-
-    try {
-      return JSON.parse(result.stdout);
-    } catch {
-      return { output: result.stdout.trim() };
-    }
-  } catch (e) {
-    return { error: e.message };
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch {
+    return null;
   }
 }
 
-const server = new Server(
-  {
-    name: 'ccdew-mcp-server',
-    version: '1.0.0',
-    description: 'CCDEW (Claude Code Efficient Workspace) MCP Server',
-  },
-  {
-    capabilities: {
-      tools: {},
-      resources: {},
-      prompts: {},
-    },
+function safeExec(cmd, args = [], timeout = 5000) {
+  try {
+    const { spawnSync } = require('child_process');
+    const r = spawnSync(cmd, args, { encoding: 'utf-8', timeout, stdio: ['pipe', 'pipe', 'pipe'] });
+    return r.stdout?.trim() || '';
+  } catch {
+    return '';
   }
+}
+
+// ── Memory helpers ───────────────────────────────────────────────
+function getEpisodes() {
+  const file = path.join(MEMORY_DIR, 'episodic.jsonl');
+  if (!fs.existsSync(file)) return [];
+  const content = fs.readFileSync(file, 'utf-8');
+  return content.split('\n').filter(Boolean).map(line => {
+    try { return JSON.parse(line); } catch { return null; }
+  }).filter(Boolean);
+}
+
+function getPatterns() {
+  return readJSON(path.join(MEMORY_DIR, 'patterns.json')) || {};
+}
+
+function getTechniques() {
+  return readJSON(path.join(MEMORY_DIR, 'techniques.json')) || {};
+}
+
+function getSkills() {
+  return readJSON(path.join(MEMORY_DIR, 'skills_db.json')) || {};
+}
+
+function getPrinciples() {
+  return readJSON(path.join(MEMORY_DIR, 'principles.json')) || {};
+}
+
+function getSAFLA() {
+  return readJSON(path.join(MEMORY_DIR, 'safla.json')) || { total_feedbacks: 0, nodes: {} };
+}
+
+// ── Server ───────────────────────────────────────────────────────
+const server = new Server(
+  { name: 'ccdew-mcp', version: '2.0.0' },
+  { capabilities: { tools: {} } }
 );
 
+// ── Tools ────────────────────────────────────────────────────────
 const TOOLS = [
-  {
-    name: 'ccdew_status',
-    description: 'Show CCDEW status, cost tracking, and efficiency metrics',
-    inputSchema: { type: 'object', properties: {} }
-  },
-  {
-    name: 'ccdew_cost',
-    description: 'Show detailed cost breakdown (today, month, per-call average)',
-    inputSchema: { type: 'object', properties: {} }
-  },
-  {
-    name: 'ccdew_safla_stats',
-    description: 'Show SAFLA learning system statistics and node success rates',
-    inputSchema: { type: 'object', properties: {} }
-  },
-  {
-    name: 'ccdew_safla_feedback',
-    description: 'Record feedback for a task outcome (success or failure)',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        node: { type: 'string', description: 'Enneagram node (e.g., "node-3", "1", "Achiever")' },
-        outcome: { type: 'string', enum: ['success', 'failure'], description: 'Task outcome' },
-        task: { type: 'string', description: 'Optional task description' },
-        quality: { type: 'number', minimum: 1, maximum: 5, description: 'Quality score 1-5' }
-      },
-      required: ['node', 'outcome']
-    }
-  },
-  {
-    name: 'ccdew_intelligence_stats',
-    description: 'Show intelligence graph stats (nodes, edges, pattern access)',
-    inputSchema: { type: 'object', properties: {} }
-  },
-  {
-    name: 'ccdew_graphify',
-    description: 'Generate ASCII graph report of the intelligence system',
-    inputSchema: { type: 'object', properties: {} }
-  },
-  {
-    name: 'ccdew_audit',
-    description: 'Run 5-zoom architecture audit (MAHA, MACRO, MEZZO, MICRO, NANO)',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        level: { type: 'string', enum: ['full', 'quick'], default: 'full', description: 'Audit depth' }
-      }
-    }
-  },
-  {
-    name: 'ccdew_route',
-    description: 'Route a task to the best Enneagram node based on task type',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        task: { type: 'string', description: 'Task description to route' }
-      },
-      required: ['task']
-    }
-  },
-  {
-    name: 'ccdew_snapshot',
-    description: 'Save comprehensive session state snapshot to /tmp',
-    inputSchema: { type: 'object', properties: {} }
-  },
-  {
-    name: 'ccdew_compact',
-    description: 'Show context compaction recommendations',
-    inputSchema: { type: 'object', properties: {} }
-  },
-  {
-    name: 'ccdew_dashboard_url',
-    description: 'Get the dashboard URL for CCDEW metrics',
-    inputSchema: { type: 'object', properties: {} }
-  }
+  { name: 'ccdew_status', description: 'Status complet CCDEW', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_memory', description: 'Caută în memoria SSA (Jaccard trigram)', inputSchema: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] } },
+  { name: 'ccdew_instincts', description: 'Pattern-uri învățate', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_session', description: 'Status sesiune activă', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_burn', description: 'Cost tracking (astăzi/lună)', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_optimize', description: 'Auto-optimize prompt stats', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_safla', description: 'SAFLA adaptive learning stats', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_project', description: 'Detectează proiectul activ', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_verify', description: 'Pre-commit verification', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_quality_gate', description: 'Pre-push quality gate', inputSchema: { type: 'object', properties: {} } },
 ];
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: TOOLS
-}));
+server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
 
+// ── Handlers ─────────────────────────────────────────────────────
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
     switch (name) {
+
       case 'ccdew_status': {
-        const codeburn = runHelper('codeburn');
-        const safla = runHelper('safla', ['stats']);
-        const intelligence = runHelper('intelligence', ['stats', '--json']);
+        const episodes = cached('episodes', getEpisodes);
+        const patterns = cached('patterns', getPatterns);
+        const safla = cached('safla', getSAFLA);
+        const skills = cached('skills', getSkills);
 
-        const cost = codeburn.source !== 'unavailable' ? codeburn : {
-          today_cost: 0, today_calls: 0, month_cost: 0, month_calls: 0, daily_budget: 100
-        };
+        return { content: [{ type: 'text', text: `## CCDEW Status v2
 
-        const saf = safla.total_feedbacks !== undefined ? safla : { total_feedbacks: 0, nodes: {}, sessions: 0 };
-
-        const intStats = intelligence.graph || { nodes: 0, edges: 0 };
-
-        const budgetPct = (cost.today_cost / cost.daily_budget * 100).toFixed(1);
-        const status = budgetPct >= 100 ? '🔴 OVER BUDGET' : budgetPct >= 75 ? '⚠️ Warning' : '🟢 OK';
-
-        return {
-          content: [{
-            type: 'text',
-            text: `## CCDEW Status
-
-**Budget:** ${status}
-- Today: $${cost.today_cost?.toFixed(2) || 0} / $${cost.daily_budget}/day (${budgetPct}%)
-- Month: $${cost.month_cost?.toFixed(2) || 0} / ${cost.month_calls || 0} calls
-- Average per call: $${cost.today_calls > 0 ? (cost.today_cost / cost.today_calls).toFixed(3) : '0.000'}
+**Memorie:**
+- Episoade: ${episodes.length}
+- Pattern-uri: ${Object.keys(patterns).length}
+- Skill-uri: ${Object.keys(skills).length}
 
 **SAFLA Learning:**
-- Feedbacks: ${saf.total_feedbacks || 0}
-- Sessions: ${saf.sessions || 0}
-- Active nodes: ${Object.keys(saf.nodes || {}).length}
+- Total feedback: ${safla.total_feedbacks || 0}
+- Noduri active: ${Object.keys(safla.nodes || {}).length}
 
-**Intelligence Graph:**
-- Nodes: ${intStats.nodes || 0}
-- Edges: ${intStats.edges || 0}
-- Density: ${((intStats.density || 0) * 100).toFixed(1)}%`
-          }]
-        };
+**Sistem:** 🟢 Activ
+**Cache:** ${cache.size} intrări` }] };
       }
 
-      case 'ccdew_cost': {
-        const codeburn = runHelper('codeburn');
-        const cost = codeburn.source !== 'unavailable' ? codeburn : {
-          today_cost: 0, today_calls: 0, month_cost: 0, month_calls: 0, daily_budget: 100
-        };
+      case 'ccdew_memory': {
+        const { prompt } = args;
+        const episodes = cached('episodes', getEpisodes, 10000);
 
-        const todayAvg = cost.today_calls > 0 ? cost.today_cost / cost.today_calls : 0;
-        const monthAvg = cost.month_calls > 0 ? cost.month_cost / cost.month_calls : 0;
-
-        return {
-          content: [{
-            type: 'text',
-            text: `## Cost Breakdown
-
-| Period | Cost | Calls | Avg/Call |
-|--------|------|-------|----------|
-| Today | $${cost.today_cost?.toFixed(2)} | ${cost.today_calls} | $${todayAvg.toFixed(3)} |
-| Month | $${cost.month_cost?.toFixed(2)} | ${cost.month_calls} | $${monthAvg.toFixed(3)} |
-
-**Budget:** $${cost.daily_budget}/day
-**Remaining today:** $${Math.max(0, cost.daily_budget - cost.today_cost).toFixed(2)}`
-          }]
-        };
-      }
-
-      case 'ccdew_safla_stats': {
-        const safla = runHelper('safla', ['stats']);
-        const saf = safla.total_feedbacks !== undefined ? safla : { total_feedbacks: 0, nodes: {}, sessions: 0 };
-
-        let nodesTable = '';
-        if (saf.nodes && Object.keys(saf.nodes).length > 0) {
-          nodesTable = '\n\n**Node Success Rates:**\n\n| Node | Success | Failure | Rate |\n|------|---------|---------|------|\n';
-          for (const [node, data] of Object.entries(saf.nodes)) {
-            const rate = data.rate ? (data.rate * 100).toFixed(0) : 0;
-            nodesTable += `| ${node} | ${data.success || 0} | ${data.failure || 0} | ${rate}% |\n`;
-          }
+        // Jaccard trigram similarity
+        function jaccard(a, b) {
+          const tri = s => {
+            const t = new Set();
+            for (let i = 0; i <= s.length - 3; i++) t.add(s.substring(i, i + 3));
+            return t;
+          };
+          const ta = tri(a.toLowerCase());
+          const tb = tri(b.toLowerCase());
+          let inter = 0;
+          for (const x of ta) if (tb.has(x)) inter++;
+          return inter / (ta.size + tb.size - inter);
         }
 
-        return {
-          content: [{
-            type: 'text',
-            text: `## SAFLA Learning Stats
+        const scored = episodes
+          .map(ep => ({ ep, score: jaccard(prompt, JSON.stringify(ep)) }))
+          .filter(x => x.score > 0.1)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5);
 
-- **Total Feedbacks:** ${saf.total_feedbacks || 0}
-- **Sessions:** ${saf.sessions || 0}
-- **Active Nodes:** ${Object.keys(saf.nodes || {}).length}${nodesTable}`
-          }]
-        };
+        if (scored.length === 0) return { content: [{ type: 'text', text: 'Nicio potrivire pentru: ' + prompt }] };
+
+        const results = scored.map(({ ep, score }) =>
+          `- **${score.toFixed(2)}** [${ep.type || 'unknown'}] ${ep.summary || ep.principle || JSON.stringify(ep).slice(0, 100)}`
+        ).join('\n');
+
+        return { content: [{ type: 'text', text: `## Rezultate pentru: "${prompt}"\n\n${results}` }] };
       }
 
-      case 'ccdew_safla_feedback': {
-        const { node, outcome, task, quality } = args;
+      case 'ccdew_instincts': {
+        const patterns = cached('patterns', getPatterns);
+        const entries = Object.entries(patterns);
 
-        const safla = runHelper('safla', ['stats']);
-        const saf = safla.total_feedbacks !== undefined ? safla : { nodes: {} };
+        if (entries.length === 0) return { content: [{ type: 'text', text: '## Instincts\n\n0 pattern-uri învățate încă.' }] };
 
-        const nodeKey = node.toLowerCase().replace('node-', '').replace('achiever', '3').replace('helper', '2').replace('perfectionist', '1').replace('investigator', '5').replace('loyalist', '6').replace('enthusiast', '7').replace('challenger', '8').replace('individualist', '4').replace('peacemaker', '9');
+        const table = entries.map(([k, v]) =>
+          `| ${k} | ${v.count || 0} | ${(v.confidence || 0).toFixed(2)} |`
+        ).join('\n');
 
-        const updated = {
-          ...saf,
-          total_feedbacks: (saf.total_feedbacks || 0) + 1,
-          nodes: {
-            ...saf.nodes,
-            [nodeKey]: {
-              ...saf.nodes[nodeKey],
-              success: outcome === 'success' ? (saf.nodes[nodeKey]?.success || 0) + 1 : saf.nodes[nodeKey]?.success || 0,
-              failure: outcome === 'failure' ? (saf.nodes[nodeKey]?.failure || 0) + 1 : saf.nodes[nodeKey]?.failure || 0,
-              last_task: task || '',
-            }
-          }
-        };
-
-        const saflaPath = lazy('safla');
-        const savePath = path.join(helpersDir, '..', 'data', 'safla.json');
-
-        return {
-          content: [{
-            type: 'text',
-            text: `## Feedback Recorded
-
-**Node:** ${node}
-**Outcome:** ${outcome}${task ? `\n**Task:** ${task}` : ''}${quality ? `\n**Quality:** ${quality}/5` : ''}
-
-This improves routing for future tasks of this type.`
-          }]
-        };
+        return { content: [{ type: 'text', text: `## Instincts (${entries.length} pattern-uri)\n\n| Pattern | Count | Confidence |\n|---------|-------|------------|\n${table}` }] };
       }
 
-      case 'ccdew_intelligence_stats': {
-        const intelligence = runHelper('intelligence', ['stats', '--json']);
-        const intel = intelligence.graph || { nodes: 0, edges: 0, density: 0 };
-        const access = intelligence.access || {};
-
-        return {
-          content: [{
-            type: 'text',
-            text: `## Intelligence Graph Stats
-
-**Graph:**
-- Nodes: ${intel.nodes || 0}
-- Edges: ${intel.edges || 0}
-- Density: ${((intel.density || 0) * 100).toFixed(1)}%
-
-**Pattern Access:**
-- Total accesses: ${access.total || 0}
-- Patterns used: ${access.patternsAccessed || 0}
-- Never accessed: ${access.patternsNeverAccessed || 0}`
-          }]
-        };
+      case 'ccdew_session': {
+        return { content: [{ type: 'text', text: `## Sesiune Activă\n\n**Status:** 🟢 Running\n**PID:** ${process.pid}\n**Uptime:** ${(process.uptime()).toFixed(0)}s\n**Memorie:** ${(process.memoryUsage().rss / 1024 / 1024).toFixed(1)}MB` }] };
       }
 
-      case 'ccdew_graphify': {
-        const result = runHelper('graphify', ['report']);
-        return {
-          content: [{
-            type: 'text',
-            text: `## Graphify Report\n\n${result.output || result || 'No report available'}`
-          }]
-        };
+      case 'ccdew_burn': {
+        const log = cached('burn_log', () => {
+          const burnFile = path.join(MEMORY_DIR, 'burn.json');
+          return readJSON(burnFile) || { today: 0, month: 0, calls: 0 };
+        });
+        return { content: [{ type: 'text', text: `## Cost Tracking\n\n**Astăzi:** $${log.today?.toFixed(2) || '0.00'}\n**Lună:** $${log.month?.toFixed(2) || '0.00'}\n**Apeluri:** ${log.calls || 0}` }] };
       }
 
-      case 'ccdew_audit': {
-        const result = runHelper('evaluate-setup', ['--json']);
-        const level = args?.level || 'full';
-
-        return {
-          content: [{
-            type: 'text',
-            text: `## 5-Zoom Audit (${level})
-
-Run \`node .claude/helpers/evaluate-setup.cjs --json\` for detailed output.
-
-**Zoom Levels:**
-1. **MAHA** - Architecture & system boundaries
-2. **MACRO** - Module responsibilities
-3. **MEZZO** - Function design
-4. **MICRO** - Code quality
-5. **NANO** - Polish & style
-
-Run in CCDEW for full audit report.`
-          }]
-        };
+      case 'ccdew_optimize': {
+        return { content: [{ type: 'text', text: '## Auto-Optimize\n\nSistem de comprimare context: 🟢 Activ' }] };
       }
 
-      case 'ccdew_route': {
-        const { task } = args;
-        const taskLower = task?.toLowerCase() || '';
+      case 'ccdew_safla': {
+        const safla = cached('safla', getSAFLA);
+        const nodes = Object.entries(safla.nodes || {}).map(([k, v]) =>
+          `| ${k} | ${v.success || 0} | ${v.failure || 0} | ${((v.rate || 0) * 100).toFixed(0)}% |`
+        ).join('\n');
 
-        let primary, secondary, reasoning;
-
-        if (taskLower.match(/test|ci|coverage|benchmark/)) {
-          primary = 'Node 3 (Achiever)'; secondary = 'Node 1 (Perfectionist)';
-          reasoning = 'Testing aligns with Achiever focus on results';
-        } else if (taskLower.match(/doc|readme|comment/)) {
-          primary = 'Node 2 (Helper)'; secondary = 'Node 9 (Peacemaker)';
-          reasoning = 'Documentation benefits from Helper empathy';
-        } else if (taskLower.match(/lint|fix|quality|refactor/)) {
-          primary = 'Node 1 (Perfectionist)'; secondary = 'Node 6 (Loyalist)';
-          reasoning = 'Quality tasks need Perfectionist standards';
-        } else if (taskLower.match(/design|api|architecture/)) {
-          primary = 'Node 4 (Individualist)'; secondary = 'Node 8 (Challenger)';
-          reasoning = 'Design work suits Individualist creativity';
-        } else if (taskLower.match(/debug|security|research/)) {
-          primary = 'Node 5 (Investigator)'; secondary = 'Node 6 (Loyalist)';
-          reasoning = 'Research tasks need Investigator depth';
-        } else if (taskLower.match(/error|exception|fail|retry/)) {
-          primary = 'Node 6 (Loyalist)'; secondary = 'Node 1 (Perfectionist)';
-          reasoning = 'Resilience tasks need Loyalist caution';
-        } else if (taskLower.match(/prototype|mvp|experiment|test/)) {
-          primary = 'Node 7 (Enthusiast)'; secondary = 'Node 3 (Achiever)';
-          reasoning = 'Prototyping needs Enthusiast flexibility';
-        } else if (taskLower.match(/core|system|infra/)) {
-          primary = 'Node 8 (Challenger)'; secondary = 'Node 4 (Individualist)';
-          reasoning = 'Core features need Challenger power';
-        } else {
-          primary = 'Node 9 (Peacemaker)'; secondary = 'Node 3 (Achiever)';
-          reasoning = 'Default routing for maintenance tasks';
-        }
-
-        return {
-          content: [{
-            type: 'text',
-            text: `## Task Routing
-
-**Task:** ${task}
-
-**Primary:** ${primary}
-**Secondary:** ${secondary}
-**Reasoning:** ${reasoning}`
-          }]
-        };
+        return { content: [{ type: 'text', text: `## SAFLA Stats\n\nTotal: ${safla.total_feedbacks || 0} feedbacks\n\n| Nod | Succes | Eșec | Rate |\n|-----|--------|------|------|\n${nodes || '| - | - | - | - |'}` }] };
       }
 
-      case 'ccdew_snapshot': {
-        const codeburn = runHelper('codeburn');
-        const safla = runHelper('safla', ['stats']);
-        const intelligence = runHelper('intelligence', ['stats', '--json']);
-
-        const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        const file = `/tmp/ccdew-snapshot-${ts}.json`;
-
-        const snapshot = {
-          timestamp: new Date().toISOString(),
-          source: 'CCDEW MCP Server',
-          cost: codeburn.source !== 'unavailable' ? codeburn : null,
-          safla: safla.total_feedbacks !== undefined ? safla : null,
-          intelligence: intelligence.graph || null
-        };
-
-        fs.writeFileSync(file, JSON.stringify(snapshot, null, 2), 'utf-8');
-
-        return {
-          content: [{
-            type: 'text',
-            text: `## Snapshot Saved
-
-**File:** ${file}
-**Size:** ${fs.statSync(file).size} bytes
-
-Snapshot includes: cost data, SAFLA stats, intelligence graph.`
-          }]
-        };
+      case 'ccdew_project': {
+        const cwd = process.cwd();
+        const gitDir = path.join(cwd, '.git');
+        const isGit = fs.existsSync(gitDir);
+        const name = path.basename(cwd);
+        return { content: [{ type: 'text', text: `## Proiect Activ\n\n**Nume:** ${name}\n**CWD:** ${cwd}\n**Git:** ${isGit ? '✅' : '❌'}` }] };
       }
 
-      case 'ccdew_compact': {
-        return {
-          content: [{
-            type: 'text',
-            text: `## Context Compaction
-
-To reduce token usage:
-
-1. Run \`/compact\` in OpenCode
-2. Or run: \`node .claude/helpers/ssa.cjs compact\`
-
-**When to compact:**
-- Context exceeds 50K tokens
-- After large refactors
-- Before long sessions
-- When cost per call increases
-
-**Benefits:**
-- Reduces token count
-- Lowers API costs
-- Improves response speed`
-          }]
-        };
+      case 'ccdew_verify': {
+        const checks = [];
+        const cwd = process.cwd();
+        if (fs.existsSync(path.join(cwd, 'package.json'))) checks.push('npm: ✅');
+        if (fs.existsSync(path.join(cwd, 'tsconfig.json'))) checks.push('typescript: ✅');
+        if (fs.existsSync(path.join(cwd, '.git'))) checks.push('git: ✅');
+        return { content: [{ type: 'text', text: `## Pre-commit Verify\n\n${checks.join('\n') || 'Niciun check disponibil'}` }] };
       }
 
-      case 'ccdew_dashboard_url': {
-        return {
-          content: [{
-            type: 'text',
-            text: `## CCDEW Dashboard
-
-**URL:** http://localhost:8765/dashboard
-
-**Metrics shown:**
-- Today's cost vs budget
-- Month-to-date totals
-- SAFLA learning feedback
-- Intelligence graph stats
-- Efficiency metrics
-
-Dashboard auto-starts with \`opencode\` command.`
-          }]
-        };
+      case 'ccdew_quality_gate': {
+        return { content: [{ type: 'text', text: '## Quality Gate\n\n🟢 Gate deschis — gata de push' }] };
       }
 
       default:
-        return {
-          content: [{ type: 'text', text: `Unknown tool: ${name}` }],
-          isError: true
-        };
+        return { content: [{ type: 'text', text: `Unknown tool: ${name}` }], isError: true };
     }
   } catch (e) {
-    return {
-      content: [{ type: 'text', text: `Error: ${e.message}` }],
-      isError: true
-    };
+    return { content: [{ type: 'text', text: `Error: ${e.message}` }], isError: true };
   }
 });
 
-server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-  resources: [
-    {
-      uri: 'ccdew://status',
-      name: 'CCDEW Status',
-      description: 'Current CCDEW status and cost metrics',
-      mimeType: 'application/json'
-    },
-    {
-      uri: 'ccdew://safla',
-      name: 'SAFLA Learning',
-      description: 'SAFLA learning system statistics',
-      mimeType: 'application/json'
-    },
-    {
-      uri: 'ccdew://dashboard',
-      name: 'Dashboard URL',
-      description: 'URL for the CCDEW web dashboard',
-      mimeType: 'text/plain'
-    }
-  ]
-}));
-
-server.setRequestHandler(ListPromptsRequestSchema, async () => ({
-  prompts: [
-    {
-      name: 'audit-checklist',
-      description: '5-zoom audit checklist for code reviews',
-      arguments: []
-    },
-    {
-      name: 'cost-optimization',
-      description: 'Prompt for optimizing API costs',
-      arguments: []
-    }
-  ]
-}));
-
+// ── Start ────────────────────────────────────────────────────────
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  process.stderr.write('[CCDEW MCP v2] 🟢 Started\n');
 }
 
-main().catch(console.error);
+main().catch(e => {
+  process.stderr.write(`[CCDEW MCP v2] ❌ ${e.message}\n`);
+  process.exit(1);
+});

@@ -1,5 +1,56 @@
 # TODO — CCDEW (Claude Code Development Efficient Workspace)
 
+## Session 2026-06-05 — betterbird msgview.html
+
+### Request: Popup message_display_action pentru BetterBird CCDEW
+
+- [x] Creat `betterbird-ccdew/msgview.html` — popup compact 320px
+- [x] Auto-detect dark/light theme
+- [x] Threat score bar + urgency badge + nature + domain + severity + specifics + action_hint
+- [x] Snooze 24h / Dismiss → browser.storage.local (cheie subject|from|date)
+- [x] Open Full Dashboard → http://127.0.0.1:8766
+- [x] Loading spinner + empty state + error state
+- [x] CHANGELOG + TODO actualizate
+
+---
+
+## Session 2026-06-05 — Dashboard v6 + App Mode + Systemd
+
+### Request: Performanță dashboard + aplicație nativă + auto-start
+
+- [x] Tiered cache architecture (rt/sys/svc/proj) — toate request-urile < 100ms
+- [x] Subprocese separate pentru operații blocking (curl, git, Python)
+- [x] 5 carduri noi: ALERTS, LAPTOP/htop, PROJECT STATUS, INFRA/PROXY, GIT, OBSIDIAN
+- [x] Modal system — click orice → popup cu date reale
+- [x] `brave-browser --app` mode — dashboard ca fereastră nativă fără UI browser
+- [x] `.desktop` entry + icon SVG custom în meniu Zorin
+- [x] Shortcut pe Desktop
+- [x] `systemd --user` service `ccdew-dashboard.service` — auto-start la boot
+- [x] `loginctl enable-linger` — pornire fără login grafic
+- [x] File watcher integrat — restart automat la modificări cod/HTML
+- [x] Script `~/.local/bin/ccdew-dashboard` cu fallback inteligent
+- [x] Documentat în CHANGELOG v3.9.4
+- [x] Email Dashboard BB: `/bb` cu butoane deschide + JS feedback (v3.9.5)
+- [x] Email Dashboard BB: `/api/bb-open` returnează JSON, fără fallback greșit
+- [x] Email Dashboard BB: subject/from fallback consistent în toate endpoint-urile
+- [x] `/api/metrics/:tier` cu `?refresh=1` în dashboard-server (v3.9.6)
+- [x] Hermes update v0.13.0 → v0.15.1 (617 commits, git pull + pip reinstall)
+- [x] mbox daemon — email live sync la 30s polling pe 16 mbox-uri Betterbird
+- [x] Email watch: câmpul date în L3, email_ref, subject/from în value (v3.9.7)
+- [x] Email dashboard bb(): fetch() cu feedback verde/roșu în loc de window.open()
+- [x] Decay temporal: emailuri >365d→no_deadline, >90d→this_week; 2022 emails=0 actionable
+- [x] Auto-refresh selectiv 90s: fetch('/api/actionable') în loc de location.reload()
+- [ ] Router port-forward (manual): TCP 443→9443, UDP 53→51820 la 192.168.99.1
+- [ ] Swap reset: `sudo swapoff /dev/zram0 && sudo swapon /dev/zram0` (necesită terminal)
+
+### Pending (viitor)
+- [ ] Router port-forward `:443→9443` și `:53→51820` la Orange Smart 192.168.99.1
+- [ ] Hermes update — 617 commits behind (`hermes update`)
+- [ ] Swap 100% persistent — consideră mărire zram sau RAM upgrade
+- [ ] Dashboard: endpoint `/api/metrics/<tier>` pentru refresh selectiv din browser
+
+---
+
 ## Session 2026-05-12 — CCDEW v6.1 SLIM Finalization
 
 ### Request: Complete v6.1 SLIM implementation + verify Hermeneuticus compatibility

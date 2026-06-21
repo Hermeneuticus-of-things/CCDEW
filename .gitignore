@@ -94,3 +94,5 @@ memory/reference_*.md
 
 # Sensitive: email passwords backup
 _MEMORY/secrets/
+
+.private/

@@ -1,0 +1,10 @@
+{
+  "key": "hermes-mcp-stdio",
+  "value": "Hermes MCP rulează doar în mod stdio spawnat de OpenCode Desktop /home/think/CCDEW",
+  "tags": [],
+  "confidence": 0.5,
+  "createdAt": 1779537024748,
+  "expiresAt": 1782129024748,
+  "_layer": "L3",
+  "protected": false
+}

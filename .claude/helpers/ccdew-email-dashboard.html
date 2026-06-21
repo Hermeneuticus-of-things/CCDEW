@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCDEW Email Intelligence</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#c9d1d9;font-size:13px}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:16px 20px;position:sticky;top:0;z-index:10}
+.header h1{font-size:18px;color:#58a6ff;display:flex;align-items:center;gap:8px}
+.header h1 .count{background:#58a6ff22;color:#58a6ff;padding:2px 10px;border-radius:12px;font-size:13px}
+.header .subtitle{font-size:11px;color:#8b949e;margin-top:4px}
+.filters{display:flex;gap:8px;padding:10px 20px;background:#161b22;border-bottom:1px solid #21262d;flex-wrap:wrap;position:sticky;top:60px;z-index:9}
+.filter-btn{font-size:11px;padding:5px 12px;border-radius:8px;border:1px solid #30363d;background:#0d1117;color:#8b949e;cursor:pointer;white-space:nowrap;transition:.15s}
+.filter-btn.active{background:#1f6feb33;border-color:#1f6feb;color:#58a6ff}
+.filter-btn:hover{background:#21262d}
+.group-header{background:#21262d;padding:8px 20px;font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:108px;z-index:5;border-bottom:1px solid #30363d}
+.alert{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:12px 16px;margin:8px 12px;cursor:pointer;transition:.15s;border-left:4px solid}
+.alert:hover{border-color:#58a6ff;background:#1c2128;transform:translateX(3px)}
+.alert.critical{border-left-color:#f85149}
+.alert.high{border-left-color:#d29922}
+.alert.medium{border-left-color:#58a6ff}
+.alert.low{border-left-color:#8b949e}
+.alert .top{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.alert .urgency{font-size:10px;font-weight:600;text-transform:uppercase;padding:2px 8px;border-radius:8px}
+.urgency.immediate{background:#f8514922;color:#f85149}
+.urgency.today{background:#d2992222;color:#d29922}
+.urgency.this_week{background:#58a6ff22;color:#58a6ff}
+.urgency.no_deadline{background:#8b949e22;color:#8b949e}
+.alert .subject{font-size:14px;font-weight:600;color:#f0f6fc;margin-bottom:4px;line-height:1.3}
+.alert .specific{font-size:11px;color:#3fb950;margin-bottom:4px}
+.alert .specific::before{content:"→ "}
+.alert .meta{font-size:10px;color:#484f58;display:flex;gap:10px;flex-wrap:wrap}
+.alert .phish-warn{font-size:10px;color:#f85149;background:#f8514911;border-radius:4px;padding:3px 8px;margin-top:6px;display:inline-block}
+.alert .priority{font-size:10px;color:#d29922;margin-top:4px}
+.alert .actions{display:none;gap:6px;margin-top:8px}
+.alert:hover .actions{display:flex}
+.action-btn{font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;cursor:pointer;transition:.15s}
+.action-btn:hover{background:#1f6feb33;border-color:#1f6feb;color:#58a6ff}
+.action-btn.primary{background:#1f6feb22;border-color:#1f6feb44;color:#58a6ff}
+.loading{text-align:center;padding:40px;color:#8b949e}
+.error{background:#f8514911;border:1px solid #f8514944;border-radius:8px;padding:16px;margin:12px;color:#f85149}
+.empty{text-align:center;padding:40px;color:#8b949e}
+.refresh{position:fixed;bottom:20px;right:20px;background:#161b22;border:1px solid #30363d;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#58a6ff;z-index:100;transition:.2s}
+.refresh:hover{background:#1c2128;transform:scale(1.1)}
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:#161b22;border-top:1px solid #30363d;padding:6px 20px;font-size:11px;color:#8b949e;display:flex;gap:16px}
+.entity-tag{font-size:10px;color:#d29922;background:#d2992211;border-radius:4px;padding:2px 6px;margin-right:4px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📧 CCDEW Email Intelligence <span class="count" id="count">0</span></h1>
+  <div class="subtitle">Click pe alertă → deschide email în BetterBird | Auto-refresh 30s</div>
+</div>
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Toate</button>
+  <button class="filter-btn" data-filter="immediate" onclick="setFilter('immediate')">🚨 Imediat</button>
+  <button class="filter-btn" data-filter="today" onclick="setFilter('today')">⏰ Azi</button>
+  <button class="filter-btn" data-filter="critical" onclick="setFilter('critical')">🔴 Critic</button>
+  <button class="filter-btn" data-filter="high" onclick="setFilter('high')">🟡 Ridicat</button>
+  <button class="filter-btn" data-filter="security" onclick="setFilter('security')">🔒 Securitate</button>
+  <button class="filter-btn" data-filter="financial" onclick="setFilter('financial')">💰 Financiar</button>
+  <button class="filter-btn" data-filter="phishing" onclick="setFilter('phishing')">⚠️ Phishing</button>
+</div>
+<div id="alerts"><div class="loading">Se încarcă...</div></div>
+<div class="refresh" id="refreshBtn" title="Reîncarcă">↻</div>
+<div class="status-bar">
+  <span>🟢 Server: <span id="srvStatus">conectare...</span></span>
+  <span>📊 Total: <span id="totalStat">0</span></span>
+  <span>📬 Conturi: <span id="acctStat">0</span></span>
+</div>
+<script>
+var SERVER='http://localhost:8766';
+var currentFilter='all';
+
+function api(path){
+  return fetch(SERVER+path,{cache:'no-cache'}).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  });
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function setFilter(f){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){
+    b.classList.toggle('active',b.dataset.filter===f);
+  });
+  renderAlerts(window._lastData);
+}
+
+function renderAlerts(data){
+  var el=document.getElementById('alerts');
+  var countEl=document.getElementById('count');
+  var totalStat=document.getElementById('totalStat');
+  var acctStat=document.getElementById('acctStat');
+  if(!data){el.innerHTML='<div class="loading">Se încarcă...</div>';return}
+  window._lastData=data;
+  var alerts=data.alerts||[];
+  totalStat.textContent=data.total_alerts||alerts.length;
+
+  // Count unique accounts
+  var accts={};
+  alerts.forEach(function(a){if(a.account)accts[a.account]=true});
+  acctStat.textContent=Object.keys(accts).length;
+
+  // Filter
+  if(currentFilter!=='all'){
+    alerts=alerts.filter(function(a){
+      if(currentFilter==='phishing')return(a.phishing_risk||'')==='HIGH'||(a.phishing_risk||'')==='MEDIUM';
+      return a.urgency===currentFilter||a.nature===currentFilter||a.severity===currentFilter;
+    });
+  }
+
+  var total=alerts.length;
+  countEl.textContent=total;
+  if(total===0){el.innerHTML='<div class="empty">Nicio alertă pentru filtrul selectat</div>';return}
+
+  var urgencyLabels={immediate:'🚨 IMEDIAT',today:'⏰ AZI',this_week:'📅 SĂPT',no_deadline:'📁 INFO'};
+  var severityLabels={critical:'CRITIC',high:'RIDICAT',medium:'MEDIU',low:'SCĂZUT'};
+
+  // Group by urgency
+  var groups={};
+  alerts.forEach(function(a){
+    var g=(a.urgency||'no_deadline')+'|'+(a.nature||'other')+'|'+(a.severity||'low');
+    if(!groups[g])groups[g]={urgency:a.urgency,nature:a.nature,severity:a.severity,alerts:[]};
+    groups[g].alerts.push(a);
+  });
+
+  var urgencyOrder=function(u){var o={immediate:0,today:1,this_week:2,no_deadline:3};return o[u]!==undefined?o[u]:9};
+  var severityOrder=function(s){var o={critical:0,high:1,medium:2,low:3};return o[s]!==undefined?o[s]:9};
+
+  var gkeys=Object.keys(groups).sort(function(a,b){
+    var ao=urgencyOrder(a.split('|')[0])-urgencyOrder(b.split('|')[0]);
+    if(ao!==0)return ao;
+    return severityOrder(a.split('|')[2])-severityOrder(b.split('|')[2]);
+  });
+
+  var html='';
+  gkeys.forEach(function(gk){
+    var g=groups[gk];
+    html+='<div class="group-header">'+esc(urgencyLabels[g.urgency]||g.urgency)+' · '+esc((g.nature||'other').toUpperCase())+' · '+esc(severityLabels[g.severity]||g.severity)+'</div>';
+    g.alerts.forEach(function(a){
+      var sev=a.severity||'medium';
+      html+='<div class="alert '+sev+'" data-subject="'+esc(a.subject||'')+'" data-from="'+esc(a.from||'')+'" data-date="'+esc(a.date||'')+'" onclick="openEmail(this)">';
+      html+='<div class="top">';
+      html+='<span class="urgency '+esc(a.urgency||'no_deadline')+'">'+esc(urgencyLabels[a.urgency]||a.urgency)+'</span>';
+      if(a.phishing_risk==='HIGH')html+='<span style="font-size:10px;color:#f85149">⚠️ PHISHING</span>';
+      if(a.priority_score>=70)html+='<span style="font-size:10px;color:#d29922">★ PRIORITAR</span>';
+      html+='</div>';
+      html+='<div class="subject">'+esc(a.subject)+'</div>';
+      if(a.specifics&&a.specifics.length>0){
+        a.specifics.slice(0,2).forEach(function(s){html+='<div class="specific">'+esc(s)+'</div>'});
+      }
+      if(a.entities&&(a.entities.amounts||[]).length>0){
+        html+='<div style="margin-top:4px">';
+        a.entities.amounts.slice(0,3).forEach(function(am){html+='<span class="entity-tag">'+esc(am)+'</span>'});
+        html+='</div>';
+      }
+      if(a.phishing_risk==='HIGH'||a.phishing_risk==='MEDIUM'){
+        html+='<div class="phish-warn">Phishing '+esc(a.phishing_risk)+' (scor: '+esc(a.phishing_score||0)+')</div>';
+      }
+      if(a.priority_score)html+='<div class="priority">Priority: '+esc(a.priority_score)+'/100</div>';
+      html+='<div class="meta">'+esc(a.account||'')+' · '+esc(a.date||'')+' · '+esc(a.nature_label||a.nature||'')+'</div>';
+      html+='<div class="actions" onclick="event.stopPropagation()">';
+      html+='<button class="action-btn primary" onclick="openEmail(this.parentNode.parentNode)">📧 Deschide în BetterBird</button>';
+      html+='</div></div>';
+    });
+  });
+  el.innerHTML=html;
+}
+
+function openEmail(card){
+  if(!card)return;
+  var subject=card.getAttribute('data-subject')||'';
+  var fromAddr=card.getAttribute('data-from')||'';
+  var date=card.getAttribute('data-date')||'';
+
+  // Try to open via bb-open script
+  fetch(SERVER+'/api/bb-open?q='+encodeURIComponent(subject)).then(function(){
+    showToast('📧 BetterBird deschis: '+subject.substring(0,50));
+  }).catch(function(){
+    // Fallback: copy to clipboard
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(subject);
+      showToast('📋 Subiect copiat: '+subject.substring(0,50));
+    }
+  });
+}
+
+function showToast(msg){
+  var el=document.getElementById('alerts');
+  var toast=document.createElement('div');
+  toast.style.cssText='background:#3fb95022;border:1px solid #3fb95044;border-radius:8px;padding:10px;margin:8px 12px;font-size:12px;color:#3fb950;position:sticky;top:108px;z-index:50';
+  toast.textContent=msg;
+  el.insertBefore(toast,el.firstChild);
+  setTimeout(function(){toast.remove()},4000);
+}
+
+function load(){
+  var srvStatus=document.getElementById('srvStatus');
+  api('/api/impact-alerts?v='+Date.now()).then(function(data){
+    srvStatus.textContent='online';
+    srvStatus.style.color='#3fb950';
+    renderAlerts(data);
+  }).catch(function(e){
+    srvStatus.textContent='offline';
+    srvStatus.style.color='#f85149';
+    document.getElementById('alerts').innerHTML='<div class="error">Nu pot conecta la serverul CCDEW.<br>Verifică că rulează pe portul 8766.<br><br>'+esc(e.message)+'</div>';
+  });
+}
+
+document.getElementById('refreshBtn').addEventListener('click',function(){
+  var btn=this;
+  btn.style.animation='spin 1s linear';
+  load();
+  setTimeout(function(){btn.style.animation=''},500);
+});
+
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCDEW Inbox</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d1117; color: #e6edf3; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* HEADER */
+  #header { background: #161b22; border-bottom: 1px solid #30363d; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  #header h1 { font-size: 16px; font-weight: 600; color: #e6edf3; white-space: nowrap; }
+  #btn-refresh { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: background 0.15s; }
+  #btn-refresh:hover { background: #30363d; }
+  #btn-dashboard { background: #21262d; border: 1px solid #30363d; color: #58a6ff; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; transition: background 0.15s; }
+  #btn-dashboard:hover { background: #30363d; }
+  #search { flex: 1; background: #0d1117; border: 1px solid #30363d; color: #e6edf3; padding: 6px 12px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #58a6ff; }
+  #search::placeholder { color: #6e7681; }
+  #count-badge { background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 3px 8px; border-radius: 12px; font-size: 12px; white-space: nowrap; }
+
+  /* MAIN LAYOUT */
+  #main { display: flex; flex: 1; overflow: hidden; }
+
+  /* SIDEBAR */
+  #sidebar { width: 160px; background: #161b22; border-right: 1px solid #30363d; padding: 8px; overflow-y: auto; flex-shrink: 0; }
+  #sidebar h2 { font-size: 11px; font-weight: 600; color: #6e7681; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 6px 8px; }
+  .acct-btn { display: block; width: 100%; text-align: left; background: none; border: none; color: #8b949e; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-bottom: 2px; transition: background 0.1s, color 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acct-btn:hover { background: #21262d; color: #e6edf3; }
+  .acct-btn.active { background: #1f6feb33; color: #58a6ff; font-weight: 600; }
+  .acct-count { float: right; font-size: 11px; color: #6e7681; background: #21262d; padding: 1px 5px; border-radius: 8px; margin-top: 1px; }
+  .acct-btn.active .acct-count { color: #58a6ff; }
+
+  /* EMAIL LIST */
+  #email-list-wrap { flex: 1; overflow-y: auto; padding: 8px; }
+  #email-list-wrap::-webkit-scrollbar { width: 6px; }
+  #email-list-wrap::-webkit-scrollbar-track { background: transparent; }
+  #email-list-wrap::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+  /* SPINNER */
+  #spinner { display: flex; align-items: center; justify-content: center; height: 200px; gap: 10px; color: #6e7681; }
+  .spin { width: 24px; height: 24px; border: 2px solid #30363d; border-top-color: #58a6ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* EMPTY STATE */
+  #empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #6e7681; gap: 8px; }
+  #empty-state .icon { font-size: 40px; opacity: 0.4; }
+
+  /* EMAIL CARD */
+  .email-card { background: #1c2128; border: 1px solid #30363d; border-radius: 8px; margin-bottom: 6px; overflow: hidden; transition: border-color 0.15s; cursor: pointer; }
+  .email-card:hover { border-color: #58a6ff44; }
+  .email-card.expanded { border-color: #58a6ff66; }
+  .email-card.threat-3 { border-left: none; box-shadow: inset 3px 0 0 #ff8c00; }
+  .email-card.threat-4 { border-left: none; box-shadow: inset 3px 0 0 #ff4444; }
+  .card-header { display: flex; align-items: stretch; }
+  .threat-bar { width: 4px; flex-shrink: 0; border-radius: 0; }
+  .card-body { flex: 1; padding: 10px 12px; min-width: 0; }
+  .card-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .sender { font-weight: 600; color: #e6edf3; font-size: 13px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .date { font-size: 11px; color: #6e7681; white-space: nowrap; flex-shrink: 0; }
+  .subject { font-size: 13px; color: #c9d1d9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+  .snippet { font-size: 12px; color: #6e7681; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
+  .badges { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.03em; }
+  .badge-urgency { background: rgba(255,68,68,0.15); border: 1px solid; }
+  .badge-nature { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+  .badge-threat { font-weight: 700; }
+
+  /* EXPANDED PANEL */
+  .expand-panel { border-top: 1px solid #30363d; padding: 12px 16px; background: #161b22; }
+  .expand-snippet { font-size: 13px; color: #c9d1d9; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; }
+  .alert-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px; }
+  .alert-title { font-size: 12px; font-weight: 700; color: #6e7681; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .alert-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+  .alert-label { color: #6e7681; font-size: 12px; min-width: 90px; flex-shrink: 0; }
+  .alert-val { color: #c9d1d9; }
+  .specifics-list { list-style: none; padding: 0; }
+  .specifics-list li { color: #c9d1d9; font-size: 12px; padding: 2px 0; padding-left: 14px; position: relative; line-height: 1.5; }
+  .specifics-list li::before { content: "›"; position: absolute; left: 0; color: #6e7681; }
+  .action-hint { background: #1c2128; border-left: 3px solid #58a6ff; padding: 8px 10px; border-radius: 0 4px 4px 0; font-size: 12px; color: #c9d1d9; line-height: 1.5; margin-top: 8px; }
+  .threat-meter { margin-top: 10px; }
+  .threat-meter-label { font-size: 11px; color: #6e7681; margin-bottom: 4px; }
+  .threat-bar-full { height: 6px; background: #21262d; border-radius: 3px; overflow: hidden; }
+  .threat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+  /* META */
+  .card-meta { font-size: 11px; color: #6e7681; padding: 6px 12px 8px; display: flex; gap: 12px; }
+  .card-meta span { display: flex; align-items: center; gap: 3px; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>📧 CCDEW Inbox</h1>
+  <button id="btn-refresh" onclick="loadInbox()">↻ Refresh</button>
+  <a id="btn-dashboard" href="http://127.0.0.1:8766/" target="_blank">→ Dashboard</a>
+  <input id="search" type="text" placeholder="Caută expeditor, subiect..." oninput="onSearch()" />
+  <span id="count-badge">0 emailuri</span>
+</div>
+
+<div id="main">
+  <div id="sidebar">
+    <h2>Conturi</h2>
+    <div id="acct-list"></div>
+  </div>
+  <div id="email-list-wrap">
+    <div id="email-list"></div>
+  </div>
+</div>
+
+<script>
+var allEmails = [];
+var currentFilter = 'all';
+var searchQ = '';
+var expandedId = null;
+
+var URGENCY_COLORS = {
+  'immediate': '#ff4444',
+  'today': '#ff8c00',
+  'this_week': '#4a9eff',
+  'this_month': '#8b5cf6',
+  'no_deadline': '#6e7681'
+};
+
+var THREAT_COLORS = {
+  1: '#6e7681',
+  2: '#4a9eff',
+  3: '#ff8c00',
+  4: '#ff4444'
+};
+
+var THREAT_LABELS = {
+  1: 'SCĂZUT',
+  2: 'MEDIU',
+  3: 'RIDICAT',
+  4: 'CRITIC'
+};
+
+var URGENCY_LABELS = {
+  'immediate': 'IMEDIAT',
+  'today': 'AZI',
+  'this_week': 'SĂPTĂMÂNA',
+  'this_month': 'LUNA',
+  'no_deadline': 'FĂRĂ URGENȚĂ'
+};
+
+function relDate(iso) {
+  var d = new Date(iso), now = new Date(), diff = (now - d) / 1000;
+  if (isNaN(diff)) return '';
+  if (diff < 60) return 'acum';
+  if (diff < 3600) return 'acum ' + Math.floor(diff/60) + 'm';
+  if (diff < 86400) return 'acum ' + Math.floor(diff/3600) + 'h';
+  if (diff < 172800) return 'ieri';
+  return Math.floor(diff/86400) + ' zile';
+}
+
+function senderName(from) {
+  if (!from) return '(necunoscut)';
+  var m = from.match(/^([^<]+)</);
+  if (m) return m[1].trim();
+  return from.replace(/<[^>]+>/, '').trim() || from;
+}
+
+function threatBarColor(alert) {
+  if (!alert) return '#30363d';
+  return THREAT_COLORS[alert.threat_score] || '#30363d';
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildAccountSidebar() {
+  var counts = {};
+  var total = allEmails.length;
+  for (var i = 0; i < allEmails.length; i++) {
+    var acc = allEmails[i].account || 'necunoscut';
+    counts[acc] = (counts[acc] || 0) + 1;
+  }
+
+  var html = '<button class="acct-btn' + (currentFilter === 'all' ? ' active' : '') + '" onclick="setFilter(\'all\')">Toate <span class="acct-count">' + total + '</span></button>';
+  var accs = Object.keys(counts).sort();
+  for (var j = 0; j < accs.length; j++) {
+    var acc = accs[j];
+    var label = acc.length > 18 ? acc.substring(0, 16) + '…' : acc;
+    html += '<button class="acct-btn' + (currentFilter === acc ? ' active' : '') + '" onclick="setFilter(\'' + escHtml(acc) + '\')" title="' + escHtml(acc) + '">' + escHtml(label) + ' <span class="acct-count">' + counts[acc] + '</span></button>';
+  }
+  document.getElementById('acct-list').innerHTML = html;
+}
+
+function setFilter(val) {
+  currentFilter = val;
+  expandedId = null;
+  buildAccountSidebar();
+  renderList();
+}
+
+function onSearch() {
+  searchQ = document.getElementById('search').value.toLowerCase();
+  expandedId = null;
+  renderList();
+}
+
+function filteredEmails() {
+  var result = [];
+  for (var i = 0; i < allEmails.length; i++) {
+    var e = allEmails[i];
+    if (currentFilter !== 'all' && e.account !== currentFilter) continue;
+    if (searchQ) {
+      var hay = ((e.subject || '') + ' ' + (e.from || '')).toLowerCase();
+      if (hay.indexOf(searchQ) === -1) continue;
+    }
+    result.push(e);
+  }
+  return result;
+}
+
+function renderBadges(alert) {
+  if (!alert) return '';
+  var uColor = URGENCY_COLORS[alert.urgency] || '#6e7681';
+  var tColor = THREAT_COLORS[alert.threat_score] || '#6e7681';
+  var uLabel = URGENCY_LABELS[alert.urgency] || alert.urgency || '';
+  var tLabel = THREAT_LABELS[alert.threat_score] || alert.threat_score || '';
+  var natureLabel = escHtml(alert.nature_label || alert.nature || '');
+  var html = '<div class="badges">';
+  html += '<span class="badge badge-urgency" style="color:' + uColor + ';border-color:' + uColor + '44">' + escHtml(uLabel) + '</span>';
+  if (natureLabel) html += '<span class="badge badge-nature">' + natureLabel + '</span>';
+  html += '<span class="badge badge-threat" style="color:' + tColor + '">' + escHtml(tLabel) + '</span>';
+  html += '</div>';
+  return html;
+}
+
+function renderAlertCard(alert) {
+  if (!alert) return '';
+  var uColor = URGENCY_COLORS[alert.urgency] || '#6e7681';
+  var tColor = THREAT_COLORS[alert.threat_score] || '#6e7681';
+  var tLabel = THREAT_LABELS[alert.threat_score] || alert.threat_score || '';
+  var uLabel = URGENCY_LABELS[alert.urgency] || alert.urgency || '';
+  var pct = (alert.threat_score / 4) * 100;
+
+  var html = '<div class="alert-card">';
+  html += '<div class="alert-title">⚠ Analiză CCDEW</div>';
+  html += '<div class="alert-row"><span class="alert-label">Urgență:</span><span class="alert-val" style="color:' + uColor + ';font-weight:600">' + escHtml(uLabel) + '</span></div>';
+  html += '<div class="alert-row"><span class="alert-label">Natură:</span><span class="alert-val">' + escHtml(alert.nature_label || alert.nature || '') + '</span></div>';
+  html += '<div class="alert-row"><span class="alert-label">Severitate:</span><span class="alert-val">' + escHtml(alert.severity || '') + '</span></div>';
+
+  if (alert.specifics && alert.specifics.length > 0) {
+    html += '<div class="alert-row"><span class="alert-label">Detalii:</span><ul class="specifics-list">';
+    for (var i = 0; i < alert.specifics.length; i++) {
+      html += '<li>' + escHtml(alert.specifics[i]) + '</li>';
+    }
+    html += '</ul></div>';
+  }
+
+  if (alert.action_hint) {
+    html += '<div class="action-hint">💡 ' + escHtml(alert.action_hint) + '</div>';
+  }
+
+  html += '<div class="threat-meter"><div class="threat-meter-label">Scor amenințare: <strong style="color:' + tColor + '">' + escHtml(tLabel) + ' (' + alert.threat_score + '/4)</strong></div>';
+  html += '<div class="threat-bar-full"><div class="threat-bar-fill" style="width:' + pct + '%;background:' + tColor + '"></div></div></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderExpandPanel(email) {
+  var html = '<div class="expand-panel">';
+  html += '<div class="card-meta">';
+  html += '<span>📬 ' + escHtml(email.from || '') + '</span>';
+  html += '<span>📁 ' + escHtml(email.folder || 'INBOX') + '</span>';
+  html += '<span>🗓 ' + escHtml(email.date ? new Date(email.date).toLocaleString('ro-RO') : '') + '</span>';
+  html += '</div>';
+  if (email.snippet) {
+    html += '<div class="expand-snippet">' + escHtml(email.snippet) + '</div>';
+  }
+  if (email.alert) {
+    html += renderAlertCard(email.alert);
+  }
+  html += '</div>';
+  return html;
+}
+
+function getEmailId(email, idx) {
+  return (email.account || '') + '|' + (email.date || '') + '|' + idx;
+}
+
+function toggleExpand(id) {
+  if (expandedId === id) {
+    expandedId = null;
+  } else {
+    expandedId = id;
+  }
+  renderList();
+}
+
+function renderList() {
+  var emails = filteredEmails();
+  var list = document.getElementById('email-list');
+  var badge = document.getElementById('count-badge');
+  badge.textContent = emails.length + ' email' + (emails.length === 1 ? '' : 'uri');
+
+  if (emails.length === 0) {
+    list.innerHTML = '<div id="empty-state"><div class="icon">📭</div><div>Niciun email în inbox</div></div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < emails.length; i++) {
+    var e = emails[i];
+    var id = getEmailId(e, i);
+    var isExpanded = (expandedId === id);
+    var tScore = e.alert ? (e.alert.threat_score || 0) : 0;
+    var tClass = tScore >= 4 ? ' threat-4' : (tScore >= 3 ? ' threat-3' : '');
+    var expanded = isExpanded ? ' expanded' : '';
+    var barColor = threatBarColor(e.alert);
+    var name = escHtml(senderName(e.from));
+    var subj = escHtml(e.subject || '(fără subiect)');
+    var snip = escHtml(e.snippet || '');
+    var dt = relDate(e.date);
+
+    html += '<div class="email-card' + tClass + expanded + '" onclick="toggleExpand(\'' + id.replace(/'/g,"\\'") + '\')">';
+    html += '<div class="card-header">';
+    html += '<div class="threat-bar" style="background:' + barColor + '"></div>';
+    html += '<div class="card-body">';
+    html += '<div class="card-row1"><span class="sender">' + name + '</span><span class="date">' + escHtml(dt) + '</span></div>';
+    html += '<div class="subject">' + subj + '</div>';
+    if (snip) html += '<div class="snippet">' + snip + '</div>';
+    if (e.alert) html += renderBadges(e.alert);
+    html += '</div></div>';
+    if (isExpanded) html += renderExpandPanel(e);
+    html += '</div>';
+  }
+
+  list.innerHTML = html;
+}
+
+function showSpinner() {
+  document.getElementById('email-list').innerHTML = '<div id="spinner"><div class="spin"></div><span>Se încarcă...</span></div>';
+}
+
+function loadInbox() {
+  showSpinner();
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/inbox', true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    if (xhr.status === 200) {
+      var data;
+      try { data = JSON.parse(xhr.responseText); } catch(e) { data = null; }
+      if (data && data.emails) {
+        allEmails = data.emails;
+      } else {
+        allEmails = [];
+      }
+    } else {
+      allEmails = [];
+    }
+    expandedId = null;
+    buildAccountSidebar();
+    renderList();
+  };
+  xhr.onerror = function() {
+    allEmails = [];
+    buildAccountSidebar();
+    document.getElementById('email-list').innerHTML = '<div id="empty-state"><div class="icon">⚠️</div><div>Eroare la conectare la /api/inbox</div></div>';
+  };
+  xhr.send();
+}
+
+loadInbox();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "ccdew-20260523115911-ada648b0": {
+    "uid": "ccdew-20260523115911-ada648b0",
+    "layer": "L1",
+    "type": "working",
+    "created_at": "2026-05-23T11:59:11.081Z",
+    "tags": [
+      "integration",
+      "hermes",
+      "mcp"
+    ],
+    "path": "/home/think/CCDEW/_MEMORY/L1-working/2026-05-23-ccdew-20260523115911-ada648b0.md"
+  },
+  "ccdew-20260523115911-467daf96": {
+    "uid": "ccdew-20260523115911-467daf96",
+    "layer": "L3",
+    "type": "semantic",
+    "created_at": "2026-05-23T11:59:11.087Z",
+    "tags": [
+      "safla",
+      "pattern",
+      "learning"
+    ],
+    "path": "/home/think/CCDEW/_MEMORY/L3-semantic/2026-05-23-ccdew-20260523115911-467daf96.md"
+  },
+  "ccdew-20260523115911-336d8fd0": {
+    "uid": "ccdew-20260523115911-336d8fd0",
+    "layer": "L4",
+    "type": "identity",
+    "created_at": "2026-05-23T11:59:11.088Z",
+    "tags": [
+      "architecture",
+      "core",
+      "permanent"
+    ],
+    "path": "/home/think/CCDEW/_MEMORY/L4-identity/2026-05-23-ccdew-20260523115911-336d8fd0.md"
+  }
+}

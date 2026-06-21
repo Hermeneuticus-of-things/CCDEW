@@ -1,0 +1,11 @@
+# Hermes Zorin Symbiote — SUDOERS ENTRY
+# Allows hermes-zorin-symbiote.py to run specific commands without password
+# Place in /etc/sudoers.d/hermes-zorin
+
+think ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart fail2ban
+think ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart docker
+think ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sshd
+think ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart dailyaidecheck
+think ALL=(ALL) NOPASSWD: /usr/bin/systemctl is-active *
+think ALL=(ALL) NOPASSWD: /usr/bin/apt list --upgradable
+think ALL=(ALL) NOPASSWD: /usr/bin/lsmod

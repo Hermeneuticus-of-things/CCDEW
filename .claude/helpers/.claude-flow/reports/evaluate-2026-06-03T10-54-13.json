@@ -1,0 +1,183 @@
+{
+  "sections": {
+    "config": [
+      {
+        "name": "settings.json parses",
+        "status": "FAIL",
+        "detail": "ENOENT: no such file or directory, open '/home/think/CCDEW/.claude/helpers/.claude/settings.json'"
+      },
+      {
+        "name": "feature-flags.json",
+        "status": "PASS",
+        "detail": "enneagram,ssa,codeburn,red_hat,safla,graphify,langraph,project_scope,intelligence,auto_optimize,instincts,secret_scan"
+      }
+    ],
+    "modules": [
+      {
+        "name": "hook-handler.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "safla.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "codeburn.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "graphify.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "intelligence.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "langgraph-micro.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "red-hat-evaluator.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "auto-optimize.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "metrics-update.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "project-scope.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "secret-scan.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "enneagram_router.py",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "enneagram_compose.py",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "lib/atomic-write.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "lib/platform.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "lib/flags.cjs",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "lib/validate.cjs",
+        "status": "PASS",
+        "detail": ""
+      }
+    ],
+    "perf": [
+      {
+        "name": "ssa.filterContext(50)",
+        "status": "PASS",
+        "detail": "0.98ms"
+      },
+      {
+        "name": "safla.recordOutcome",
+        "status": "PASS",
+        "detail": "0.81ms"
+      }
+    ],
+    "state": [
+      {
+        "name": "safla.json node keys",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "no .tmp orphans",
+        "status": "PASS",
+        "detail": ""
+      }
+    ],
+    "cost": [
+      {
+        "name": "codeburn CLI on PATH",
+        "status": "WARN",
+        "detail": "fallback to native engine"
+      },
+      {
+        "name": "native engine",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "totals",
+        "status": "PASS",
+        "detail": "native/$0.00/0"
+      }
+    ],
+    "security": [
+      {
+        "name": "secret-scan detects AWS key",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "secret-scan no false-positive",
+        "status": "PASS",
+        "detail": ""
+      },
+      {
+        "name": "settings deny rules",
+        "status": "WARN",
+        "detail": ""
+      }
+    ],
+    "platform": [
+      {
+        "name": "platform",
+        "status": "PASS",
+        "detail": "linux"
+      },
+      {
+        "name": "python",
+        "status": "PASS",
+        "detail": "/usr/bin/python3"
+      },
+      {
+        "name": "node executable",
+        "status": "PASS",
+        "detail": "/usr/bin/node"
+      }
+    ]
+  },
+  "summary": {
+    "pass": 29,
+    "warn": 2,
+    "fail": 1
+  }
+}

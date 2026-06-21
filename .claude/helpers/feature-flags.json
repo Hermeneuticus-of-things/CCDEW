@@ -7,31 +7,31 @@
   },
   "mode": "full",
   "components": {
-    "enneagram":    true,
-    "ssa":          true,
-    "codeburn":     true,
-    "red_hat":      true,
-    "safla":        true,
-    "graphify":     true,
-    "langraph":     true,
-    "project_scope":true,
+    "enneagram": true,
+    "ssa": true,
+    "codeburn": true,
+    "red_hat": true,
+    "safla": true,
+    "graphify": true,
+    "langraph": true,
+    "project_scope": true,
     "intelligence": true,
-    "auto_optimize":true,
-    "instincts":    true,
-    "secret_scan":  true,
-    "ruflo":        true
+    "auto_optimize": true,
+    "instincts": true,
+    "secret_scan": true,
+    "ruflo": true,
+    "mission_control": true
   },
   "ssa": {
-    "max_context_tokens": 8000,
-    "top_k": 8,
-    "min_score": 0.10
+    "top_k": 3,
+    "min_score": 0.35
   },
   "codeburn": {
     "warn_tokens": 50000,
     "alert_tokens": 100000,
-    "daily_budget_usd": 100.0,
+    "daily_budget_usd": 100,
     "warn_at_pct": 0.75,
-    "alert_at_pct": 1.0,
+    "alert_at_pct": 1,
     "cost_per_call_warn": 0.05
   },
   "red_hat": {
@@ -40,64 +40,75 @@
   },
   "safla": {
     "weight_success": 0.05,
-    "weight_failure": -0.10,
+    "weight_failure": -0.1,
     "weight_clamp": 0.5
   },
   "profiles": {
     "lite": {
       "components": {
-        "enneagram":    true,
-        "ssa":          false,
-        "codeburn":     true,
-        "red_hat":      false,
-        "safla":        false,
-        "graphify":     false,
-        "langraph":     false,
-        "project_scope":false,
+        "enneagram": true,
+        "ssa": false,
+        "codeburn": true,
+        "red_hat": false,
+        "safla": false,
+        "graphify": false,
+        "langraph": false,
+        "project_scope": false,
         "intelligence": false,
-        "auto_optimize":false,
-        "instincts":    false,
-        "secret_scan":  true,
-        "ruflo":        false
+        "auto_optimize": false,
+        "instincts": false,
+        "secret_scan": true,
+        "ruflo": false
       },
-      "ssa": { "top_k": 3, "min_score": 0.35 }
+      "ssa": {
+        "top_k": 3,
+        "min_score": 0.35
+      }
     },
     "full": {
       "components": {
-        "enneagram":    true,
-        "ssa":          true,
-        "codeburn":     true,
-        "red_hat":      true,
-        "safla":        true,
-        "graphify":     true,
-        "langraph":     true,
-        "project_scope":true,
+        "enneagram": true,
+        "ssa": true,
+        "codeburn": true,
+        "red_hat": true,
+        "safla": true,
+        "graphify": true,
+        "langraph": true,
+        "project_scope": true,
         "intelligence": true,
-        "auto_optimize":true,
-        "instincts":    true,
-        "secret_scan":  true,
-        "ruflo":        true
+        "auto_optimize": true,
+        "instincts": true,
+        "secret_scan": true,
+        "ruflo": true
       },
-      "ssa": { "top_k": 6, "min_score": 0.30 }
+      "ssa": {
+        "top_k": 6,
+        "min_score": 0.3
+      }
     },
     "ssa_max": {
       "components": {
-        "enneagram":    true,
-        "ssa":          true,
-        "codeburn":     true,
-        "red_hat":      true,
-        "safla":        true,
-        "graphify":     false,
-        "langraph":     false,
-        "project_scope":true,
+        "enneagram": true,
+        "ssa": true,
+        "codeburn": true,
+        "red_hat": true,
+        "safla": true,
+        "graphify": false,
+        "langraph": false,
+        "project_scope": true,
         "intelligence": true,
-        "auto_optimize":true,
-        "instincts":    false,
-        "secret_scan":  true,
-        "ruflo":        false
+        "auto_optimize": true,
+        "instincts": false,
+        "secret_scan": true,
+        "ruflo": false
       },
-      "ssa": { "top_k": 6, "min_score": 0.25 },
-      "codeburn": { "daily_budget_usd": 50.0 }
+      "ssa": {
+        "top_k": 6,
+        "min_score": 0.25
+      },
+      "codeburn": {
+        "daily_budget_usd": 50
+      }
     }
   }
 }

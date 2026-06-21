@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCDEW Email Intelligence</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a2e;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    width: 400px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  #header {
+    background: #16213e;
+    padding: 10px 12px;
+    border-bottom: 1px solid #0f3460;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  #header-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  #header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  #status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+  #status-badge.online { background: #064e3b; color: #34d399; }
+  #status-badge.offline { background: #450a0a; color: #f87171; }
+  #status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .online #status-dot { background: #34d399; }
+  .offline #status-dot { background: #f87171; }
+
+  #counters {
+    display: flex;
+    gap: 6px;
+    font-size: 11px;
+    flex: 1;
+  }
+  .counter-chip {
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 10px;
+  }
+  .cnt-crit { background: #450a0a; color: #f87171; }
+  .cnt-high { background: #431407; color: #fb923c; }
+  .cnt-low  { background: #1e293b; color: #94a3b8; }
+
+  #btn-refresh {
+    background: none;
+    border: 1px solid #0f3460;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  #btn-refresh:hover { color: #e2e8f0; border-color: #3b82f6; }
+
+  /* SEARCH */
+  #search-wrap {
+    padding: 8px 12px;
+    background: #16213e;
+    border-bottom: 1px solid #0f3460;
+    flex-shrink: 0;
+  }
+  #search {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #1e3a5f;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #e2e8f0;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #search:focus { border-color: #3b82f6; }
+  #search::placeholder { color: #475569; }
+
+  /* ALERTS LIST */
+  #alerts-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  #alerts-wrap::-webkit-scrollbar { width: 4px; }
+  #alerts-wrap::-webkit-scrollbar-track { background: transparent; }
+  #alerts-wrap::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
+
+  #empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #475569;
+    display: none;
+  }
+  #empty-state svg { margin-bottom: 12px; opacity: 0.3; }
+
+  #loading-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #475569;
+  }
+
+  /* CARD */
+  .alert-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+    display: flex;
+  }
+  .alert-card:hover { border-color: #334155; background: #111827; }
+  .alert-card.expanded { border-color: #3b82f6; }
+
+  .card-bar {
+    width: 4px;
+    flex-shrink: 0;
+    border-radius: 6px 0 0 6px;
+  }
+
+  .card-body {
+    flex: 1;
+    padding: 8px 10px;
+    min-width: 0;
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+
+  .card-nature {
+    font-size: 10px;
+    color: #64748b;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .card-subject {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e8f0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+  .card-subject.expanded-subject { white-space: normal; overflow: visible; }
+
+  /* EXPANDED */
+  .card-details {
+    display: none;
+    margin-top: 8px;
+    border-top: 1px solid #1e293b;
+    padding-top: 8px;
+  }
+  .alert-card.expanded .card-details { display: block; }
+
+  .detail-from {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .detail-from span { color: #60a5fa; }
+
+  .action-block {
+    background: #1c1a00;
+    border: 1px solid #713f12;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 11px;
+    color: #fde68a;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    word-break: break-word;
+  }
+  .action-block::before {
+    content: '→ ';
+    font-weight: 700;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .btn-action:hover { opacity: 0.85; }
+  .btn-open    { background: #1d4ed8; color: #fff; }
+  .btn-reply   { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+  .btn-snooze  { background: #292524; color: #d6d3d1; border: 1px solid #57534e; }
+  .btn-dismiss { background: #1f2937; color: #9ca3af; border: 1px solid #374151; }
+
+  /* FOOTER */
+  #footer {
+    background: #16213e;
+    border-top: 1px solid #0f3460;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  #btn-reset {
+    background: none;
+    border: 1px solid #374151;
+    color: #6b7280;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  #btn-reset:hover { color: #ef4444; border-color: #ef4444; }
+
+  #link-inbox {
+    font-size: 11px;
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  #link-inbox:hover { color: #60a5fa; }
+
+  /* SSE indicator */
+  #sse-indicator {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #374151;
+    display: inline-block;
+    margin-left: 4px;
+    vertical-align: middle;
+    transition: background 0.5s;
+  }
+  #sse-indicator.active { background: #34d399; animation: pulse-sse 2s infinite; }
+  @keyframes pulse-sse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .spinning { animation: spin 0.6s linear infinite; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="header-top">
+    <span id="header-title">🛡 CCDEW Email Intelligence</span>
+    <span id="status-badge" class="offline">
+      <span id="status-dot"></span>
+      <span id="status-text">OFFLINE</span>
+    </span>
+    <button id="btn-refresh" title="Refresh manual">↺</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span id="counters">
+      <span class="counter-chip cnt-crit" id="cnt-crit">🔴 0</span>
+      <span class="counter-chip cnt-high" id="cnt-high">🟠 0</span>
+      <span class="counter-chip cnt-low"  id="cnt-low">⚪ 0</span>
+    </span>
+    <span id="sse-indicator" title="SSE live"></span>
+  </div>
+</div>
+
+<div id="search-wrap">
+  <input id="search" type="text" placeholder="🔍  Caută subiect / natură / acțiune…" autocomplete="off">
+</div>
+
+<div id="alerts-wrap">
+  <div id="loading-state">Se încarcă alertele…</div>
+  <div id="empty-state">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    </svg>
+    <div>Nicio alertă de afișat</div>
+  </div>
+  <div id="alerts-list"></div>
+</div>
+
+<div id="footer">
+  <button id="btn-reset">Reset ignorate (<span id="dismissed-count">0</span>)</button>
+  <a id="link-inbox" href="http://127.0.0.1:8766/inbox" target="_blank">→ Inbox complet</a>
+</div>
+
+<script>
+'use strict';
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let allAlerts = [];
+let expandedKey = null;
+let sseSource = null;
+let pollTimer = null;
+
+// ─── Storage helpers ─────────────────────────────────────────────────────────
+function getSnoozed()   { try { return JSON.parse(localStorage.getItem('ccdew_snoozed') || '{}'); } catch(e){ return {}; } }
+function getDismissed() { try { return JSON.parse(localStorage.getItem('ccdew_dismissed') || '{}'); } catch(e){ return {}; } }
+
+function alertKey(a) {
+  return btoa(encodeURIComponent((a.subject||'') + '|' + (a.from||''))).slice(0, 32);
+}
+
+function isHidden(a) {
+  const k = alertKey(a);
+  const snoozed   = getSnoozed();
+  const dismissed = getDismissed();
+  if (dismissed[k]) return true;
+  if (snoozed[k] && snoozed[k] > Date.now()) return true;
+  return false;
+}
+
+function updateDismissedCount() {
+  const d = getDismissed();
+  const s = getSnoozed();
+  let total = Object.keys(d).length;
+  // count non-expired snoozes
+  const now = Date.now();
+  for (const v of Object.values(s)) if (v > now) total++;
+  document.getElementById('dismissed-count').textContent = total;
+}
+
+// ─── Color helpers ───────────────────────────────────────────────────────────
+function threatColor(score) {
+  if (score >= 4) return '#ef4444';
+  if (score >= 3) return '#f97316';
+  if (score >= 2) return '#3b82f6';
+  return '#6b7280';
+}
+
+function threatLabel(score) {
+  if (score >= 4) return 'CRITIC';
+  if (score >= 3) return 'RIDICAT';
+  if (score >= 2) return 'MEDIU';
+  return 'SCĂZUT';
+}
+
+function urgencyColor(u) {
+  if (u === 'immediate') return '#ef4444';
+  if (u === 'today')     return '#f97316';
+  if (u === 'this_week') return '#3b82f6';
+  if (u === 'this_month')return '#8b5cf6';
+  return '#6b7280';
+}
+
+function urgencyLabel(u) {
+  if (u === 'immediate') return 'IMEDIAT';
+  if (u === 'today')     return 'AZI';
+  if (u === 'this_week') return 'SĂPTĂMÂNA';
+  if (u === 'this_month')return 'LUNA';
+  return 'FĂRĂ TERMEN';
+}
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Status ping ─────────────────────────────────────────────────────────────
+async function pingServer() {
+  try {
+    const r = await fetch('/api/impact-alerts', { method: 'HEAD', signal: AbortSignal.timeout(3000) });
+    setOnline(r.ok || r.status < 500);
+  } catch(e) {
+    setOnline(false);
+  }
+}
+
+function setOnline(online) {
+  const badge = document.getElementById('status-badge');
+  const text  = document.getElementById('status-text');
+  badge.className = 'online' ? (online ? 'online' : 'offline') : badge.className;
+  badge.classList.toggle('online', online);
+  badge.classList.toggle('offline', !online);
+  text.textContent = online ? 'ONLINE' : 'OFFLINE';
+}
+
+// ─── Fetch alerts ─────────────────────────────────────────────────────────────
+async function fetchAlerts() {
+  try {
+    const r = await fetch('/api/impact-alerts', { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    setOnline(true);
+    allAlerts = Array.isArray(data) ? data : (data.alerts || []);
+    // sort by threat_score desc, then urgency weight
+    const urgWeight = { immediate:4, today:3, this_week:2, this_month:1 };
+    allAlerts.sort((a,b) => {
+      const sd = (b.threat_score||0) - (a.threat_score||0);
+      if (sd !== 0) return sd;
+      return (urgWeight[b.urgency]||0) - (urgWeight[a.urgency]||0);
+    });
+    renderAlerts();
+  } catch(e) {
+    setOnline(false);
+    // keep existing alerts if any
+    if (allAlerts.length === 0) {
+      document.getElementById('loading-state').textContent = 'Server indisponibil. Reîncerc…';
+    }
+  }
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function renderAlerts() {
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  const loadEl  = document.getElementById('loading-state');
+  const emptyEl = document.getElementById('empty-state');
+  const listEl  = document.getElementById('alerts-list');
+
+  loadEl.style.display = 'none';
+
+  const filtered = allAlerts.filter(a => {
+    if (isHidden(a)) return false;
+    if (!query) return true;
+    const haystack = ((a.subject||'') + ' ' + (a.nature_label||'') + ' ' + (a.recommended_action||'')).toLowerCase();
+    return haystack.includes(query);
+  });
+
+  // Update counters (all visible, not filtered)
+  const visible = allAlerts.filter(a => !isHidden(a));
+  let crit=0, high=0, low=0;
+  visible.forEach(a => {
+    const s = a.threat_score || 0;
+    if (s >= 4) crit++;
+    else if (s >= 3) high++;
+    else low++;
+  });
+  document.getElementById('cnt-crit').textContent = '🔴 ' + crit;
+  document.getElementById('cnt-high').textContent = '🟠 ' + high;
+  document.getElementById('cnt-low').textContent  = '⚪ ' + low;
+
+  if (filtered.length === 0) {
+    emptyEl.style.display = 'block';
+    listEl.innerHTML = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  listEl.innerHTML = filtered.map(a => buildCard(a)).join('');
+  updateDismissedCount();
+
+  // attach events
+  listEl.querySelectorAll('.alert-card').forEach(card => {
+    const key = card.dataset.key;
+    // click card body (not buttons) → expand
+    card.addEventListener('click', e => {
+      if (e.target.closest('.btn-action')) return;
+      toggleExpand(key);
+    });
+    // action buttons
+    const openBtn    = card.querySelector('.btn-open');
+    const replyBtn   = card.querySelector('.btn-reply');
+    const snoozeBtn  = card.querySelector('.btn-snooze');
+    const dismissBtn = card.querySelector('.btn-dismiss');
+
+    if (openBtn)    openBtn.addEventListener('click',    e => { e.stopPropagation(); doOpen(key); });
+    if (replyBtn)   replyBtn.addEventListener('click',   e => { e.stopPropagation(); doReply(key); });
+    if (snoozeBtn)  snoozeBtn.addEventListener('click',  e => { e.stopPropagation(); doSnooze(key); });
+    if (dismissBtn) dismissBtn.addEventListener('click', e => { e.stopPropagation(); doDismiss(key); });
+  });
+}
+
+function buildCard(a) {
+  const key      = alertKey(a);
+  const tColor   = threatColor(a.threat_score);
+  const tLabel   = threatLabel(a.threat_score);
+  const uColor   = urgencyColor(a.urgency);
+  const uLabel   = urgencyLabel(a.urgency);
+  const isExp    = (expandedKey === key);
+
+  return `
+  <div class="alert-card${isExp ? ' expanded' : ''}" data-key="${esc(key)}" data-subject="${esc(a.subject)}" data-from="${esc(a.from)}">
+    <div class="card-bar" style="background:${tColor}"></div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="badge" style="background:${tColor}22;color:${tColor};border:1px solid ${tColor}44">${tLabel}</span>
+        <span class="badge" style="background:${uColor}22;color:${uColor};border:1px solid ${uColor}44">${uLabel}</span>
+        <span class="card-nature">${esc(a.nature_label || '')}</span>
+      </div>
+      <div class="card-subject${isExp ? ' expanded-subject' : ''}">${esc(a.subject || '(fără subiect)')}</div>
+      <div class="card-details">
+        <div class="detail-from">De la: <span>${esc(a.from || '—')}</span></div>
+        ${a.recommended_action ? `<div class="action-block">${esc(a.recommended_action)}</div>` : ''}
+        <div class="card-actions">
+          <button class="btn-action btn-open">📧 Deschide</button>
+          <button class="btn-action btn-reply">↩ Răspunde</button>
+          <button class="btn-action btn-snooze">⏰ Amână 24h</button>
+          <button class="btn-action btn-dismiss">× Ignoră</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleExpand(key) {
+  expandedKey = (expandedKey === key) ? null : key;
+  renderAlerts();
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function findAlert(key) {
+  return allAlerts.find(a => alertKey(a) === key);
+}
+
+function doOpen(key) {
+  const a = findAlert(key);
+  if (!a) return;
+  const subject = encodeURIComponent(a.subject || '');
+  // Try server-side open for BetterBird
+  fetch('/api/bb-open?q=' + subject, { method: 'POST' }).catch(() => {});
+  // Also open in browser panel inbox
+  window.open('http://127.0.0.1:8766/inbox#' + encodeURIComponent(a.subject || ''), '_blank');
+}
+
+function doReply(key) {
+  const a = findAlert(key);
+  if (!a) return;
+  const mailto = 'mailto:' + encodeURIComponent(a.from || '')
+    + '?subject=' + encodeURIComponent('Re: ' + (a.subject || ''));
+  window.open(mailto);
+}
+
+function doSnooze(key) {
+  const snoozed = getSnoozed();
+  snoozed[key] = Date.now() + 86400000;
+  localStorage.setItem('ccdew_snoozed', JSON.stringify(snoozed));
+  renderAlerts();
+}
+
+function doDismiss(key) {
+  const dismissed = getDismissed();
+  dismissed[key] = true;
+  localStorage.setItem('ccdew_dismissed', JSON.stringify(dismissed));
+  renderAlerts();
+}
+
+// ─── SSE ─────────────────────────────────────────────────────────────────────
+function startSSE() {
+  if (sseSource) { sseSource.close(); sseSource = null; }
+  try {
+    sseSource = new EventSource('/api/events');
+    const dot = document.getElementById('sse-indicator');
+
+    sseSource.onopen = () => {
+      dot.classList.add('active');
+      // SSE works → clear poll fallback
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    };
+
+    sseSource.onmessage = () => {
+      fetchAlerts();
+    };
+
+    sseSource.addEventListener('alert', () => fetchAlerts());
+    sseSource.addEventListener('refresh', () => fetchAlerts());
+
+    sseSource.onerror = () => {
+      dot.classList.remove('active');
+      sseSource.close();
+      sseSource = null;
+      // fallback poll
+      if (!pollTimer) {
+        pollTimer = setInterval(fetchAlerts, 30000);
+      }
+      // retry SSE after 15s
+      setTimeout(startSSE, 15000);
+    };
+  } catch(e) {
+    if (!pollTimer) pollTimer = setInterval(fetchAlerts, 30000);
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.getElementById('btn-refresh').addEventListener('click', () => {
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('spinning');
+  fetchAlerts().finally(() => {
+    setTimeout(() => btn.classList.remove('spinning'), 400);
+  });
+  pingServer();
+});
+
+document.getElementById('search').addEventListener('input', renderAlerts);
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  localStorage.removeItem('ccdew_snoozed');
+  localStorage.removeItem('ccdew_dismissed');
+  renderAlerts();
+  updateDismissedCount();
+});
+
+// Initial load
+updateDismissedCount();
+pingServer();
+fetchAlerts();
+startSSE();
+
+// Ping server every 60s
+setInterval(pingServer, 60000);
+</script>
+</body>
+</html>

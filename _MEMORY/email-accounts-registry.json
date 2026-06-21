@@ -1,0 +1,144 @@
+{
+  "key": "email-accounts-registry",
+  "source": "betterbird-cache",
+  "active_client": "BetterBird (Flatpak)",
+  "profile_path": "~/.var/app/eu.betterbird.Betterbird/.thunderbird/b8e98ik1.default-default",
+  "flatpak_id": "eu.betterbird.Betterbird",
+  "launch_command": "flatpak run eu.betterbird.Betterbird",
+  "migration_rollback_date": "2026-05-21",
+  "prefilter_path": "~/.local/state/ccdew-email-prefilter.json",
+  "regenerator": ".claude/helpers/betterbird-cache-reader.py",
+  "last_refresh": "2026-05-21",
+  "total_accounts": 7,
+  "total_emails": 8579,
+  "accounts": [
+    {
+      "email": "savorvegetarien@gmail.com",
+      "provider": "gmail",
+      "imap_host": "imap.gmail.com",
+      "cache_dir": "imap.gmail.com",
+      "emails_indexed": 189
+    },
+    {
+      "email": "ombundetotdetot@gmail.com",
+      "provider": "gmail",
+      "imap_host": "imap.gmail.com",
+      "cache_dir": "imap.gmail-1.com",
+      "emails_indexed": 33
+    },
+    {
+      "email": "Matei.Ionut.Catalin.Dominic@gmail.com",
+      "provider": "gmail",
+      "imap_host": "imap.gmail.com",
+      "cache_dir": "imap.gmail-2.com",
+      "emails_indexed": 361
+    },
+    {
+      "email": "forsunriseverify@gmail.com",
+      "provider": "gmail",
+      "imap_host": "imap.gmail.com",
+      "cache_dir": "imap.gmail-3.com",
+      "emails_indexed": 22
+    },
+    {
+      "email": "thingsofinternet2018@gmail.com",
+      "provider": "gmail",
+      "imap_host": "imap.gmail.com",
+      "cache_dir": "imap.gmail-4.com",
+      "emails_indexed": 1723
+    },
+    {
+      "email": "themateiionutcatalin@gmail.com",
+      "provider": "gmail",
+      "imap_host": "imap.gmail.com",
+      "cache_dir": "imap.gmail-5.com",
+      "emails_indexed": 4619
+    },
+    {
+      "email": "matei2020@gmx.fr",
+      "provider": "gmx",
+      "imap_host": "imap.gmx.com",
+      "cache_dir": "imap.gmx.com",
+      "emails_indexed": 1632
+    }
+  ],
+  "passwords_backup": {
+    "v2_path": "~/CCDEW/_MEMORY/secrets/email-passwords-2026-05-21-1726-v2.json",
+    "v2_contains": "6 Gmail OAuth refresh tokens (format 1//03...) + 2 GMX passwords (CalDAV/CardDAV)",
+    "v2_schema": "structurat per cont cu auth_method, oauth_refresh_token sau password, imap_host, smtp_host",
+    "v1_path_legacy": "~/CCDEW/_MEMORY/secrets/email-passwords-2026-05-21.json",
+    "v1_status": "deprecated, pastrat 7 zile (sterge dupa 2026-05-28)",
+    "profile_snapshot": "~/CCDEW/_MEMORY/secrets/bb-profile-keys-2026-05-21-1726.tar.gz",
+    "snapshot_contains": "key4.db + cert9.db + logins.json + prefs.js (toate stocurile critice)",
+    "permissions": "600 (read/write owner only)",
+    "in_gitignore": true,
+    "note": "Rescue v2 contine REFRESH TOKENS valide pentru re-import in BB nou daca key4.db se corupe. NU comite in git."
+  },
+  "history": [
+    "2026-05-21 15:01: Migrare BetterBird -> Thunderbird vanilla (cp -a profil)",
+    "2026-05-21 15:11: Instalat Thunderbird vanilla 151.0 tarball Mozilla",
+    "2026-05-21 15:13: TB vanilla pornit headless OK, compatibility.ini generat",
+    "2026-05-21 15:21: ROLLBACK - sters TB vanilla complet, pastrat doar BetterBird",
+    "2026-05-21 17:05: Manifest extensie CCDEW reparat (v3.0.1): sidebar_action->browser_action, adaugat gecko.id, icons 16/32, host_permissions cu /*",
+    "2026-05-21 17:08: user.js cu xpinstall.signatures.required=false; XPI copiat in extensions/",
+    "2026-05-21 17:10: Headless flatpak test esuat (RenderCompositorSWGL crash) - lansare interactiva necesara",
+    "2026-05-21 17:26: Validare cripto OK - firefox_decrypt standalone, 8/8 logins decriptate (6 OAuth Google refresh tokens + 2 GMX passwords)",
+    "2026-05-21 17:26: Snapshot tar profil critic + rescue v2 cu OAuth refresh tokens (rezistenta la pierderea key4.db)",
+    "2026-05-21 17:29: Live OAuth test - 6/6 Gmail refresh tokens VALID la Google (access tokens noi obtinute)",
+    "2026-05-21 17:31: Live IMAP test - 7/7 conturi connect OK (Gmail XOAUTH2 + GMX LOGIN), 7055 mesaje INBOX live",
+    "2026-05-21 17:33: Live SMTP self-send lant - 7/7 mesaje SENT + 7/7 PRIMITE (4 in Gmail Spam = comportament Google normal pentru emailuri scurte cu marker)",
+    "2026-05-21 17:38: Cleanup test emails - 7 INBOX/Spam + 6 Sent + 4 All Mail = 17 mesaje purged definitiv"
+  ],
+  "last_validation": {
+    "date": "2026-05-21",
+    "time": "17:29-17:38 + 22:11",
+    "method": "firefox_decrypt offline + live OAuth/IMAP/SMTP test (Python, FARA BB GUI)",
+    "all_accounts_functional": true,
+    "oauth_tokens_status": "6/6 VALID (format token 1//03..., servere Gmail IMAP atinse, OAuth flow functional in BB)",
+    "imap_status": "7/7 OK (Gmail XOAUTH2 prin BetterBird + GMX LOGIN direct), ~7055 mesaje INBOX live",
+    "smtp_status": "7/7 SENT, 7/7 RECEIVED (chain test anterior)",
+    "gmx_live_test_22_11": " matei2020@gmx.fr: LOGIN OK, INBOX 1636 mesaje (era 1633), 13 foldere",
+    "imap_direct_test_note": "Gmail refuza login direct cu parola (normal, folosesc OAuth2). BetterBird gestioneaza OAuth automat.",
+    "reauth_needed": [],
+    "live_inbox_counts": {
+      "savorvegetarien@gmail.com": 190,
+      "ombundetotdetot@gmail.com": 34,
+      "Matei.Ionut.Catalin.Dominic@gmail.com": 361,
+      "forsunriseverify@gmail.com": 20,
+      "thingsofinternet2018@gmail.com": 1727,
+      "themateiionutcatalin@gmail.com": 3090,
+      "matei2020@gmx.fr": 1636
+    },
+    "total_inbox_live": 7058,
+    "spam_observation": "4/6 Gmail self-send messages landed in Spam (between own Gmail accounts) - Google anti-spam behavior, NOT auth issue",
+    "cleanup_complete": true,
+    "test_marker_used": "[CCDEW-TEST 2026-05-21-172903]"
+  },
+  "notes": [
+    "DECISION 2026-05-21: pastrat doar BetterBird (Flatpak) - actualizari automate, sandboxed, integrat CCDEW",
+    "Thunderbird vanilla sters complet (~/.local/opt/thunderbird, ~/.thunderbird/, launcher, desktop entry)",
+    "Eliberat ~1.7 GB spatiu pe disk",
+    "Toate cele 7 conturi raman functionale in BetterBird cu OAuth Gmail si parola GMX intacte",
+    "GMX (matei2020@gmx.fr) testat live: 1633 mesaje INBOX, 13 foldere - OK",
+    "Pornire: flatpak run eu.betterbird.Betterbird (sau Activities)",
+    "Re-sincronizare prefilter: python3 .claude/helpers/betterbird-cache-reader.py",
+    "Analiza/clasificare emailuri: python3 .claude/helpers/hermes-email-orchestrator.py",
+    "Backup parole rescue: ~/CCDEW/_MEMORY/secrets/email-passwords-2026-05-21.json (chmod 600)",
+    "Daca BetterBird crapa: parolele se pot recupera cu firefox_decrypt + rescue JSON",
+    "PROTECTIE ACTIVA: Profilul BB are flag .CCDEW_PROTECTED - Niciodata write direct",
+    "Scripturile CCDEW folosesc doar copii /tmp (bb_readonly.py)",
+    "Backup automat: ~/Backups/betterbird-auto/ (snapshot tar.gz)"
+  ],
+  "profile_protection": {
+    "status": "ACTIVE",
+    "flag_file": ".CCDEW_PROTECTED",
+    "rules": [
+      "1. NEVER write to BB profile while BB is running",
+      "2. ALWAYS use /tmp read-only copies for CCDEW scripts",
+      "3. BACKUP first before any write (even if BB stopped)"
+    ],
+    "read_only_guard": "bb_readonly.py",
+    "safe_reader": "bb-safe-reader.py",
+    "backup_location": "~/Backups/betterbird-auto/"
+  }
+}

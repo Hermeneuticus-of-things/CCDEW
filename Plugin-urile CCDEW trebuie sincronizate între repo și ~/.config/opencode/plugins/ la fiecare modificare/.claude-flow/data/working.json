@@ -1,0 +1,11 @@
+{
+  "tasks": [],
+  "goals": [],
+  "insights": [
+    {
+      "insight": "Plugin-urile CCDEW trebuie sincronizate între repo și ~/.config/opencode/plugins/ la fiecare modificare /home/think/CCDEW",
+      "createdAt": 1779537012556
+    }
+  ],
+  "_layer": "L1"
+}

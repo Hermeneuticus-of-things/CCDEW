@@ -127,7 +127,7 @@ class Agent:
                         if line.startswith("https://") or line.startswith("http://"):
                             url = line.strip()
                             try:
-                                r = sp.run(["ffprobe","-v","quiet","-print_format","json",
+                                r = subprocess.run(["ffprobe","-v","quiet","-print_format","json",
                                     "-show_streams","-rw_timeout","3000000","-user_agent","VLC/3.0",url],
                                     capture_output=True, text=True, timeout=15)
                                 d = json.loads(r.stdout)

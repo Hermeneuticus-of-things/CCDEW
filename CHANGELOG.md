@@ -6,6 +6,319 @@
 
 ---
 
+## [4.2.0] — 2026-06-05 — betterbird-ccdew: msgview.html popup pentru message_display_action
+
+### Request
+Creare `betterbird-ccdew/msgview.html` — popup inline în toolbar-ul de citire email BetterBird.
+
+### Decizii
+- Vanilla JS, fără ES6+ module syntax (compatibilitate MV2/Thunderbird)
+- Auto-detect dark/light theme via `prefers-color-scheme`
+- Threat score bar (1-4 nivele cu culori distincte)
+- Urgency badge, nature, life_domain, severity, specifics (max 2), action_hint
+- Snooze 24h + Dismiss salvate în `browser.storage.local` (aceeași schemă ca sidebar.html)
+- "Open Full Dashboard" → `browser.tabs.create({url: 'http://127.0.0.1:8766'})`
+- Loading spinner pe durata fetch-ului
+
+### Fișiere modificate
+- `betterbird-ccdew/msgview.html` — creat
+
+---
+
+## [4.1.0] — 2026-06-05 — CCDEW v3.1.0: messageDisplayAction + context menu
+
+### Request
+Better BB symbiosis — CCDEW integrat în UI-ul nativ BB.
+
+### Implementat
+1. `message_display_action` — buton în toolbar-ul de citire email, popup msgview.html
+2. `matchAlert` handler în background.js
+3. Context menu pe lista de mesaje
+4. `msgview.html` — mini-card cu threat score, snooze/dismiss inline
+
+### Fișiere modificate
+- betterbird-ccdew/manifest.json — v3.1.0
+- betterbird-ccdew/background.js — matchAlert + context menu
+- betterbird-ccdew/msgview.html — NOU
+
+---
+
+## [4.0.2] — 2026-06-05 — BetterBird fix configurare extensie: popup + descriptor + status
+
+### Probleme rezolvate
+1. **`browser_action` fără `default_popup`** — click pe butonul din toolbar nu deschidea nimic
+   - Fix: adăugat `"default_popup": "sidebar.html"` în manifest.json
+2. **`status: null` și `descriptor: null`** în extensions.json — BB nu știa calea extensiei
+   - Fix: setat `status=4`, `descriptor=<cale reală>` în extensions.json
+3. Versiune incrementată → `3.0.3`
+
+### NU schimba fără testare
+- `manifest.json` → `browser_action.default_popup` trebuie să rămână `"sidebar.html"`
+- `extensions.json` → `status=4`, `descriptor` cu calea absolută, `active=true`
+- `user.js` → cele 3 pref-uri pentru extensii nesemnate trebuie să existe
+
+### Fișiere modificate
+- `betterbird-ccdew/manifest.json` — adăugat `default_popup`, versiune 3.0.3
+- `.thunderbird/.../extensions.json` — descriptor + status reparate
+
+---
+
+## [4.0.1] — 2026-06-05 — BB Email Dashboard: Rezolvare conturi + Documentare stare stabilă
+
+### Request
+Salvare stare stabilă a proiectului BB Email Dashboard pentru a nu se strica pe viitor.
+Rezolvare: câmpul `account` afișa "Gmail N" în loc de adresa reală.
+
+### Stare curentă — STABILĂ ✅
+- `http://localhost:8766/` — Dashboard dark UI complet funcțional
+- `http://localhost:8766/api/impact-alerts` — 50 alerte live cu câmpuri complete
+- `ccdew-email-dashboard.service` — enabled + running, restart automat
+- Extensie BetterBird `ccdew-email-intelligence@ccdew` v3.0.2 — activă
+- Autostart la login: BetterBird + Dashboard (`.config/autostart/`)
+- Smoke tests: 5/5 ✅
+
+### Ce NU trebuie schimbat fără testare
+- `email-dashboard-server.py` — `resolve_account()` + `_build_account_map()` (mapare conturi)
+- `email-dashboard.html` — UI complet cu modal, search, stats, sort
+- `betterbird-ccdew/sidebar.html` — aceleași câmpuri ca dashboard-ul web
+- `ccdew-email-dashboard.service` + wrapper `ccdew-email-dashboard-start.sh`
+- `email-accounts-registry.json` — sursa mapărilor cont → adresă email
+
+### Rezolvare account "Gmail N"
+- Problemă: `account` = "Gmail 1", "Gmail 2" etc. (nume intern BetterBird)
+- Cauză: `betterbird-cache-reader.py` stochează numele IMAP dir, nu adresa
+- Soluție: `_build_account_map()` în server citește `email-accounts-registry.json`
+  și construiește maparea `"Gmail N" → adresă reală` per provider (Gmail/GMX/Proton/etc.)
+- Funcționează pentru orice provider — primul cont = fără număr, al doilea = 1, etc.
+
+### Proton Mail — statusul integrării
+- Proton Bridge NU e instalat → emailurile Proton nu sunt indexate
+- Codul suportă deja Proton în mapare — când se instalează Bridge și se adaugă în BB,
+  va apărea automat ca `matei@protonmail.com` (sau adresa reală)
+- Pași instalare: vezi mesajul din sesiunea 2026-06-05
+
+### Fișiere modificate
+- `CCDEW/.claude/helpers/email-dashboard-server.py` — `_build_account_map()` + `resolve_account()`
+- `CCDEW/.claude/helpers/email-dashboard.html` — UI v4.0: search, stats clickabile, modal, sort, prev/next, clipboard
+- `CCDEW/betterbird-ccdew/sidebar.html` — UI v4.0: carduri compacte + modal popup
+
+---
+
+## [4.0.0] — 2026-06-05 — BB Email Dashboard: Modal popup interactiv per email
+
+### Request
+UI interactiv — clic pe card deschide popup cu toate detaliile emailului.
+
+### Decizii
+- Carduri compacte în listă: icon, urgency, nature badge, subiect, expeditor, action hint
+- Clic pe card → modal overlay animat cu detalii complete
+- Modalul conține: urgency+severity+nature badges, subiect, label, expeditor+dată+cont, specifics (bullet list complet), action hint, butoane
+- Butoane modal: Deschide BB / Arhivează / Amână (condițional) / Închide
+- Închidere: buton ✕, clic pe overlay, tasta ESC
+- Focus management: focus pe butonul ✕ la deschidere, ESC global
+- `alertsIndex[]` — array local cu obiectele alerte pentru acces rapid din modal
+- CSS complet pentru modal, carduri compacte, animații, focus-visible, reducedMotion
+
+### Fișiere modificate
+- `betterbird-ccdew/sidebar.html` — rewrite complet cu modal popup
+
+## [3.9.9] — 2026-06-05 — BB Email Dashboard: Redesign carduri email cu câmpuri reale API
+
+### Request
+UI sidebar.html — fiecare card de alertă să afișeze mult mai multe informații: expeditor, natură, deadline-uri/limite, specifice.
+
+### Decizii
+- Cardurile foloseau câmpuri inexistente (`phishing_risk`, `priority_score`, `time_sensitive`, `entities.amounts`) — înlocuite cu câmpurile reale ale API-ului
+- Câmpuri noi afișate: `from` (expeditor), `label` (descriere), `specifics[]` (bullet list), `action_hint` (acțiune recomandată), `nature_label`+`family` (badges), `date`, `account`+`severity` (meta)
+- Filtrul `phishing` reparat: verifică `a.nature==='phishing'` în loc de `a.phishing_risk==='HIGH'`
+- Butoane: `snooze` apare la urgency immediate/today (nu `time_sensitive==='yes'`)
+- CSS nou: `.label-desc`, `.from-row`, `.from-addr`, `.date-val`, `.specifics-list`, `.action-hint`, `.nature-badge`, `.family-badge`, `.phishing-badge`
+- CSS vechi eliminat: `.ts-badge`, `.entity-tag`, `.phish-warn`, `.priority`, `.specific`
+- Sync automat în BetterBird via `ccdew-bb-sync-ext.sh`
+
+### Fișiere modificate
+- `betterbird-ccdew/sidebar.html` — rewrite complet `renderAlerts()` + CSS carduri
+
+### [3.9.8] — 2026-06-05 — BB Email Dashboard: Audit complet + 26 fix-uri + Suite teste + Autostart
+
+### Request
+Audit complet UX/UI + cod + teste multi-nivel + pornire automată Zorin OS pentru proiectul betterbird-ccdew.
+
+### Decizii
+- Serviciu canonic `ccdew-email-dashboard.service` cu wrapper anti-conflict-port
+- Extensie BetterBird sincronizată automat via `ccdew-bb-sync-ext.sh`
+- Suită de teste 3-tier: unit (34) + frontend static + integration HTTP (38 total, 100%)
+- Script master `ccdew-bb-start` (start / --fix / --status)
+
+### Fișiere modificate/create
+- `betterbird-ccdew/sidebar.html` — 13 fix-uri UX/JS/CSS/accesibilitate
+- `betterbird-ccdew/manifest.json` — eliminat messagesUpdate, adăugat CSP
+- `betterbird-ccdew/background.js` — recursie subfoldere, skip spam/junk/trash
+- `betterbird-ccdew/install-addon.sh` — eliminat messagesUpdate din userPermissions
+- `.claude/helpers/email-dashboard-server.py` — thread safety, CORS OPTIONS, path traversal, throttle
+- `~/.config/systemd/user/ccdew-email-dashboard.service` — Conflicts, StartLimitBurst
+- `~/.local/bin/ccdew-email-dashboard-start.sh` — wrapper anti-conflict port
+- `~/.local/bin/ccdew-bb-sync-ext.sh` — sync sursă → extensie + extensions.json
+- `~/.local/bin/ccdew-bb-start` — script master start/fix/status
+- `~/.config/autostart/ccdew-betterbird.desktop` — autostart BB la login
+- `betterbird-ccdew/tests/` — 3 fișiere test Python + runner bash
+
+### Versiune
+3.9.8
+
+---
+
+## [3.9.4] — 2026-06-05 — Dashboard v6: Tiered Cache + App Mode + Systemd + Auto-restart
+
+### CCDEW Dashboard v6 — Refactorizare completă performanță + UX
+
+#### Performanță — Tiered Cache Architecture
+- **4 tier-uri de refresh independente** via subprocese separate (non-blocking):
+  - `rt` 5s — cost, SSA, SAFLA, session, memory (file reads)
+  - `sys` 8s — htop CPU per-core, procese, temperaturi, swap (Python subprocess)
+  - `svc` 30s — proxy health, servicii up/down, disk/RAM, intelligence (curl + net)
+  - `proj` 90s — git log, obsidian scan, CHANGELOG/TODO, hermes version
+- **Toate request-urile < 100ms** (față de 3-13s anterior)
+- Subprocese `child_process.spawn` — event loop Node.js nu mai e blocat niciodată
+- Cache pre-warmat la startup staggered (1s/3s/5s) pentru first-load instant
+
+#### Carduri noi adăugate în Dashboard
+- 🔴 **ALERTS** — critical/warn/info automate (Swap%, Disk%, Temp, Hermes behind, TODO)
+- 💻 **LAPTOP** — htop-style: CPU cores bars, top 12 procese, swap, temp, agenți, servicii
+- 📋 **PROJECT STATUS** — CHANGELOG versiuni recente + TODO pending/done
+- 🔌 **INFRA/PROXY** — Anthropic Proxy :8082, Claude-Mem MCP :37700, Hermes skills/memories
+- 🌿 **GIT ACTIVITY** — CCDEW + Open-Cload: ultimele 5 commit-uri, uncommitted changes
+- 🧠 **OBSIDIAN** — scan `_MEMORY/`: 31 fișiere .md, user-profile preview
+
+#### Mod aplicație nativă
+- `brave-browser --app=http://localhost:8765/dashboard` — fereastră fără UI browser
+- `.desktop` entry: `~/.local/share/applications/ccdew-dashboard.desktop`
+- Icon SVG custom: dark theme, CPU bars, cost curve, litera C Claude
+- Shortcut pe Desktop + apare în meniu Zorin ca "CCDEW Dashboard"
+- Script `~/.local/bin/ccdew-dashboard` cu auto-start server dacă nu rulează
+
+#### Auto-start + Auto-restart
+- **systemd user service** `ccdew-dashboard.service` — pornire la boot
+- `loginctl enable-linger think` — pornește chiar fără login grafic
+- **File watcher** integrat în server — detectează modificări `dashboard-server.cjs` / `dashboard.html`, `process.exit(0)` → systemd `Restart=on-failure` repornește automat
+- Interval watcher: 2s
+
+#### Fix-uri anterioare (din sesiunea precedentă)
+- `process.chdir(CCDEW_ROOT)` — fix SAFLA/SSA care citeau din directorul greșit
+- `getSSAStats()` cu fallback la `ssa-stats.json` pe disk (date persistente între restart-uri)
+- `getIntelligenceDirect()` — citire directă `graph-state.json` (310 noduri / 24525 edges)
+- `budget_pct: NaN` → fix `(data.daily_budget || 100)` ca fallback
+- Modal system complet — click orice card → popup cu date reale detaliate
+- Toate componentele (Red Hat, Graphify, Project Scope, etc.) au modal cu date reale
+- Indicator `⚡ Xms · rt:Xs sys:Xs svc:Xs proj:Xs` în topbar pentru transparență cache
+
+### Fișiere modificate
+- `Open-Cload/.opencode/dashboard-server.cjs` — refactorizare majoră
+- `Open-Cload/.opencode/dashboard.html` — carduri noi + modal system + cache hint
+- `.claude/helpers/agent-harness.cjs` — NOU: OODA loop + benchmarking + observation contract
+- `~/.local/share/applications/ccdew-dashboard.desktop` — NOU
+- `~/.local/share/icons/hicolor/256x256/apps/ccdew-dashboard.svg` — NOU
+- `~/.local/bin/ccdew-dashboard` — NOU
+- `~/.config/systemd/user/ccdew-dashboard.service` — NOU
+
+### Comenzi utile
+```bash
+systemctl --user status ccdew-dashboard   # stare
+systemctl --user restart ccdew-dashboard  # restart manual
+journalctl --user -u ccdew-dashboard -f   # log live
+ccdew-dashboard                           # lansează fereastra app
+```
+
+---
+
+## [3.9.5] — 2026-06-05 — Email Dashboard BB Integration Fix
+
+### Email Dashboard (:8766) — Fix complet integrare Betterbird
+
+#### `/bb` endpoint — rescris complet
+- **Butoane „✉ Deschide în Betterbird"** per rând (doar emailurile cu email_ref)
+- JS minim inline — `fetch('/api/bb-open?q=KEY')` cu feedback vizual (#status)
+- Feedback: „Se deschide..." → „Deschis în Betterbird ✓" (verde) sau „Nu s-a găsit .eml" (roșu)
+- Până la 50 rânduri (față de 20 anterior)
+- **Fix fallback subject/from** — același lanț de fallback ca `load_index()`:
+  `raw.subject → entry.subject → raw.summary → entry.summary → '(fără subiect)'`
+
+#### `/api/bb-open` — fix critic
+- **Eliminat fallback la ultimul .eml modificat** (deschidea emailul greșit)
+- Returnează acum **JSON** în loc de text plain
+  - `{"ok": true, "eml": "/path/to/file.eml"}` la succes
+  - `{"ok": false, "error": "no .eml found", "hint": "rulează ccdew-email-refresh"}` la lipsă
+- Căutare în 2 pași: ref exact (`{ref}-*.eml`) → suffix key (`*{suffix}*.eml`) → eroare clară
+- `hint` în răspuns explică ce trebuie făcut
+
+#### `/` (pagina principală) — fix subject/from
+- Același lanț de fallback consistent aplicat în `light[]` pentru JSON dat front-end-ului
+
+### Fișiere modificate
+- `.claude/helpers/email-dashboard-server.py` — `/bb`, `/api/bb-open`, `light[]` fallback
+
+---
+
+## [3.9.6] — 2026-06-05 — Pending items: metrics/tier + Hermes update + mbox daemon
+
+### Dashboard `/api/metrics/:tier`
+- **Nou endpoint** `GET /api/metrics/{rt|sys|svc|proj}` — returnează doar tier-ul cerut
+- **`?refresh=1`** — forțează refresh imediat, așteaptă max 6s și returnează datele proaspete
+- Răspuns: `{tier, age, data, timestamp}` — util pentru refresh selectiv din browser sau scripturi
+- `global._ccdewRefresh` expune funcțiile `runSys/runSvc/runProj` pentru trigger extern
+
+### Hermes Agent update
+- **v0.13.0 → v0.15.1** (617 commits instalați cu `git pull --rebase origin main`)
+- pip absent din venv: reparat cu `ensurepip` + reinstalare pachet
+- 158 skills disponibile (față de un număr mai mic anterior)
+
+### mbox daemon — email live sync
+- **`~/.local/bin/ccdew-mbox-daemon.py`** — NOU
+  - Polling 30s pe 16 mbox-uri Betterbird (`ImapMail/`)
+  - Detectează modificări mtime → rulează `ccdew-email-watch.py` → notifică `:8766/api/webhook`
+  - Log: `~/.local/state/ccdew-mbox-daemon.log`
+- **`~/.config/systemd/user/ccdew-mbox-watcher.service`** — NOU, enabled + active
+- Email-urile noi apar în dashboard în < 30s după ce Betterbird le descarcă din IMAP
+
+### Fișiere create/modificate
+- `Open-Cload/.opencode/dashboard-server.cjs` — `/api/metrics/:tier` + `global._ccdewRefresh`
+- `~/.local/bin/ccdew-mbox-daemon.py` — NOU
+- `~/.config/systemd/user/ccdew-mbox-watcher.service` — NOU
+
+---
+
+## [3.9.7] — 2026-06-05 — Email Dashboard: 4 fix-uri calitate UI + date
+
+### A) `ccdew-email-watch.py` — câmpul `date` în L3
+- `batch` entries primesc `date` din header-ul email real (Date:), normalizat la `YYYY-MM-DD`
+- `store_memory()` acceptă `dates=` și scrie `date`, `subject`, `from`, `account` în `val`
+- `email_ref` scris în JSON de nivel superior (nu doar în `value`)
+- Emailuri noi indexate vor apărea corect în statisticile „azi / săptămâna / luna"
+
+### B) `email-dashboard.html` — `bb()` cu `fetch()` și feedback vizual
+- Înlocuit `window.open()` cu `fetch('/api/bb-open?q=...')`
+- Buton „Deschide în Betterbird" feedback: verde ✓ la succes, roșu ✗ cu mesaj la eroare
+- Fallback timeout 3-4s și resetare automată a butonului
+
+### C) Decay temporal — emailuri vechi nu mai apar ca „immediate"
+- `_age_days()` extinde fallback la `createdAt` (timestamp indexare) când câmpul `date` lipsește
+- Reguli decay: >365 zile → `no_deadline`, >90 zile → `this_week`, >30 zile (non-critical) → `today`
+- `is_actionable()` folosește `eff_urgency` (cu decay) în loc de `urgency` brut
+- **Rezultat verificat**: emailuri 2022 → 0 actionable (toate 193 degradate corect)
+
+### D) Auto-refresh selectiv — fără `location.reload()`
+- `setInterval(90s)` face `fetch('/api/actionable?limit=200')` și re-renderizează lista
+- Păstrează: scroll, filtre active, text căutat, panel detalii deschis
+- Live dot clipire verde la fiecare refresh reușit
+- Nu întrerupe dacă user scrie în search sau are panel deschis
+
+### Fișiere modificate
+- `~/.local/bin/ccdew-email-watch.py` — date + email_ref în L3
+- `.claude/helpers/email-dashboard.html` — `bb()` fetch + auto-refresh selectiv
+- `.claude/helpers/email-dashboard-server.py` — `_age_days()`, `effective_urgency()`, `is_actionable()`
+
+---
+
 ## [3.9.3] — 2026-05-12 — SSA Token Metrics + Devcontainer + GitHub Actions + Scheduled Tasks + Dashboard v5
 
 ### SSA Efficiency Fix

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zorin TV — Stream-uri Românești</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: #0d0d0d; color: #e0e0e0; padding: 0; }
+  .header { position: sticky; top: 0; z-index: 50; background: #0d0d0d; padding: 16px 20px 8px; border-bottom: 1px solid #1a1a2e; }
+  h1 { font-size: 1.5rem; margin-bottom: 5px; color: #8ab4f8; }
+  .sub { font-size: .8rem; color: #888; margin-bottom: 15px; }
+  .stats { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+  .stat { background: #1a1a2e; padding: 10px 18px; border-radius: 8px; font-size: .9rem; border: 1px solid #2a2a4e; }
+  .stat span { color: #8ab4f8; font-weight: bold; }
+  .stat.red span { color: #eb5757; }
+  .topbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .topbar button { background: #2a2a4e; color: #ccc; border: 1px solid #3a3a5e; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: .8rem; }
+  .topbar button:hover { background: #3a3a5e; color: #fff; }
+  .topbar button.active { background: #2d4a8e; border-color: #8ab4f8; color: #fff; }
+  .add-panel { background: #1a1a2e; border: 1px solid #2a2a4e; border-radius: 8px; padding: 15px; margin-bottom: 15px; display: none; }
+  .add-panel.show { display: block; }
+  .add-row { display: flex; gap: 10px; }
+  .add-row input { flex: 1; padding: 10px 14px; background: #1a1a2e; border: 1px solid #2a2a4e; border-radius: 8px; color: #e0e0e0; font-size: .9rem; outline: none; }
+  .add-row input:focus { border-color: #8ab4f8; }
+  .add-btn { background: #2d8a4e; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: .85rem; }
+  .add-btn:hover { background: #3aa85e; }
+  .msg { font-size: .8rem; color: #8ab4f8; margin-top: 8px; }
+  .search { width: 100%; padding: 8px 12px; background: #1a1a2e; border: 1px solid #2a2a4e; border-radius: 6px; color: #e0e0e0; font-size: .85rem; outline: none; margin-bottom: 10px; }
+  .search:focus { border-color: #8ab4f8; }
+
+  .group { margin-bottom: 20px; }
+  .group-header { font-size: .95rem; font-weight: 600; color: #8ab4f8; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #2a2a4e; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .group-header:hover { color: #a8c8ff; }
+  .group-header .count { font-size: .75rem; color: #666; font-weight: 400; margin-left: 8px; }
+  .group-header .arrow { font-size: .7rem; color: #555; transition: transform .2s; }
+  .group-header.collapsed .arrow { transform: rotate(-90deg); }
+  .group-body { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 6px; }
+  .group-header.collapsed + .group-body { display: none; }
+
+  .card { background: #1a1a2e; border: 1px solid #2a2a4e; border-radius: 6px; padding: 10px 14px; transition: .2s; cursor: pointer; position: relative; }
+  .card:hover { border-color: #8ab4f8; }
+  .card.dead { opacity: .4; }
+  .card.dead:hover { opacity: .7; border-color: #eb5757; }
+  .card .name { font-size: .88rem; font-weight: 500; margin-bottom: 2px; }
+  .card .meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+  .card .del { display: none; position: absolute; top: -5px; right: -5px; background: #8a2d2d; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; cursor: pointer; align-items: center; justify-content: center; }
+  .card:hover .del { display: flex; }
+  .tag { font-size: .65rem; padding: 1px 6px; border-radius: 3px; background: #2a2a4e; }
+  .tag.hd { background: #1a4a2e; color: #6fcf97; }
+  .tag.sd { background: #4a3a1e; color: #f2c94a; }
+  .tag.live { background: #1a3a4e; color: #56ccf2; }
+  .tag.dead { background: #4a1a1e; color: #eb5757; }
+  .tag.probing { background: #3a2a1e; color: #f2994a; }
+
+  .freshness { font-size: .73rem; color: #555; text-align: center; margin-bottom: 8px; }
+  .freshness button { background: none; border: none; color: #8ab4f8; cursor: pointer; font-size: .73rem; text-decoration: underline; }
+
+  .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,.92); }
+  .modal.show { display: flex; align-items: center; justify-content: center; flex-direction: column; }
+  .modal video { max-width: 95vw; max-height: 75vh; background: #000; border-radius: 8px; }
+  .modal .info { color: #ccc; margin-top: 10px; font-size: .9rem; }
+  .modal .err { color: #eb5757; margin-top: 10px; font-size: .8rem; }
+  .modal .close { position: absolute; top: 15px; right: 25px; color: #fff; font-size: 2rem; cursor: pointer; }
+  .modal .rename-row { display:flex; gap:8px; margin-top:8px; width:95vw; max-width:600px; }
+  .modal .rename-row input { flex:1; padding:8px; background:#1a1a2e; border:1px solid #3a3a5e; border-radius:4px; color:#e0e0e0; font-size:.9rem; outline:none; }
+  .modal .rename-row input:focus { border-color:#8ab4f8; }
+  .modal .rename-row button { padding:8px 16px; background:#27ae60; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:.85rem; }
+  .modal .rename-row button:hover { background:#1e8449; }
+  .modal .renamemsg { font-size:.8rem; min-height:1.2em; margin-top:4px; }
+  .modal .alt-btn { margin-top:10px; padding:8px 18px; background:#2d4a8e; color:#fff; border:1px solid #8ab4f8; border-radius:6px; cursor:pointer; font-size:.85rem; }
+  .modal .alt-btn:hover { background:#3a5aa0; }
+  .modal .alt-btn:disabled { opacity:.5; cursor:default; }
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>📺 Zorin TV</h1>
+<p class="sub">Click pe canal → play inline cu hls.js</p>
+
+<div class="stats" id="stats">
+  <div class="stat">Total: <span id="total">0</span></div>
+  <div class="stat">Live: <span id="live" style="color:#56ccf2">0</span></div>
+  <div class="stat red" style="display:none" id="deadStat">Moarte: <span id="dead" style="color:#eb5757">0</span></div>
+  <div class="stat">HD: <span id="hd">0</span></div>
+  <div class="stat">SD: <span id="sd">0</span></div>
+</div>
+
+<div class="topbar">
+  <button onclick="toggleAdd()">+ Adaugă</button>
+  <button onclick="refreshAll()">🔄 Re-probează</button>
+  <span style="color:#888;font-size:.8rem" id="probing"></span>
+  <div style="flex:1"></div>
+  <button data-sort="alpha" onclick="setSort('alpha')">A-Z</button>
+  <button class="active" data-sort="group" onclick="setSort('group')">Grup</button>
+</div>
+
+<div class="add-panel" id="addPanel">
+  <div class="add-row">
+    <input id="addName" placeholder="Nume">
+    <input id="addUrl" placeholder="URL .m3u8">
+    <button class="add-btn" onclick="addChannel()">Salvează</button>
+  </div>
+  <div class="msg" id="addMsg"></div>
+</div>
+
+<input class="search" id="search" placeholder="Caută canal..." oninput="render()">
+
+<div class="freshness" id="freshness"></div>
+</div>
+
+<div id="container" style="padding:12px 20px"></div>
+<div id="status" style="font-size:.8rem;color:#666;text-align:center;margin-top:10px"></div>
+
+<div class="modal" id="playerModal">
+  <span class="close" onclick="closePlayer()">&times;</span>
+  <video id="videoPlayer" controls autoplay></video>
+  <div class="info" id="playerInfo"></div>
+  <div class="err" id="playerErr"></div>
+  <button class="alt-btn" id="altBtn" onclick="findAlternative()">🔍 Caută variantă funcțională</button>
+  <div class="rename-row">
+    <input id="renameInput" placeholder="Nume nou...">
+    <button onclick="renameChannel()">Redenumește</button>
+  </div>
+  <div class="renamemsg" id="renameMsg"></div>
+</div>
+
+<script>
+let currentPlayer = null, channels = [], results = {}, sortMode = "group", collapsed = {};
+
+function hd(name) {
+  const m = name.match(/\((\d+)/);
+  if (m) return parseInt(m[1]) >= 720;
+  return null;
+}
+
+function ago(ts) {
+  const s = Math.floor(Date.now()/1000 - ts);
+  if (s < 60) return 'acum 1m';
+  if (s < 3600) return `acum ${Math.floor(s/60)}m`;
+  if (s < 86400) return `acum ${Math.floor(s/3600)}h`;
+  return `acum ${Math.floor(s/86400)}z`;
+}
+
+async function load() {
+  try {
+    const r = await fetch('/status.json');
+    const d = await r.json();
+    channels = d.channels || [];
+    if (d.checked_at > 0)
+      document.getElementById('freshness').innerHTML = `Verificat ${ago(d.checked_at)} <button onclick="refreshAll()">🔄</button>`;
+    for (const r of (d.results||[])) results[r.url] = r;
+  } catch(e) {}
+  render();
+}
+
+async function refreshAll() {
+  document.getElementById('probing').textContent = '🧪 Verific...';
+  try {
+    const r = await fetch('/probe-all');
+    const d = await r.json();
+    results = {};
+    for (const r of (d.results||[])) results[r.url] = r;
+    if (d.checked_at) document.getElementById('freshness').innerHTML = `Verificat ${ago(d.checked_at)}`;
+  } catch(e) {}
+  render();
+}
+
+async function probeOne(url) {
+  const r = await fetch('/probe-one?url='+encodeURIComponent(url));
+  const d = await r.json();
+  results[url] = {url, live: d.live, info: d.live ? d.info : d.info};
+  render();
+}
+
+function toggleAdd() { document.getElementById('addPanel').classList.toggle('show'); }
+
+async function addChannel() {
+  const name = document.getElementById('addName').value.trim();
+  const url = document.getElementById('addUrl').value.trim();
+  const msg = document.getElementById('addMsg');
+  if (!name||!url) { msg.textContent = 'Completează ambele'; return; }
+  msg.textContent = '...';
+  const r = await fetch('/add-channel',{method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'name='+encodeURIComponent(name)+'&url='+encodeURIComponent(url)});
+  const d = await r.json();
+  msg.textContent = d.message;
+  if (d.ok) { document.getElementById('addName').value=''; document.getElementById('addUrl').value=''; await refreshAll(); }
+}
+
+async function removeChannel(url) {
+  if (!confirm('Șterg canalul?')) return;
+  await fetch('/delete-channel',{method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'url='+encodeURIComponent(url)});
+  delete results[url];
+  await refreshAll();
+}
+
+function setSort(mode) {
+  sortMode = mode;
+  document.querySelectorAll('[data-sort]').forEach(b => b.classList.toggle('active', b.dataset.sort === mode));
+  render();
+}
+
+function toggleGroup(name) {
+  collapsed[name] = !collapsed[name];
+  render();
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = channels.filter(c => c.name.toLowerCase().includes(q));
+
+  let total=0, live=0, dead=0, hdc=0, sdc=0;
+  for (const c of channels) {
+    const r = results[c.url];
+    if (r && r.live) { live++; const h=hd(c.name); if (h===true) hdc++; else if (h===false) sdc++; }
+    if (r && !r.live) dead++;
+  }
+  total = channels.length;
+
+  document.getElementById('total').textContent = total;
+  document.getElementById('live').textContent = live;
+  document.getElementById('dead').textContent = dead;
+  document.getElementById('deadStat').style.display = dead ? '' : 'none';
+  document.getElementById('hd').textContent = hdc;
+  document.getElementById('sd').textContent = sdc;
+  document.getElementById('status').textContent = `Arată ${filtered.length} din ${total}`;
+  document.getElementById('probing').textContent = '';
+
+  const cont = document.getElementById('container');
+
+  if (sortMode === 'alpha') {
+    filtered.sort((a,b) => a.name.localeCompare(b.name));
+    let html = '<div class="group-body" style="display:grid">';
+    for (const c of filtered) html += cardHtml(c);
+    html += '</div>';
+    cont.innerHTML = html;
+    return;
+  }
+
+  // Group mode
+  const groups = {};
+  for (const c of filtered) {
+    const g = c.group || 'Diverse';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(c);
+  }
+
+  // Sort groups, sort channels within each group
+  const groupOrder = ['TVR','Premium','Filme','Comedie','Sport','Știri','Copii','Muzică','Divertisment','Documentare','Religios','Moldova','Locale','AntenaPlay','Broadcasting','Diverse'];
+  const sortedGroups = Object.keys(groups).sort((a,b) => {
+    const ia = groupOrder.indexOf(a), ib = groupOrder.indexOf(b);
+    return (ia===-1?99:ia) - (ib===-1?99:ib);
+  });
+
+  let html = '';
+  for (const g of sortedGroups) {
+    const list = groups[g].sort((a,b) => a.name.localeCompare(b.name));
+    const isCollapsed = collapsed[g];
+    html += `<div class="group">
+      <div class="group-header ${isCollapsed?'collapsed':''}" onclick="toggleGroup('${g}')">
+        <span>${g} <span class="count">${list.length}</span></span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="group-body">${list.map(c => cardHtml(c)).join('')}</div>
+    </div>`;
+  }
+  cont.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function cardHtml(c) {
+  const r = results[c.url];
+  const isLive = r && r.live;
+  const isDead = r && !r.live;
+  const hdFlag = hd(c.name);
+
+  return `<div class="card ${isDead?'dead':''}" data-url="${esc(c.url)}" data-name="${esc(c.name)}" data-live="${isLive?1:0}">
+    <button class="del" data-action="del">&times;</button>
+    <div class="name">${esc(c.name)}</div>
+    <div class="meta">
+      ${hdFlag!==null ? `<span class="tag ${hdFlag?'hd':'sd'}">${hdFlag?'HD':'SD'}</span>` : ''}
+      <span class="tag ${isDead?'dead':(isLive?'live':'probing')}">${isDead?'mort':(isLive?'live':'?')}</span>
+    </div>
+  </div>`;
+}
+
+document.getElementById('container').addEventListener('click', e => {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  const url = card.dataset.url, name = card.dataset.name;
+  if (e.target.closest('[data-action="del"]')) { removeChannel(url); return; }
+  handleClick(url, name, card.dataset.live === '1');
+});
+
+function handleClick(url, name, isLive) {
+  triedAlt = false;
+  originalUrl = url;
+  // magicplaces cere token (+ token la segmente) — redă prin proxy din start
+  const needsProxy = /magicplaces\.eu/.test(url);
+  triedProxy = needsProxy;
+  playChannel(needsProxy ? toProxy(url) : url, name);
+  if (!isLive) probeOne(url);
+}
+
+// urlsafe base64 pentru endpoint-ul /hls (rezolva CORS/referer server-side)
+function toProxy(u) {
+  return '/hls?u=' + btoa(u).replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+// la eroare de redare: incearca intai proxy (CORS/referer), apoi find-alternative
+function escalate() {
+  if (!triedProxy) {
+    triedProxy = true;
+    document.getElementById('playerErr').textContent = '🔁 Reîncerc prin proxy (CORS)...';
+    playChannel(toProxy(originalUrl), currentOldName);
+  } else if (!triedAlt) {
+    findAlternative();
+  }
+}
+
+function playChannel(url, name) {
+  const video = document.getElementById('videoPlayer');
+  document.getElementById('playerInfo').textContent = name;
+  document.getElementById('playerErr').textContent = '';
+  document.getElementById('renameInput').value = name;
+  document.getElementById('renameMsg').textContent = '';
+  if (currentPlayer) { currentPlayer.destroy(); currentPlayer = null; }
+  document.getElementById('playerModal').classList.add('show');
+  if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+    video.onerror = () => escalate();
+  } else if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.ERROR, (evt, data) => {
+      if (data.fatal) escalate();
+    });
+    currentPlayer = hls;
+  } else {
+    document.getElementById('playerErr').textContent = '❌ Browserul nu suportă HLS.';
+  }
+  currentUrl = url;
+  currentOldName = name;
+}
+
+let currentUrl = '', currentOldName = '', originalUrl = '', triedAlt = false, triedProxy = false;
+
+async function findAlternative() {
+  const errEl = document.getElementById('playerErr');
+  const btn = document.getElementById('altBtn');
+  if (!originalUrl && !currentOldName) return;
+  triedAlt = true;
+  btn.disabled = true;
+  errEl.textContent = '🔍 Caut variantă funcțională (OTT + iptv-org)...';
+  try {
+    const r = await fetch('/find-alternative?name=' + encodeURIComponent(currentOldName) +
+                          '&url=' + encodeURIComponent(originalUrl));
+    const d = await r.json();
+    if (d.ok) {
+      const w = d.info && d.info.w ? ` ${d.info.w}x${d.info.h}` : '';
+      errEl.textContent = '✅ Variantă găsită' + w + ' — pornesc...';
+      const name = currentOldName;
+      originalUrl = d.url;
+      triedProxy = false;
+      playChannel(d.url, name);
+      errEl.textContent = '✅ Rezolvat prin variantă funcțională.';
+      await load();
+    } else {
+      errEl.textContent = '❌ ' + (d.message || 'Nicio variantă funcțională');
+    }
+  } catch (e) {
+    errEl.textContent = '❌ Eroare la căutarea variantei';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function renameChannel() {
+  const newName = document.getElementById('renameInput').value.trim();
+  const msg = document.getElementById('renameMsg');
+  if (!newName || !currentOldName) { msg.textContent = 'Scrie un nume'; return; }
+  msg.textContent = 'Se salvează...';
+  try {
+    const r = await fetch('/rename', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'old_name=' + encodeURIComponent(currentOldName) + '&new_name=' + encodeURIComponent(newName)
+    });
+    const d = await r.json();
+    if (d.ok) {
+      msg.textContent = '✅ Salvat! Se reîncarcă...';
+      document.getElementById('playerInfo').textContent = newName;
+      currentOldName = newName;
+      await load();
+    } else {
+      msg.textContent = '❌ ' + (d.message || 'Eroare');
+    }
+  } catch(e) {
+    msg.textContent = '❌ Eroare rețea';
+  }
+}
+
+function closePlayer() {
+  document.getElementById('playerModal').classList.remove('show');
+  const video = document.getElementById('videoPlayer');
+  video.pause(); video.src = '';
+  if (currentPlayer) { currentPlayer.destroy(); currentPlayer = null; }
+  currentUrl = ''; currentOldName = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+
+setSort('group');
+load();
+</script>
+</body>
+</html>

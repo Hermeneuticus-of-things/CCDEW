@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; font-family: system-ui; background: #0f172a; color: #e2e8f0; padding: 20px; }
+.header { background: linear-gradient(90deg, #3b82f6, #8b5cf6); padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+.header h1 { margin: 0; font-size: 1.5rem; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+.stat { background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; }
+.stat .num { font-size: 2rem; font-weight: bold; color: #3b82f6; }
+.stat .label { font-size: 0.8rem; color: #94a3b8; }
+.alerts { background: #1e293b; border-radius: 10px; padding: 15px; max-height: 400px; overflow-y: auto; }
+.alert { border-left: 4px solid; padding: 10px; margin-bottom: 10px; background: #0f172a; border-radius: 0 8px 8px 0; }
+.alert.URGENT { border-color: #ef4444; }
+.alert.HIGH { border-color: #f59e0b; }
+.alert.MEDIUM { border-color: #3b82f6; }
+.alert .subj { font-weight: bold; margin-bottom: 5px; }
+.alert .meta { font-size: 0.8rem; color: #94a3b8; }
+.alert .action { display: inline-block; margin-top: 5px; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.action-ACT_NOW { background: #ef444430; color: #ef4444; }
+.action-PAY { background: #22c55e30; color: #22c55e; }
+.action-SCHEDULE { background: #3b82f630; color: #3b82f6; }
+.action-CONSULT { background: #a855f730; color: #a855f7; }
+.action-REVIEW { background: #f59e0b30; color: #f59e0b; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🧠 HERMES AUTONOMOUS — Live Email Intelligence</h1>
+  <p>Ultima analiză: 2026-05-22T23:19:08.177702 | 8608 emailuri analizate</p>
+</div>
+<div class="stats">
+  <div class="stat"><div class="num">8608</div><div class="label">Total Emailuri</div></div>
+  <div class="stat"><div class="num" style="color:#ef4444">32</div><div class="label">Urgente</div></div>
+  <div class="stat"><div class="num" style="color:#f59e0b">0</div><div class="label">High Risk</div></div>
+  <div class="stat"><div class="num" style="color:#22c55e">7</div><div class="label">Conturi</div></div>
+</div>
+<div class="alerts">
+  <h3>🚨 Alertele Prioritare (15)</h3>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">Votre colis Temu arrive =?UTF-8?B?YmllbnTDtHQ=?=</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">Your Temu order (#PO-069-19466482079353235) is waiting for your review</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">=?UTF-8?Q?Marchandises_=C3=A0_forte_valeur,_exp=C3=A9?=</div>
+    <div class="meta">savorvegetarien@gmail.com • urgent • Prioritate: 10</div>
+    <span class="action action-ACT_NOW">Acțiune urgentă necesară!</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">Your Temu order (#PO-069-16030479790713235) is waiting for your review</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">Thank you for your review on Temu.</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">matei, Your Chronotype Results Are In!</div>
+    <div class="meta">savorvegetarien@gmail.com • urgent • Prioritate: 10</div>
+    <span class="action action-ACT_NOW">Acțiune urgentă necesară!</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">(no subject)</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+  <div class="alert URGENT">
+    <div class="subj">Your Temu order (#PO-069-19466565965433235) is waiting for your review</div>
+    <div class="meta">savorvegetarien@gmail.com • vehicul • Prioritate: 8</div>
+    <span class="action action-SCHEDULE">Verifică documente/CT/programare</span>
+  </div>
+
+</div>
+</body>
+</html>

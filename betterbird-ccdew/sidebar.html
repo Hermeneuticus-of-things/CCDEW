@@ -6,270 +6,728 @@
 <title>CCDEW Email Intelligence</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#c9d1d9;font-size:12px;overflow-y:auto;overflow-x:hidden;min-height:100vh;width:480px;max-height:640px}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#c9d1d9;font-size:12px;overflow-y:auto;overflow-x:hidden;min-height:100vh;width:480px;max-height:640px;padding-bottom:40px}
+
+/* ── Header ── */
 .header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 12px;position:sticky;top:0;z-index:10}
 .header h1{font-size:14px;color:#58a6ff;display:flex;align-items:center;gap:6px}
 .header h1 .count{background:#58a6ff22;color:#58a6ff;padding:1px 8px;border-radius:10px;font-size:11px}
 .header .subtitle{font-size:10px;color:#8b949e;margin-top:2px}
+
+/* ── Filtre ── */
 .filters{display:flex;gap:6px;padding:8px 10px;background:#161b22;border-bottom:1px solid #21262d;flex-wrap:wrap;position:sticky;top:46px;z-index:9}
 .filter-btn{font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#8b949e;cursor:pointer;white-space:nowrap;transition:.1s}
 .filter-btn.active{background:#1f6feb33;border-color:#1f6feb;color:#58a6ff}
-.group-header{background:#21262d;padding:6px 10px;font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:86px;z-index:5;border-bottom:1px solid #30363d}
-.alert{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px 10px;margin:6px;cursor:pointer;transition:.15s;border-left:3px solid;position:relative}
-.alert:hover{border-color:#58a6ff;background:#1c2128;transform:translateX(2px)}
+.filter-btn:focus-visible{outline:2px solid #58a6ff;outline-offset:1px}
+
+/* ── Group header ── */
+.group-header{background:#21262d;padding:6px 10px;font-size:10px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:86px;z-index:5;border-bottom:1px solid #30363d}
+
+/* ── Card compact ── */
+.alert{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px 10px;margin:5px 6px;cursor:pointer;transition:.15s;border-left:3px solid;position:relative;outline:none}
+.alert:hover{border-color:#58a6ff44;background:#1c2128;transform:translateX(2px)}
+.alert:focus-visible{outline:2px solid #58a6ff;outline-offset:1px}
 .alert.critical{border-left-color:#f85149}
 .alert.high{border-left-color:#d29922}
 .alert.medium{border-left-color:#58a6ff}
 .alert.low{border-left-color:#8b949e}
-.alert .top{display:flex;gap:4px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
-.alert .icon{font-size:14px}
-.alert .urgency{font-size:9px;font-weight:600;text-transform:uppercase;padding:1px 6px;border-radius:8px}
+
+/* card: rând 1 */
+.card-top{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px}
+.card-icon{font-size:13px;flex-shrink:0}
+.urgency{font-size:9px;font-weight:700;text-transform:uppercase;padding:1px 6px;border-radius:8px;flex-shrink:0}
 .urgency.immediate{background:#f8514922;color:#f85149}
 .urgency.today{background:#d2992222;color:#d29922}
 .urgency.this_week{background:#58a6ff22;color:#58a6ff}
+.urgency.this_month{background:#3fb95022;color:#3fb950}
 .urgency.no_deadline{background:#8b949e22;color:#8b949e}
-.alert .ts-badge{font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px;background:#3fb95022;color:#3fb950}
-.alert .ts-badge.no{background:#8b949e22;color:#8b949e}
-.alert .subject{font-size:12px;font-weight:600;color:#f0f6fc;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.alert .meta{font-size:9px;color:#484f58;margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.alert .specific{font-size:10px;color:#3fb950;margin-bottom:2px}
-.alert .specific::before{content:"→ "}
-.alert .phish-warn{font-size:9px;color:#f85149;background:#f8514911;border-radius:4px;padding:2px 6px;margin-top:4px;display:inline-block}
-.alert .priority{font-size:9px;color:#d29922;margin-top:2px}
-.alert .actions{display:none;gap:4px;margin-top:6px;flex-wrap:wrap}
-.alert:hover .actions{display:flex}
-.alert .action-btn{font-size:9px;padding:2px 8px;border-radius:4px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;cursor:pointer;transition:.1s}
-.alert .action-btn:hover{background:#1f6feb33;border-color:#1f6feb;color:#58a6ff}
-.alert .action-btn.primary{background:#1f6feb22;border-color:#1f6feb44;color:#58a6ff}
-.alert .action-btn.danger{background:#f8514922;border-color:#f8514944;color:#f85149}
+.nature-badge{font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px;background:#58a6ff22;color:#58a6ff}
+.phishing-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:#f8514922;color:#f85149}
+/* card: rând 2 */
+.card-subject{font-size:11px;font-weight:700;color:#f0f6fc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+/* card: rând 3 */
+.card-from{font-size:10px;color:#8b949e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-from strong{color:#58a6ff;font-weight:500}
+/* card: rând 4 — hint */
+.card-hint{font-size:9px;color:#3fb950;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-hint::before{content:"👉 "}
+/* expand icon */
+.card-expand{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:14px;color:#30363d;transition:.15s}
+.alert:hover .card-expand{color:#58a6ff}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay{position:fixed;inset:0;background:#0d111799;z-index:1000;display:none;align-items:center;justify-content:center;padding:12px}
+.modal-overlay.open{display:flex}
+.modal{background:#161b22;border:1px solid #30363d;border-radius:10px;width:100%;max-width:440px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px #000a}
+@media (prefers-reduced-motion:no-preference){
+  .modal-overlay.open .modal{animation:slideUp .18s ease}
+  @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+}
+
+/* modal header */
+.modal-head{padding:12px 14px 10px;border-bottom:1px solid #21262d;position:relative}
+.modal-urgency-row{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.modal-sev{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px}
+.modal-sev.critical{background:#f8514922;color:#f85149;border:1px solid #f8514944}
+.modal-sev.high{background:#d2992222;color:#d29922;border:1px solid #d2992244}
+.modal-sev.medium{background:#58a6ff22;color:#58a6ff;border:1px solid #58a6ff44}
+.modal-sev.low{background:#8b949e22;color:#8b949e;border:1px solid #8b949e44}
+.modal-subject{font-size:14px;font-weight:700;color:#f0f6fc;line-height:1.3;padding-right:28px}
+.modal-label{font-size:11px;color:#a8b6c1;font-style:italic;margin-top:3px}
+.modal-close{position:absolute;top:10px;right:10px;background:none;border:none;color:#6e7681;font-size:18px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px;transition:.1s}
+.modal-close:hover{background:#21262d;color:#f0f6fc}
+.modal-close:focus-visible{outline:2px solid #58a6ff}
+
+/* modal body */
+.modal-body{overflow-y:auto;padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:10px}
+.modal-section{display:flex;flex-direction:column;gap:3px}
+.modal-section-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#6e7681;margin-bottom:2px}
+.modal-row{display:flex;gap:8px;align-items:flex-start}
+.modal-row-label{font-size:10px;color:#6e7681;min-width:64px;flex-shrink:0;margin-top:1px}
+.modal-row-val{font-size:11px;color:#c9d1d9;flex:1;word-break:break-word}
+.modal-row-val.blue{color:#58a6ff}
+.modal-row-val.green{color:#3fb950}
+.modal-badges{display:flex;gap:4px;flex-wrap:wrap}
+.modal-badge{font-size:9px;padding:2px 7px;border-radius:8px}
+.modal-badge.nature{background:#58a6ff22;color:#58a6ff}
+.modal-badge.family{background:#8b949e22;color:#8b949e}
+.modal-badge.phishing{background:#f8514922;color:#f85149;font-weight:700}
+
+/* specifics list */
+.modal-specifics{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.modal-specifics li{font-size:11px;color:#c9d1d9;padding:4px 8px;background:#21262d;border-radius:5px;line-height:1.4}
+.modal-specifics li::before{content:"• ";color:#58a6ff}
+
+/* action hint */
+.modal-action-hint{background:#3fb95011;border:1px solid #3fb95033;border-radius:6px;padding:7px 10px;font-size:11px;color:#3fb950}
+.modal-action-hint::before{content:"👉  "}
+
+/* divider */
+.modal-divider{border:none;border-top:1px solid #21262d;margin:0}
+
+/* modal footer butoane */
+.modal-footer{padding:10px 14px;border-top:1px solid #21262d;display:flex;gap:6px;flex-wrap:wrap}
+.modal-btn{font-size:11px;padding:5px 14px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;cursor:pointer;transition:.1s;flex:1;min-width:80px;text-align:center}
+.modal-btn:hover{background:#21262d;border-color:#8b949e}
+.modal-btn:focus-visible{outline:2px solid #58a6ff;outline-offset:1px}
+.modal-btn.primary{background:#1f6feb22;border-color:#1f6feb66;color:#58a6ff}
+.modal-btn.primary:hover{background:#1f6feb44}
+.modal-btn.danger{background:#f8514922;border-color:#f8514966;color:#f85149}
+.modal-btn.danger:hover{background:#f8514944}
+.modal-btn.warn{background:#d2992222;border-color:#d2992266;color:#d29922}
+.modal-btn.warn:hover{background:#d2992244}
+
+/* ── Misc ── */
 .loading{text-align:center;padding:30px;color:#8b949e;font-size:12px}
 .error{background:#f8514911;border:1px solid #f8514944;border-radius:6px;padding:10px;margin:8px;font-size:11px;color:#f85149}
-.refresh{position:fixed;bottom:12px;right:12px;background:#161b22;border:1px solid #30363d;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#58a6ff;z-index:100;transition:.2s}
+.empty{text-align:center;padding:20px;color:#8b949e;font-size:11px}
+.refresh{position:fixed;bottom:34px;right:12px;background:#161b22;border:1px solid #30363d;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#58a6ff;z-index:100;transition:.2s}
 .refresh:hover{background:#1c2128;transform:scale(1.1)}
 .refresh.loading{animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.empty{text-align:center;padding:20px;color:#8b949e;font-size:11px}
-.entity-tag{font-size:9px;color:#d29922;background:#d2992211;border-radius:4px;padding:1px 5px;margin-right:3px;display:inline-block}
-.open-hint{position:absolute;right:8px;top:8px;font-size:10px;color:#484f58;opacity:0;transition:.2s}
-.alert:hover .open-hint{opacity:1}
+@media (prefers-reduced-motion:reduce){.refresh.loading{animation:none;opacity:.6}}
 .status-bar{position:fixed;bottom:0;left:0;right:0;background:#161b22;border-top:1px solid #30363d;padding:4px 10px;font-size:10px;color:#8b949e;z-index:90;display:flex;gap:10px}
 .status-bar .item{display:flex;gap:4px;align-items:center}
+#toast-container{position:fixed;top:90px;left:0;right:0;z-index:2000;pointer-events:none;padding:0 6px}
+.toast{background:#3fb95022;border:1px solid #3fb95044;border-radius:6px;padding:7px 10px;margin-bottom:4px;font-size:11px;color:#3fb950;pointer-events:auto;transition:opacity .3s}
+.toast.warn{background:#d2992222;border-color:#d2992244;color:#d29922}
+.search-bar-wrap{padding:6px 10px;background:#161b22;border-bottom:1px solid #21262d}
+.search-bar-wrap input{width:100%;box-sizing:border-box;background:#0d1117;border:1px solid #30363d;color:#c9d1d9;border-radius:6px;padding:5px 8px;font-size:11px;outline:none}
+.search-bar-wrap input:focus{border-color:#58a6ff}
+.acc-btn{font-size:10px;padding:2px 7px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#8b949e;cursor:pointer;white-space:nowrap;transition:.1s}
+.acc-btn.active{background:#1f6feb33;border-color:#1f6feb;color:#58a6ff}
+.card-tag{display:inline-block;font-size:9px;background:#58a6ff22;color:#58a6ff;border-radius:4px;padding:0px 5px;margin-top:2px}
 </style>
 </head>
 <body>
+
 <div class="header">
   <h1>📧 Email Intelligence <span class="count" id="count">0</span></h1>
-  <div class="subtitle">Click = deschide direct în BetterBird | Filtre rapid</div>
+  <div class="subtitle">Clic pe email → detalii complete + acțiuni</div>
+</div>
+<div class="search-bar-wrap">
+  <input type="text" id="searchInput" placeholder="🔍 Caută subiect, expeditor..." autocomplete="off"/>
 </div>
 <div class="filters" id="filters">
-  <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Toate</button>
-  <button class="filter-btn" data-filter="immediate" onclick="setFilter('immediate')">🚨 Imediat</button>
-  <button class="filter-btn" data-filter="today" onclick="setFilter('today')">⏰ Azi</button>
-  <button class="filter-btn" data-filter="security" onclick="setFilter('security')">🔒 Securitate</button>
-  <button class="filter-btn" data-filter="financial" onclick="setFilter('financial')">💰 Financiar</button>
-  <button class="filter-btn" data-filter="phishing" onclick="setFilter('phishing')">⚠️ Phishing</button>
+  <button class="filter-btn active" data-filter="all"       onclick="setFilter('all')">Toate</button>
+  <button class="filter-btn"        data-filter="immediate" onclick="setFilter('immediate')">🚨 Imediat</button>
+  <button class="filter-btn"        data-filter="today"     onclick="setFilter('today')">⏰ Azi</button>
+  <button class="filter-btn"        data-filter="security"  onclick="setFilter('security')">🔒 Securitate</button>
+  <button class="filter-btn"        data-filter="financial" onclick="setFilter('financial')">💰 Financiar</button>
+  <button class="filter-btn"        data-filter="phishing"  onclick="setFilter('phishing')">⚠️ Phishing</button>
 </div>
-<div id="alerts"><div class="loading">Se încarcă alertele...</div></div>
-<div class="refresh" id="refreshBtn" title="Reîncarcă">↻</div>
+<div id="accountFilters" style="display:flex;flex-wrap:wrap;gap:4px;padding:2px 10px 6px;background:#161b22;border-bottom:1px solid #21262d"></div>
+
+<div id="toast-container"></div>
+<div id="alerts" role="list" aria-live="polite" aria-label="Alerte email"><div class="loading">Se încarcă alertele...</div></div>
+<div class="refresh" id="refreshBtn" title="Reîncarcă" role="button" tabindex="0" aria-label="Reîncarcă alertele">↻</div>
 <div class="status-bar" id="statusBar">
   <span class="item">🟢 Server: <span id="srvStatus">conectare...</span></span>
   <span class="item">📊 Total: <span id="totalStat">0</span></span>
+  <span class="item">✅ Rezolvate: <span id="dismissedStat">0</span></span>
+  <span class="item">⏰ Amânate: <span id="snoozedStat">0</span></span>
+</div>
+
+<!-- ══════════════ MODAL POPUP ══════════════ -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalSubject">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-urgency-row" id="modalUrgencyRow"></div>
+      <div class="modal-subject" id="modalSubject"></div>
+      <div class="modal-label"   id="modalLabel"></div>
+      <button class="modal-close" id="modalClose" aria-label="Închide">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
 </div>
 
 <script>
-var SERVER='http://localhost:8766'
+(function(){
 var currentFilter='all'
+var currentAccountFilter='all'
+var searchQ=''
+var lastData=null
+var refreshTimer=null
+var alertsIndex=[]   // array cu obiectele alertă, indexat după data-idx
+var dismissed=new Set()
+var snoozed={}
+var tags={}
 
-function api(path){
-  return fetch(SERVER+path,{cache:'no-cache'}).then(function(r){
-    if(!r.ok) throw new Error('HTTP '+r.status)
-    return r.json()
+/* ── Helpers snooze/dismiss/tag ── */
+function alertId(a){ return (a.subject||'')+'|'+(a.from||'')+'|'+(a.date||'') }
+function isDismissed(a){ return dismissed.has(alertId(a)) }
+function isSnoozed(a){ var t=snoozed[alertId(a)]; return !!(t && t > Date.now()) }
+function saveDismissed(){ browser.storage.local.set({ccdew_dismissed:[...dismissed]}) }
+function saveSnoozed(){ browser.storage.local.set({ccdew_snoozed:snoozed}) }
+function saveTags(){ browser.storage.local.set({ccdew_tags:tags}) }
+
+/* ── Load persistent data from storage ── */
+if(typeof browser!=='undefined'&&browser.storage){
+  browser.storage.local.get(['ccdew_dismissed','ccdew_snoozed','ccdew_tags']).then(function(r){
+    dismissed=new Set(r.ccdew_dismissed||[])
+    snoozed=r.ccdew_snoozed||{}
+    tags=r.ccdew_tags||{}
   })
 }
 
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+/* ── Utilități ── */
+function esc(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+}
 
+/* ── API v4.0 — storage.local → sendMessage → fetch direct ── */
+function api(path){
+  var hasBrowser = typeof browser!=='undefined' && browser.runtime
+
+  // Metoda 1: citește din storage.local (background pre-fetch, instant)
+  if(hasBrowser && browser.storage){
+    return browser.storage.local.get('ccdew_alerts').then(function(res){
+      var stored = res['ccdew_alerts']
+      if(stored && stored.ok && stored.data){
+        // Date recente (<6 min) → returnează direct
+        if(Date.now() - stored.ts < 6*60*1000) return stored.data
+      }
+      // Date vechi sau lipsă → cere background să refacă fetch
+      return browser.runtime.sendMessage({action:'fetchAlerts'})
+        .then(function(resp){
+          if(resp && resp.success) return resp.data
+          // Fallback storage dacă background nu răspunde
+          if(stored && stored.data) return stored.data
+          throw new Error(resp ? resp.error : 'Repornește BetterBird')
+        })
+        .catch(function(e){
+          if(stored && stored.data) return stored.data
+          throw e
+        })
+    })
+  }
+
+  // Metoda 2: fetch direct (web dashboard sau dacă browser API lipsește)
+  var urls=['http://127.0.0.1:8766','http://localhost:8766']
+  function tryNext(i){
+    if(i>=urls.length) return Promise.reject(new Error('Server inaccesibil'))
+    return fetch(urls[i]+path,{cache:'no-cache'})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json() })
+      .catch(function(){ return tryNext(i+1) })
+  }
+  return tryNext(0)
+}
+function showToast(msg,type){
+  var c=document.getElementById('toast-container')
+  var t=document.createElement('div')
+  t.className='toast'+(type==='warn'?' warn':'')
+  t.textContent=msg
+  c.appendChild(t)
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){t.remove()},300) },3700)
+}
+
+/* ── Search input listener ── */
+document.getElementById('searchInput').addEventListener('input',function(){
+  searchQ=this.value.toLowerCase().trim()
+  if(lastData) renderAlerts(lastData)
+})
+
+/* ── Account filter ── */
+function setAccountFilter(acc){
+  currentAccountFilter=acc
+  document.querySelectorAll('.acc-btn').forEach(function(b){
+    b.classList.toggle('active',b.dataset.acc===acc)
+  })
+  if(lastData) renderAlerts(lastData)
+}
+
+function buildAccountFilters(alerts){
+  var wrap=document.getElementById('accountFilters')
+  var accs=['all']
+  alerts.forEach(function(a){ if(a.account&&!accs.includes(a.account)) accs.push(a.account) })
+  wrap.innerHTML=''
+  if(accs.length<=1) return
+  accs.forEach(function(acc){
+    var b=document.createElement('button')
+    b.className='acc-btn'+(acc===currentAccountFilter?' active':'')
+    b.dataset.acc=acc
+    b.textContent=acc==='all'?'Toate conturile':acc
+    b.onclick=function(){ setAccountFilter(acc) }
+    wrap.appendChild(b)
+  })
+}
+
+/* ── Filtre ── */
 function setFilter(f){
   currentFilter=f
   document.querySelectorAll('.filter-btn').forEach(function(b){
-    b.classList.toggle('active', b.dataset.filter===f)
+    b.classList.toggle('active',b.dataset.filter===f)
   })
-  renderAlerts(window._lastData)
+  if(lastData) renderAlerts(lastData)
 }
+
+/* ── Render liste carduri compact ── */
+var urgencyLabels={immediate:'🚨 IMEDIAT',today:'⏰ AZI',this_week:'📅 SĂPT',this_month:'📆 LUNĂ',no_deadline:'📁 INFO'}
+var severityLabels={critical:'CRITIC',high:'RIDICAT',medium:'MEDIU',low:'SCĂZUT'}
+
+function urgencyOrder(u){ return {immediate:0,today:1,this_week:2,this_month:3,no_deadline:4}[u]??9 }
+function severityOrder(s){ return {critical:0,high:1,medium:2,low:3}[s]??9 }
+function natureOrder(n){ return {security:0,financial:1,legal:2,medical:3,health:4,account:5,personal:6,administrative:7,technical:8,business:9,commercial:10,travel:11,logistics:12,vehicle:13,education:14,professional:15,other:99}[n]??99 }
 
 function renderAlerts(data){
   var el=document.getElementById('alerts')
   var countEl=document.getElementById('count')
   var totalStat=document.getElementById('totalStat')
   if(!data){ el.innerHTML='<div class="loading">Se încarcă...</div>'; return }
-  window._lastData=data
+  lastData=data
   var alerts=data.alerts||[]
   totalStat.textContent=data.total_alerts||alerts.length
 
+  /* build account filters on first render */
+  buildAccountFilters(alerts)
+
+  /* filtrare dismissed + snoozed */
+  alerts=alerts.filter(function(a){ return !isDismissed(a) && !isSnoozed(a) })
+
   if(currentFilter!=='all'){
     alerts=alerts.filter(function(a){
-      if(currentFilter==='phishing') return (a.phishing_risk||'')==='HIGH' || (a.phishing_risk||'')==='MEDIUM'
-      return a.urgency===currentFilter || a.nature===currentFilter
+      if(currentFilter==='phishing') return a.nature==='phishing'||(a.family||'').toLowerCase().includes('phishing')
+      return a.urgency===currentFilter||a.nature===currentFilter
     })
   }
 
-  var total=alerts.length
-  countEl.textContent=total
-
-  if(total===0){
-    el.innerHTML='<div class="empty">Nicio alertă pentru filtrul selectat</div>'
-    return
+  /* filtrare cont */
+  if(currentAccountFilter!=='all'){
+    alerts=alerts.filter(function(a){ return a.account===currentAccountFilter })
   }
 
-  var urgencyLabels={immediate:'🚨 IMEDIAT',today:'⏰ AZI',this_week:'📅 SĂPT',no_deadline:'📁 INFO'}
-  var severityLabels={critical:'CRITIC',high:'RIDICAT',medium:'MEDIU',low:'SCĂZUT'}
+  /* filtrare search */
+  if(searchQ){
+    alerts=alerts.filter(function(a){
+      return (a.subject||'').toLowerCase().includes(searchQ)
+          || (a.from||'').toLowerCase().includes(searchQ)
+          || (a.specifics||[]).some(function(s){ return s.toLowerCase().includes(searchQ) })
+    })
+  }
 
+  countEl.textContent=alerts.length
+  if(alerts.length===0){ el.innerHTML='<div class="empty">Nicio alertă pentru filtrul selectat</div>'; return }
+
+  /* grupare */
   var groups={}
   alerts.forEach(function(a){
     var g=(a.urgency||'no_deadline')+'|'+(a.nature||'other')+'|'+(a.severity||'low')
-    if(!groups[g]) groups[g]={urgency:a.urgency,nature:a.nature,severity:a.severity,alerts:[]}
+    if(!groups[g]) groups[g]={urgency:a.urgency,nature:a.nature,nature_label:a.nature_label,severity:a.severity,alerts:[]}
     groups[g].alerts.push(a)
   })
   var gkeys=Object.keys(groups).sort(function(a,b){
-    var ao=urgencyOrder(a.split('|')[0])-urgencyOrder(b.split('|')[0])
-    if(ao!==0) return ao
-    var no=natureOrder(a.split('|')[1])-natureOrder(b.split('|')[1])
-    if(no!==0) return no
-    return severityOrder(a.split('|')[2])-severityOrder(b.split('|')[2])
+    var p=a.split('|'), q=b.split('|')
+    return (urgencyOrder(p[0])-urgencyOrder(q[0]))||
+           (natureOrder(p[1])-natureOrder(q[1]))||
+           (severityOrder(p[2])-severityOrder(q[2]))
   })
 
+  alertsIndex=[]
   var html=''
   gkeys.forEach(function(gk){
     var g=groups[gk]
-    html+='<div class="group-header">'+esc(urgencyLabels[g.urgency]||g.urgency)+' · '+esc((g.nature||'other').toUpperCase())+' · '+esc(severityLabels[g.severity]||g.severity)+'</div>'
+    var gh=(urgencyLabels[g.urgency]||g.urgency||'')+' · '+(g.nature_label||g.nature||'OTHER').toUpperCase()+' · '+(severityLabels[g.severity]||g.severity||'').toUpperCase()
+    html+='<div class="group-header">'+esc(gh)+'</div>'
     g.alerts.forEach(function(a){
+      var idx=alertsIndex.length
+      alertsIndex.push(a)
       var sev=a.severity||'medium'
-      var dataAttrs = 'data-subject="'+esc(a.subject||'').replace(/'/g,"\\'")+'" data-from="'+esc(a.from||'').replace(/'/g,"\\'")+'" data-date="'+esc(a.date||'')+'"'
-      html+='<div class="alert '+sev+'" '+dataAttrs+' onclick="openEmailCard(this)">'
-      html+='<span class="open-hint">Click pentru a deschide →</span>'
-      html+='<div class="top">'
-      html+='<span class="icon">'+esc(a.icon||a.nature_icon||'📋')+'</span>'
-      html+='<span class="urgency '+(a.urgency||'no_deadline')+'">'+(urgencyLabels[a.urgency]||a.urgency)+'</span>'
-      if(a.time_sensitive==='yes') html+='<span class="ts-badge">⏱ TIME SENSITIVE</span>'
-      else html+='<span class="ts-badge no">fără deadline</span>'
-      if(a.phishing_risk==='HIGH') html+='<span style="font-size:9px;color:#f85149">⚠️ PHISHING</span>'
-      if(a.priority_score>=70) html+='<span style="font-size:9px;color:#d29922">★ PRIORITAR</span>'
+      var isPhish=a.nature==='phishing'||(a.family||'').toLowerCase().includes('phishing')
+      html+='<div class="alert '+esc(sev)+'" data-idx="'+idx+'" role="listitem" tabindex="0"'
+      html+=' onclick="openModal('+idx+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openModal('+idx+')}">'
+      /* rând 1: icon + urgency + nature + phishing */
+      html+='<div class="card-top">'
+      html+='<span class="card-icon">'+esc(a.icon||a.nature_icon||'📋')+'</span>'
+      html+='<span class="urgency '+(a.urgency||'no_deadline')+'">'+esc(urgencyLabels[a.urgency]||a.urgency_label||a.urgency||'')+'</span>'
+      if(a.nature_label) html+='<span class="nature-badge">'+esc(a.nature_label)+'</span>'
+      if(isPhish) html+='<span class="phishing-badge">⚠ PHISHING</span>'
       html+='</div>'
-
-      html+='<div class="subject">'+esc(a.subject)+'</div>'
-
-      if(a.entities && (a.entities.amounts||[]).length>0){
-        html+='<div style="margin-top:2px">'
-        a.entities.amounts.slice(0,3).forEach(function(am){ html+='<span class="entity-tag">'+esc(am)+'</span>' })
-        html+='</div>'
-      }
-      if(a.entities && (a.entities.deadlines||[]).length>0){
-        html+='<div style="margin-top:2px">'
-        a.entities.deadlines.slice(0,2).forEach(function(d){ html+='<span class="entity-tag" style="color:#3fb950;background:#3fb95011">📅 '+esc(d)+'</span>' })
-        html+='</div>'
-      }
-
-      var action = a.suggested_action || a.action_hint || ''
-      if(action && action !== 'Nimic') html+='<div class="specific">'+esc(action)+'</div>'
-
-      if(a.phishing_risk==='HIGH' || a.phishing_risk==='MEDIUM'){
-        html+='<div class="phish-warn">Phishing '+esc(a.phishing_risk)+' (scor: '+esc(a.phishing_score||0)+')</div>'
-      }
-      if(a.priority_score) html+='<div class="priority">Priority Score: '+esc(a.priority_score)+'/100</div>'
-
-      html+='<div class="meta">'+esc(a.account||'')+' · '+esc(a.date||'')+' · '+esc((a.nature_label||a.nature||'').toUpperCase())+'</div>'
-
-      html+='<div class="actions" onclick="event.stopPropagation()">'
-      html+='<button class="action-btn primary" onclick="openEmailCard(this.parentNode.parentNode)">📧 Deschide</button>'
-      html+='<button class="action-btn danger" onclick="sendAction(\'archive\',this.parentNode.parentNode)">🗑 Arhivează</button>'
-      if(a.time_sensitive==='yes') html+='<button class="action-btn" onclick="sendAction(\'snooze\',this.parentNode.parentNode)">⏰ Amână</button>'
-      html+='</div>'
+      /* rând 2: subiect */
+      html+='<div class="card-subject">'+esc(a.subject||'(fără subiect)')+'</div>'
+      /* rând 3: from */
+      if(a.from) html+='<div class="card-from"><strong>'+esc(a.from)+'</strong></div>'
+      /* rând 4: action hint (scurt) */
+      if(a.action_hint&&a.action_hint!=='Nimic')
+        html+='<div class="card-hint">'+esc(a.action_hint)+'</div>'
+      /* tag manual */
+      var cardTagText=tags[alertsIndex.length>idx?alertId(a):'']
+      if(cardTagText) html+='<span class="card-tag">🏷 '+esc(cardTagText)+'</span>'
+      /* expand icon */
+      html+='<span class="card-expand" aria-hidden="true">›</span>'
       html+='</div>'
     })
   })
 
   el.innerHTML=html
+  requestAnimationFrame(updateStickyTop)
 }
 
-function urgencyOrder(u){ var o={immediate:0,today:1,this_week:2,no_deadline:3}; return o[u]!==undefined?o[u]:9 }
-function severityOrder(s){ var o={critical:0,high:1,medium:2,low:3}; return o[s]!==undefined?o[s]:9 }
-function natureOrder(n){ var o={security:0,financial:1,legal:2,medical:3,health:4,account:5,personal:6,administrative:7,technical:8,business:9,commercial:10,travel:11,logistics:12,vehicle:13,education:14,professional:15,other:99}; return o[n]!==undefined?o[n]:99 }
+/* ── Modal deschide ── */
+function openModal(idx){
+  var a=alertsIndex[idx]
+  if(!a) return
+  var overlay=document.getElementById('modalOverlay')
+  var sev=a.severity||'medium'
+  var isPhish=a.nature==='phishing'||(a.family||'').toLowerCase().includes('phishing')
 
-// === Deep Link: deschide email direct în BetterBird ===
-function openEmailCard(card){
-  if(!card) return
-  var subject = card.getAttribute('data-subject') || ''
-  var fromAddr = card.getAttribute('data-from') || ''
-  var date = card.getAttribute('data-date') || ''
+  /* urgency row */
+  var uRow=document.getElementById('modalUrgencyRow')
+  uRow.innerHTML=''
+  var ub=document.createElement('span')
+  ub.className='urgency '+(a.urgency||'no_deadline')
+  ub.textContent=urgencyLabels[a.urgency]||a.urgency_label||a.urgency||''
+  uRow.appendChild(ub)
+  var sb=document.createElement('span')
+  sb.className='modal-sev '+sev
+  sb.textContent=severityLabels[sev]||sev.toUpperCase()
+  uRow.appendChild(sb)
+  if(a.nature_label){var nb=document.createElement('span');nb.className='modal-badge nature';nb.textContent=a.nature_label;uRow.appendChild(nb)}
+  if(a.family){var fb=document.createElement('span');fb.className='modal-badge family';fb.textContent=a.family;uRow.appendChild(fb)}
+  if(isPhish){var pb=document.createElement('span');pb.className='modal-badge phishing';pb.textContent='⚠ PHISHING';uRow.appendChild(pb)}
 
-  // Trimite mesaj la background.js pentru a deschide emailul în BetterBird
-  if(typeof browser !== 'undefined' && browser.runtime && browser.runtime.sendMessage){
-    browser.runtime.sendMessage({
-      action: 'openEmail',
-      subject: subject,
-      fromAddr: fromAddr,
-      date: date
-    }).then(function(response){
-      if(response && response.success){
-        showToast('✅ Email deschis în BetterBird: '+subject.substring(0,40))
-      } else {
-        showToast('⚠️ Email nu a fost găsit local. Încercare fallback...')
-        fallbackOpen(subject)
-      }
-    }).catch(function(e){
-      // Fallback dacă messaging nu e disponibil (ex: deschis în browser normal)
-      fallbackOpen(subject)
+  /* subject + label */
+  document.getElementById('modalSubject').textContent=a.subject||'(fără subiect)'
+  var labelEl=document.getElementById('modalLabel')
+  if(a.label&&a.label!==a.subject){ labelEl.textContent=a.label; labelEl.style.display='' }
+  else labelEl.style.display='none'
+
+  /* body */
+  var body=document.getElementById('modalBody')
+  body.innerHTML=''
+
+  /* secțiunea: Expeditor */
+  if(a.from||a.date||a.account){
+    var sec=section('Expeditor & context')
+    if(a.from)    sec.appendChild(row('De la:',  a.from,   'blue'))
+    if(a.date)    sec.appendChild(row('Data:',   a.date))
+    if(a.account) sec.appendChild(row('Cont:',   a.account))
+    body.appendChild(sec)
+    body.appendChild(hr())
+  }
+
+  /* secțiunea: Detalii specifice */
+  var specs=a.specifics||[]
+  if(specs.length>0){
+    var sec2=section('Detalii specifice')
+    var ul=document.createElement('ul')
+    ul.className='modal-specifics'
+    specs.forEach(function(s){
+      var li=document.createElement('li')
+      li.textContent=s
+      ul.appendChild(li)
     })
+    sec2.appendChild(ul)
+    body.appendChild(sec2)
+    body.appendChild(hr())
+  }
+
+  /* secțiunea: Acțiune recomandată — doar dacă nu e deja în specifics */
+  var hintAlreadyInSpecs = specs.some(function(s){ return s===a.action_hint })
+  if(a.action_hint&&a.action_hint!=='Nimic'&&!hintAlreadyInSpecs){
+    var ah=document.createElement('div')
+    ah.className='modal-action-hint'
+    ah.textContent=a.action_hint
+    body.appendChild(ah)
+    body.appendChild(hr())
+  }
+
+  /* ── Analiză nuanțată ── */
+  var SENSITIVE=['security','financial','legal','phishing']
+  var LIFE_DOM={security:{label:'🔐 Securitate digitală',w:1.4},phishing:{label:'🎣 Phishing',w:1.6},financial:{label:'💰 Bani & finanțe',w:1.3},legal:{label:'⚖️ Juridic',w:1.35},medical:{label:'🏥 Sănătate',w:1.2},personal:{label:'👤 Personal',w:0.9},account:{label:'🔑 Conturi & acces',w:1.2},business:{label:'💼 Profesional',w:1.0},technical:{label:'⚙️ Tehnologie',w:0.85},commercial:{label:'🛒 Cumpărături',w:0.8},travel:{label:'✈️ Călătorii',w:0.8},admin:{label:'📋 Administrativ',w:0.8}}
+  var ld=LIFE_DOM[a.nature||'']||{label:'📬 General',w:1.0}
+  var u2=a.urgency||'no_deadline', s2v=a.severity||'medium', n2=a.nature||''
+  var baseScore={immediate:4,today:3,this_week:2,this_month:1.5,no_deadline:1}[u2]||1
+  var natMul=SENSITIVE.includes(n2)?1.5:1
+  var sevMul={high:1.5,medium:1,low:0.7,critical:2}[s2v]||1
+  var rawScore=baseScore*natMul*sevMul*ld.w
+  var ts=rawScore>=6?4:rawScore>=3.5?3:rawScore>=1.8?2:1
+  var TLABELS=['','🟢 SCĂZUT','🟡 MEDIU','🟠 RIDICAT','🔴 CRITIC']
+
+  var anSec=section('📊 Analiză risc')
+
+  /* vârstă */
+  var ageStr='—'
+  try{var d0=new Date(a.date);var ageDays=Math.round((Date.now()-d0)/86400000);if(!isNaN(ageDays)){if(ageDays===0)ageStr='Azi';else if(ageDays===1)ageStr='Ieri';else if(ageDays<7)ageStr=ageDays+' zile în urmă';else if(ageDays<30)ageStr=Math.round(ageDays/7)+' săpt. ('+ageDays+'z)';else ageStr=Math.round(ageDays/30)+' luni ('+ageDays+'z)'}}catch(e){}
+
+  function srow(lbl,val){var d=document.createElement('div');d.className='modal-row';var l=document.createElement('span');l.className='modal-row-label';l.textContent=lbl;var v=document.createElement('span');v.className='modal-row-val';v.textContent=val;d.appendChild(l);d.appendChild(v);return d}
+  anSec.appendChild(srow('📅 Vârstă:',ageStr))
+  anSec.appendChild(srow('🎯 Amenințare:',TLABELS[ts]+' ('+rawScore.toFixed(1)+')'))
+  anSec.appendChild(srow('🗂 Domeniu:',ld.label+' ×'+ld.w.toFixed(1)))
+
+  /* bară scor */
+  var barW=document.createElement('div');barW.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0'
+  var bar=document.createElement('div');bar.style.cssText='flex:1;height:6px;background:#30363d;border-radius:3px;overflow:hidden'
+  var fill=document.createElement('div');var pct=Math.min(100,rawScore/9*100).toFixed(0)
+  var bc=ts===4?'#ff0000':ts===3?'#f85149':ts===2?'#d29922':'#3fb950'
+  fill.style.cssText='height:100%;width:'+pct+'%;background:'+bc+';border-radius:3px'
+  bar.appendChild(fill);barW.appendChild(bar)
+  var bl=document.createElement('span');bl.style.cssText='font-size:9px;color:#8b949e';bl.textContent=pct+'%'
+  barW.appendChild(bl);anSec.appendChild(barW)
+
+  /* explicații risc */
+  var risks=[]
+  if(n2==='phishing') risks.push('⚠️ Posibil phishing — nu accesa linkuri')
+  if(n2==='security') risks.push('🔐 Alertă securitate — verifică imediat')
+  if(n2==='financial'&&u2!=='no_deadline') risks.push('💰 Financiar — confirmă sursa')
+  if(n2==='legal') risks.push('⚖️ Document legal — necesită atenție')
+  if(u2==='immediate') risks.push('🚨 Acțiune IMEDIATĂ necesară')
+  else if(u2==='today') risks.push('⏰ Rezolvă AZI')
+  else if(u2==='this_week') risks.push('📅 Rezolvă săptămâna asta')
+  else if(u2==='this_month') risks.push('📆 Rezolvă luna asta')
+  if(risks.length===0) risks.push('ℹ️ Informativ, fără urgență')
+  risks.forEach(function(r){anSec.appendChild(srow('💡',r))})
+
+  body.appendChild(anSec)
+
+  /* tag input */
+  var tagInput=document.createElement('input')
+  tagInput.placeholder='🏷 Adaugă tag...'
+  tagInput.style.cssText='width:100%;background:#161b22;border:1px solid #30363d;color:#c9d1d9;border-radius:4px;padding:4px 7px;font-size:10px;margin-bottom:6px;outline:none'
+  var aid=alertId(a)
+  tagInput.value=tags[aid]||''
+  tagInput.addEventListener('input',function(){
+    tags[aid]=this.value.trim()
+    saveTags()
+    if(lastData) renderAlerts(lastData)
+  })
+  body.appendChild(tagInput)
+
+  /* footer butoane */
+  var footer=document.getElementById('modalFooter')
+  footer.innerHTML=''
+  var btnOpen=btn('📧 Deschide BB','primary',function(){
+    closeModal()
+    openEmailInBB(a)
+  })
+  var btnArc=btn('🗑 Arhivează','danger',function(){
+    closeModal()
+    doAction('archive',a)
+  })
+  var btnDismiss=btn('✅ Rezolvat','',function(){
+    dismissed.add(alertId(a))
+    saveDismissed()
+    closeModal()
+    if(lastData) renderAlerts(lastData)
+    updateStatusBar()
+    showToast('✅ Rezolvat: '+(a.subject||'').substring(0,40))
+  })
+  var btnSnz1=btn('⏰ Amână 1h','warn',function(){
+    snoozed[alertId(a)]=Date.now()+3600000
+    saveSnoozed()
+    closeModal()
+    if(lastData) renderAlerts(lastData)
+    updateStatusBar()
+    showToast('⏰ Amânat 1h: '+(a.subject||'').substring(0,40),'warn')
+  })
+  var btnSnz24=btn('⏰ Amână 24h','warn',function(){
+    snoozed[alertId(a)]=Date.now()+86400000
+    saveSnoozed()
+    closeModal()
+    if(lastData) renderAlerts(lastData)
+    updateStatusBar()
+    showToast('⏰ Amânat 24h: '+(a.subject||'').substring(0,40),'warn')
+  })
+  footer.appendChild(btnOpen)
+  footer.appendChild(btnArc)
+  footer.appendChild(btnDismiss)
+  footer.appendChild(btnSnz1)
+  footer.appendChild(btnSnz24)
+  if(a.urgency==='immediate'||a.urgency==='today'){
+    var btnSnzLeg=btn('⏰ Amână','warn',function(){
+      closeModal()
+      doAction('snooze',a)
+    })
+    footer.appendChild(btnSnzLeg)
+  }
+  var btnClose=btn('✕ Închide','',function(){ closeModal() })
+  footer.appendChild(btnClose)
+
+  overlay.classList.add('open')
+  document.getElementById('modalClose').focus()
+}
+
+function section(title){
+  var s=document.createElement('div')
+  s.className='modal-section'
+  var t=document.createElement('div')
+  t.className='modal-section-title'
+  t.textContent=title
+  s.appendChild(t)
+  return s
+}
+function row(label,val,colorClass){
+  var d=document.createElement('div')
+  d.className='modal-row'
+  var l=document.createElement('span')
+  l.className='modal-row-label'
+  l.textContent=label
+  var v=document.createElement('span')
+  v.className='modal-row-val'+(colorClass?' '+colorClass:'')
+  v.textContent=val
+  d.appendChild(l); d.appendChild(v)
+  return d
+}
+function hr(){
+  var h=document.createElement('hr')
+  h.className='modal-divider'
+  return h
+}
+function btn(text,cls,cb){
+  var b=document.createElement('button')
+  b.className='modal-btn'+(cls?' '+cls:'')
+  b.textContent=text
+  b.addEventListener('click',cb)
+  return b
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open')
+}
+
+/* click pe overlay (în afara modal) = închide */
+document.getElementById('modalOverlay').addEventListener('click',function(e){
+  if(e.target===this) closeModal()
+})
+document.getElementById('modalClose').addEventListener('click',closeModal)
+/* ESC = închide */
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeModal()
+})
+
+/* ── Acțiuni email ── */
+function openEmailInBB(a){
+  if(typeof browser!=='undefined'&&browser.runtime&&browser.runtime.sendMessage){
+    browser.runtime.sendMessage({action:'openEmail',subject:a.subject||'',fromAddr:a.from||'',date:a.date||''})
+      .then(function(r){ showToast(r&&r.success?'✅ Deschis în BetterBird':'⚠️ Nu a fost găsit local','') })
+      .catch(function(){ fallbackOpen(a.subject||'') })
   } else {
-    fallbackOpen(subject)
+    fallbackOpen(a.subject||'')
   }
 }
-
 function fallbackOpen(subject){
-  fetch(SERVER+'/api/bb-open?q='+encodeURIComponent(subject))
-  showToast('📧 Betterbird deschis — subiect: '+subject.substring(0,40))
+  browser.runtime.sendMessage({action:'fetchHealth'}).catch(function(){})
+  showToast('📧 BetterBird deschis — '+subject.substring(0,40))
 }
-
-function sendAction(action, card){
-  if(!card) return
-  var subject = card.getAttribute('data-subject') || ''
-  fetch(SERVER+'/api/bb-open?q='+encodeURIComponent('['+action+'] '+subject))
-  showToast('✅ Acțiune înregistrată: '+action)
-  card.style.opacity='0.4'
-  setTimeout(function(){ card.style.display='none' }, 300)
-}
-
-function showToast(msg){
-  var el=document.getElementById('alerts')
-  var toast=document.createElement('div')
-  toast.style.cssText='background:#3fb95022;border:1px solid #3fb95044;border-radius:6px;padding:8px;margin:6px;font-size:11px;color:#3fb950;position:sticky;top:86px;z-index:50'
-  toast.textContent=msg
-  el.insertBefore(toast,el.firstChild)
-  setTimeout(function(){toast.remove()},4000)
-}
-
-function load(){
-  var srvStatus=document.getElementById('srvStatus')
-  api('/api/impact-alerts?v='+Date.now()).then(function(data){
-    srvStatus.textContent='online'
-    srvStatus.style.color='#3fb950'
-    renderAlerts(data)
-  }).catch(function(e){
-    srvStatus.textContent='offline'
-    srvStatus.style.color='#f85149'
-    document.getElementById('alerts').innerHTML='<div class="error">Nu pot conecta la serverul CCDEW.<br>Verifică că rulează pe portul 8766.<br><br>'+esc(e.message)+'</div>'
+function doAction(action,a){
+  browser.runtime.sendMessage({action:'bgPost',path:'/api/action',
+    body:{action:action,subject:a.subject||'',from:a.from||'',date:a.date||''}
+  }).catch(function(){})
+  showToast('✅ '+(action==='archive'?'Arhivat':'Amânat')+': '+(a.subject||'').substring(0,40))
+  /* elimină cardul din lista vizibilă */
+  document.querySelectorAll('.alert').forEach(function(el){
+    if(parseInt(el.dataset.idx)===alertsIndex.indexOf(a)){
+      el.style.transition='opacity .3s'
+      el.style.opacity='0'
+      setTimeout(function(){el.style.display='none'},350)
+    }
   })
 }
 
-document.getElementById('refreshBtn').addEventListener('click',function(){
-  var btn=this
-  btn.classList.add('loading')
-  load()
-  setTimeout(function(){btn.classList.remove('loading')},500)
+/* ── Status bar update ── */
+function updateStatusBar(){
+  var dismissedEl=document.getElementById('dismissedStat')
+  var snoozedEl=document.getElementById('snoozedStat')
+  if(dismissedEl) dismissedEl.textContent=dismissed.size
+  if(snoozedEl){
+    var activeSnooze=Object.values(snoozed).filter(function(t){ return t>Date.now() }).length
+    snoozedEl.textContent=activeSnooze
+  }
+}
+
+/* ── Load & refresh ── */
+function load(){
+  var srv=document.getElementById('srvStatus')
+  api('/api/impact-alerts?v='+Date.now()).then(function(data){
+    srv.textContent='online'; srv.style.color='#3fb950'
+    renderAlerts(data)
+    updateStatusBar()
+    /* Daily digest */
+    var today=new Date().toDateString()
+    if(typeof browser!=='undefined'&&browser.storage){
+      browser.storage.local.get('ccdew_last_digest').then(function(r){
+        if(r.ccdew_last_digest!==today && data && data.alerts){
+          var urgent=data.alerts.filter(function(a){ return a.urgency==='immediate'||a.urgency==='today' })
+          var week=data.alerts.filter(function(a){ return a.urgency==='this_week' })
+          showToast('📊 Digest: '+urgent.length+' urgente, '+week.length+' săptămâna asta','warn')
+          browser.storage.local.set({ccdew_last_digest:today})
+        }
+      })
+    }
+  }).catch(function(e){
+    srv.textContent='offline'; srv.style.color='#f85149'
+    var msg=e.message||String(e)
+    var hint=msg.indexOf('background')>=0
+      ? '⚠️ Repornește BetterBird (File → Quit → redeschide)'
+      : 'Rulează: <code>systemctl --user start ccdew-email-dashboard</code>'
+    document.getElementById('alerts').innerHTML='<div class="error">Nu pot conecta la server.<br>'+hint+'<br><small style="color:#6e7681">'+msg+'</small></div>'
+  })
+}
+
+var refreshBtn=document.getElementById('refreshBtn')
+refreshBtn.addEventListener('click',function(){
+  this.classList.add('loading'); load()
+  setTimeout(function(){refreshBtn.classList.remove('loading')},600)
+})
+refreshBtn.addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); this.click() }
 })
 
+function updateStickyTop(){
+  var h=document.querySelector('.header')
+  var f=document.querySelector('.filters')
+  if(h&&f){
+    var top=(h.offsetHeight+f.offsetHeight)+'px'
+    document.querySelectorAll('.group-header').forEach(function(el){el.style.top=top})
+  }
+}
+
 load()
-setInterval(load,60000)
+if(refreshTimer) clearInterval(refreshTimer)
+refreshTimer=setInterval(load,60000)
+window.addEventListener('resize',updateStickyTop)
+
+})()
 </script>
 </body>
 </html>
