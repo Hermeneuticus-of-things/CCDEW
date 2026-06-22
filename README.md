@@ -19,18 +19,13 @@
 
 ---
 
-## What can you do with it?
+## [MAHA] Overview — 10-second read
 
-| You want to... | CCDEW gives you... |
-|----------------|-------------------|
-| Solve hard problems with multiple AI perspectives | **Divergent/Convergent engine** — spawn 18 agents with different personalities, then synthesize one verdict |
-| Research from your own documents without hallucination | **NotebookLM Bridge** — query your PDFs, videos, notes with async + cache + anti-suspicion throttle |
-| Agents that remember and improve every session | **6-level memory pyramid** — N1 episodic → N6 principles, auto-consolidated |
-| Analyze anything at every scale | **Fractal Enneagram** — zoom from Maha (big picture) to Nano (detail) with 5 lenses |
-| Treat AI like production code | **CI/CD + CodeBurn + Quality Gate** — pre-commit checks, cost tracking, pre-push verification |
-| Connect any app, any protocol | **6 integration methods** — Bridge, MCP, Plugin, Skill, Agent, Template |
+**What:** A complete, opinionated AI agent ecosystem built on top of Claude Code Desktop.
 
----
+**Why:** Turn a chat LLM into an autonomous multi-agent system with memory, tools, CI/CD, and self-evolution.
+
+**How:** 6 MCP servers → 105+ agents → 133 skills → 6-level memory pyramid → auto-consolidation → self-healing.
 
 ### Who is it for?
 
@@ -41,7 +36,20 @@
 
 ---
 
-## Quick start
+## [MACRO] Getting Started — 60-second read
+
+### What can you do with it?
+
+| You want to... | CCDEW gives you... |
+|----------------|-------------------|
+| Solve hard problems with multiple AI perspectives | **Divergent/Convergent engine** — spawn 18 agents with different personalities, then synthesize one verdict |
+| Research from your own documents without hallucination | **NotebookLM Bridge** — query your PDFs, videos, notes with async + cache + anti-suspicion throttle |
+| Agents that remember and improve every session | **6-level memory pyramid** — N1 episodic → N6 principles, auto-consolidated |
+| Analyze anything at every scale | **Fractal Enneagram** — zoom from Maha to Nano with 5 analytic lenses |
+| Treat AI like production code | **CI/CD + CodeBurn + Quality Gate** — pre-commit checks, cost tracking, pre-push verification |
+| Connect any app, any protocol | **6 integration methods** — Bridge, MCP, Plugin, Skill, Agent, Template |
+
+### Quick start
 
 ```bash
 git clone https://github.com/Hermeneuticus-of-things/CCDEW.git
@@ -52,9 +60,7 @@ python3 .claude/helpers/mission-control.py  # API + dashboard on :8899
 
 Open Claude Code Desktop in the repo — the AGENTS.md context loads automatically. Ask "what can you do?" and the ecosystem answers.
 
----
-
-## Architecture at a glance
+### Architecture at a glance
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -69,7 +75,7 @@ Open Claude Code Desktop in the repo — the AGENTS.md context loads automatical
                      │
   ┌──────────────────▼───────────────────────────┐
   │              CCDEW CORE                      │
-  │  MCP ×6 · Bridges ×5 · Swarm · Plugins ×15  │
+  │  MCP x6 · Bridges x5 · Swarm · Plugins x15  │
   │  Convergent/Divergent · NLM · Fractal Enneag │
   └──────────────────┬───────────────────────────┘
                      │
@@ -97,12 +103,10 @@ Open Claude Code Desktop in the repo — the AGENTS.md context loads automatical
 
 ---
 
+## [MEZZO] Setup & Components — 2-minute scan
+
 > [!IMPORTANT]
 > **CCDEW is a bring-your-own-LLM framework.** You don't need any paid API key to start — all core features work with free OpenRouter models (DeepSeek, Qwen, Gemma). Paid keys unlock premium models but are never required.
-
----
-
-## Setup
 
 ### Prerequisites
 
@@ -157,22 +161,16 @@ CCDEW works *inside* Claude Code Desktop. Two files make it discoverable:
 
 Replace `/home/YOU` with your actual path. The repo's `.opencode/opencode.json` has relative paths as a starting point.
 
----
+### MCP Servers (6 active)
 
 > [!NOTE]
-> All MCP servers are in `.claude/mcp/`. To activate them, register each in `~/.config/opencode/opencode.json` as shown in Setup above. After registration, restart OpenCode and the tools appear automatically.
-
----
-
-## Components
-
-### MCP Servers (6 active)
+> All MCP servers are in `.claude/mcp/`. To activate them, register each in `~/.config/opencode/opencode.json` as shown above. After registration, restart OpenCode and the tools appear automatically.
 
 | Server | File | What it does |
 |--------|------|-------------|
 | **ccdew-mcp** | `ccdew-mcp.cjs` | 11 tools: route, safla, audit, cost, snapshot, compact |
-| **ccdew-convergent-divergent** | `ccdew-convergent-divergent.cjs` | 5 tools: divergent, convergent, full pipeline, wings, domain mapping |
-| **ccdew-nlm-bridge** | `ccdew-nlm-bridge.cjs` | 7 tools: async query, grouped, batch, cache, multi-channel, quota, auth |
+| **ccdew-convergent-divergent** | `ccdew-convergent-divergent.cjs` | 5 tools: divergent, convergent, pipeline, wings, domain mapping |
+| **ccdew-nlm-bridge** | `ccdew-nlm-bridge.cjs` | 7 tools: async, grouped, batch, cache, multi-channel, quota, auth |
 | **notebooklm** | `ccdew-notebooklm-mcp.cjs` | Content intelligence — connects to Google NotebookLM |
 | **opencode-llm** | `opencode-llm-mcp.cjs` | 5 tools: models, chat, embedding, providers, cost |
 | **hermes-mission-control** | `mission-control.py` | System health, snapshot, agent activity |
@@ -187,11 +185,11 @@ codeburn · graphify · safla · instincts · verify · optimize · permissions 
 
 ---
 
-## New Active Components
+## [MICRO] Detailed Reference — 5-minute read
 
 ### Convergent/Divergent Engine (v1)
 
-Enables multi-perspective reasoning: spawn N agents with distinct Enneagram wings, then synthesize their outputs into one integrated verdict.
+Spawn N agents with distinct Enneagram wings, then synthesize their outputs into one integrated verdict.
 
 | Tool | Description |
 |------|-------------|
@@ -217,8 +215,6 @@ Enables multi-perspective reasoning: spawn N agents with distinct Enneagram wing
 
 ### Fractal Enneagram Router (v2)
 
-Zooms from Maha (big picture) to Nano (detail) across 5 levels, with 5 analytic lenses.
-
 | Command | Description |
 |---------|-------------|
 | `zoom [level]` | Zoom details: Maha, Macro, Mezzo, Micro, Nano |
@@ -231,14 +227,10 @@ Zooms from Maha (big picture) to Nano (detail) across 5 levels, with 5 analytic 
 
 `nlm-session-hook.cjs` — Auto-checks NLM auth at each session start with anti-suspicion pattern (max 1 check per session, not on every query).
 
----
+### Intelligence & Memory — 6-Level Pyramid
 
 > [!TIP]
-> The memory pyramid auto-consolidates. Every action is saved at N1; periodically, patterns (N2), techniques (N3), skills (N4), attitudes (N5), and principles (N6) are extracted automatically. No manual curation needed.
-
----
-
-## Intelligence & Memory — 6-Level Pyramid
+> The memory pyramid auto-consolidates. Every action is saved at N1; periodically, patterns (N2), techniques (N3), skills (N4), attitudes (N5), and principles (N6) are extracted automatically.
 
 | Level | File | What it stores |
 |-------|------|----------------|
@@ -251,14 +243,10 @@ Zooms from Maha (big picture) to Nano (detail) across 5 levels, with 5 analytic 
 
 Engines: `ssa.cjs` (semantic search) · `safla.cjs` (adaptive learning, success rates) · `instincts.cjs` (pattern recognition) · `hologram_engine.py` (fractal integration) · `auto_learn_consolidate.py` (periodic N1→N6)
 
----
+### LLM & Models — OpenRouter Gateway
 
 > [!TIP]
-> **Model-agnostic.** Swap any model without changing agent code — just update the config. The gateway handles routing, fallback, cost tracking, and provider switching transparently.
-
----
-
-## LLM & Models — OpenRouter Gateway
+> **Model-agnostic.** Swap any model without changing agent code — just update the config.
 
 **Any agent can use any model.** Gateway (`opencode-llm-mcp.cjs`) provides model discovery, chat completion, embeddings, provider info, cost estimation.
 
@@ -273,14 +261,10 @@ Engines: `ssa.cjs` (semantic search) · `safla.cjs` (adaptive learning, success 
 
 Selection: by profile, by cost, by capability, adaptive (success/failure history), or fully configurable.
 
----
+### How to integrate anything
 
 > [!NOTE]
-> These 6 methods are independent — mix and match. A single application can have a Bridge for real-time data, a Skill for domain knowledge, and an Agent Profile for autonomous operation.
-
----
-
-## How to integrate anything
+> These 6 methods are independent — mix and match.
 
 | Method | When |
 |--------|------|
@@ -291,9 +275,7 @@ Selection: by profile, by cost, by capability, adaptive (success/failure history
 | **Agent Profile** | You want a new agent role with custom tools |
 | **Template** | You want a complete project scaffold |
 
----
-
-## Security
+### Security
 
 > [!WARNING]
 > Never commit secrets, API keys, or vault contents to git. CCDEW's pre-commit hook (`secret-scan`) blocks commits with detected secrets automatically.
@@ -307,7 +289,9 @@ Selection: by profile, by cost, by capability, adaptive (success/failure history
 
 ---
 
-## Repository Structure
+## [NANO] Implementation Detail — Deep Reference
+
+### Repository Structure
 
 ```
 CCDEW/
@@ -329,9 +313,7 @@ CCDEW/
 ├── [your-apps]            # Your applications integrated here
 ```
 
----
-
-## Complete Architecture (Mermaid)
+### Complete Architecture (Mermaid)
 
 ```mermaid
 graph TB
