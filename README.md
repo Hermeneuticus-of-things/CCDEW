@@ -63,7 +63,7 @@ graph TB
     CC_MCP1["ccdew-mcp<br/>11 tools: route, safla<br/>audit, cost, snapshot..."]
     CC_MCP2["opencode-llm<br/>5 tools: models, chat<br/>embedding, providers"]
     CC_MCP3["notebooklm<br/>content intelligence"]
-    CC_MCP4["hermes-mission-control<br/>system health & snapshot"]
+    CC_MCP4["hermes-mission-control<br/>system health and snapshot"]
     CC_MCP5["ccdew-convergent-divergent<br/>5 tools: divergent, convergent<br/>pipeline, wings, domains"]
     CC_MCP6["ccdew-nlm-bridge<br/>7 tools: async, grouped, batch<br/>cache, multi, quota, auth"]
     CC_BRIDGES["Bridges x5"]
@@ -80,12 +80,12 @@ graph TB
     CC_ENN1["T1:Reformer T2:Helper T3:Achiever<br/>T4:Individualist T5:Investigator<br/>T6:Loyalist T7:Enthusiast<br/>T8:Challenger T9:Peacemaker"]
   end
 
-  subgraph L1b_MODELS["LLM & MODELS — Gateway & Free Models"]
+  subgraph L1b_MODELS["LLM and MODELS — Gateway and Free Models"]
     MODEL_GW["OpenRouter Gateway<br/>opencode-llm-mcp.cjs<br/>5 tools: models, chat<br/>embedding, providers, cost"]
     MODEL_FREE["Free Models Available<br/>deepseek/deepseek-v4-flash:free<br/>qwen/qwen3-80b:free<br/>google/gemma-4-*:free<br/>mistralai/*:free · meta-llama/*:free<br/>minimax/m2.5:free · and more"]
-    MODEL_DIR["Model Directory & Pricing<br/>pricing.cjs · openrouter-pricing.cjs<br/>check-openrouter-free.cjs<br/>openrouter-note.md"]
+    MODEL_DIR["Model Directory and Pricing<br/>pricing.cjs · openrouter-pricing.cjs<br/>check-openrouter-free.cjs<br/>openrouter-note.md"]
     MODEL_BENCH["LLM Benchmark Suite<br/>llm-benchmark.py<br/>Open Cload cognitive tests<br/>performance comparison"]
-    MODEL_MAP["Agent → Model Mapping<br/>Hermes → qwen3-80b:free<br/>Claude Agents → Anthropic Claude<br/>GX Phone → minimax-m2.5:free<br/>OpenCode → deepseek-v4:free<br/>Swarm → varies by task"]
+    MODEL_MAP["Agent -> Model Mapping<br/>Hermes -> qwen3-80b:free<br/>Claude Agents -> Anthropic Claude<br/>GX Phone -> minimax-m2.5:free<br/>OpenCode -> deepseek-v4:free<br/>Swarm -> varies by task"]
     MODEL_OCONFIG["OpenCode Model Config<br/>.opencode.json · free list<br/>model fallback chain<br/>provider routing"]
     MODEL_HERMES["Hermes Model Usage<br/>Enneagram routing per node<br/>SAFLA selects best model<br/>auto-fallback on failure"]
   end
@@ -99,7 +99,7 @@ graph TB
     MC_METRICS["Metrics<br/>_METRICS/ · growth log"]
   end
 
-  subgraph L3_MEM["INTELLIGENCE & MEMORY — 6 LEVEL PYRAMID"]
+  subgraph L3_MEM["INTELLIGENCE and MEMORY — 6 LEVEL PYRAMID"]
     MEM_N1["N1: EPISODIC<br/>episodic.jsonl<br/>every action saved"]
     MEM_N2["N2: PATTERNS<br/>patterns.json<br/>Jaccard trigram clusters"]
     MEM_N3["N3: TECHNIQUES<br/>techniques.json<br/>reusable methods"]
@@ -111,7 +111,7 @@ graph TB
     MEM_SAFLA["SAFLA Adaptive Learning<br/>success rates · weights"]
     MEM_INST["Instincts<br/>pattern recognition"]
     MEM_HOLO["Hologram Engine<br/>fractal integration"]
-    MEM_AUTO["Auto-Consolidation<br/>auto_learn_consolidate.py<br/>N2→N6 periodic"]
+    MEM_AUTO["Auto-Consolidation<br/>auto_learn_consolidate.py<br/>N2->N6 periodic"]
     MEM_MOTORS["Additional Engines<br/>hermes-memory-sync.py<br/>hermes-binary-guardian.py<br/>fractal_patterns.json<br/>self_evolution.json"]
   end
 
@@ -184,7 +184,7 @@ graph TB
     TMPL_MCP["MCP Project"]
   end
 
-  subgraph L9_CRON["AUTOMATION — Cron & Watchdogs"]
+  subgraph L9_CRON["AUTOMATION — Cron and Watchdogs"]
     CRON_TOKEN["token refresh 5min<br/>magicplaces · b1tv · qnap"]
     CRON_WATCH["watchdog 2min<br/>zorin-tv-watchdog.sh"]
     CRON_CLEAN["clean / probe 6h<br/>zorin-tv-clean.py"]
@@ -206,45 +206,45 @@ graph TB
 
   subgraph L11_ANY["UNIVERSAL INTEGRATION — Any Application"]
     ANY_HOW["6 integration methods"]
-    ANY_BRIDGE["① Bridge<br/>HTTP · WS · MQTT · TCP · UDP<br/>gRPC · serial · custom"]
-    ANY_MCP["② MCP Server<br/>expose tools to agents"]
-    ANY_PLUGIN["③ Plugin<br/>hooks on lifecycle events<br/>pre-bash · pre-edit · post-task"]
-    ANY_SKILL["④ Skill<br/>domain instructions<br/>auto-loaded on match"]
-    ANY_AGENT["⑤ Agent Profile<br/>role definition<br/>custom tools + prompts"]
-    ANY_TEMPLATE["⑥ Template<br/>full project scaffold<br/>copy + customize"]
+    ANY_BRIDGE["(1) Bridge<br/>HTTP · WS · MQTT · TCP · UDP<br/>gRPC · serial · custom"]
+    ANY_MCP["(2) MCP Server<br/>expose tools to agents"]
+    ANY_PLUGIN["(3) Plugin<br/>hooks on lifecycle events<br/>pre-bash · pre-edit · post-task"]
+    ANY_SKILL["(4) Skill<br/>domain instructions<br/>auto-loaded on match"]
+    ANY_AGENT["(5) Agent Profile<br/>role definition<br/>custom tools + prompts"]
+    ANY_TEMPLATE["(6) Template<br/>full project scaffold<br/>copy + customize"]
   end
 
-  OC_DASH & OC_NOTE & OC_MONITOR & OC_BENCH & OC_COG --> MODEL_GW
-  MODEL_GW --> MODEL_FREE & MODEL_DIR & MODEL_BENCH & MODEL_MAP & MODEL_OCONFIG & MODEL_HERMES
+  OC_DASH and OC_NOTE and OC_MONITOR and OC_BENCH and OC_COG --> MODEL_GW
+  MODEL_GW --> MODEL_FREE and MODEL_DIR and MODEL_BENCH and MODEL_MAP and MODEL_OCONFIG and MODEL_HERMES
   MODEL_GW --> CC_CORE
   MODEL_MAP --> CC_MCP2
-  CC_CORE --> CC_MCP1 & CC_MCP2 & CC_MCP3 & CC_MCP4 & CC_MCP5 & CC_MCP6
-  CC_CORE --> CC_BR1 & CC_BR2 & CC_BR3 & CC_BR4 & CC_BR5
-  CC_CORE --> CC_RUFLO & CC_SWARM & CC_PLUGINS
+  CC_CORE --> CC_MCP1 and CC_MCP2 and CC_MCP3 and CC_MCP4 and CC_MCP5 and CC_MCP6
+  CC_CORE --> CC_BR1 and CC_BR2 and CC_BR3 and CC_BR4 and CC_BR5
+  CC_CORE --> CC_RUFLO and CC_SWARM and CC_PLUGINS
   CC_CORE --> CC_ENN
   CC_ENN --> CC_ENN1
   CC_PLUGINS --> CC_PL1
-  CC_MCP1 & CC_MCP2 & CC_MCP3 & CC_MCP4 & CC_MCP5 & CC_MCP6 --> MC_API
-  MC_API --> MC_DASH & MC_MGR & MC_BURN & MC_QUALITY & MC_METRICS
+  CC_MCP1 and CC_MCP2 and CC_MCP3 and CC_MCP4 and CC_MCP5 and CC_MCP6 --> MC_API
+  MC_API --> MC_DASH and MC_MGR and MC_BURN and MC_QUALITY and MC_METRICS
   MC_MGR --> MEM_ENGINE
-  MEM_ENGINE --> MEM_N1 & MEM_N2 & MEM_N3 & MEM_N4 & MEM_N5 & MEM_N6
-  MEM_SSA & MEM_SAFLA & MEM_INST & MEM_HOLO & MEM_AUTO --> MEM_ENGINE
+  MEM_ENGINE --> MEM_N1 and MEM_N2 and MEM_N3 and MEM_N4 and MEM_N5 and MEM_N6
+  MEM_SSA and MEM_SAFLA and MEM_INST and MEM_HOLO and MEM_AUTO --> MEM_ENGINE
   MEM_ENGINE --> MEM_MOTORS
-  MEM_N4 --> AG_HERMES & AG_CLAUDE & AG_ZORIN & AG_SWARM & AG_GX & AG_EMAIL
-  AG_CLAUDE --> AG_C1 & AG_C2 & AG_C3 & AG_C4 & AG_C5 & AG_C6 & AG_C7 & AG_C8 & AG_C9 & AG_C10
+  MEM_N4 --> AG_HERMES and AG_CLAUDE and AG_ZORIN and AG_SWARM and AG_GX and AG_EMAIL
+  AG_CLAUDE --> AG_C1 and AG_C2 and AG_C3 and AG_C4 and AG_C5 and AG_C6 and AG_C7 and AG_C8 and AG_C9 and AG_C10
   SK_OC --> SK_OC1
-  SK_H --> SK_H1 & SK_H2 & SK_H3 & SK_H4 & SK_H5 & SK_H6 & SK_H7 & SK_H8 & SK_H9 & SK_H10
+  SK_H --> SK_H1 and SK_H2 and SK_H3 and SK_H4 and SK_H5 and SK_H6 and SK_H7 and SK_H8 and SK_H9 and SK_H10
   SK_C --> SK_C1
   SK_OCL --> SK_OCL
-  MEM_N4 --> SK_OC & SK_H & SK_C & SK_OCL
-  MC_MGR --> CMD_ANALYSIS & CMD_AUTO & CMD_GITHUB & CMD_HOOKS & CMD_MONITOR & CMD_OPT & CMD_SPARC
+  MEM_N4 --> SK_OC and SK_H and SK_C and SK_OCL
+  MC_MGR --> CMD_ANALYSIS and CMD_AUTO and CMD_GITHUB and CMD_HOOKS and CMD_MONITOR and CMD_OPT and CMD_SPARC
   CC_RUFLO --> FLOW_CONFIG
-  FLOW_CONFIG --> FLOW_SESSIONS & FLOW_REPORTS & FLOW_DATA & FLOW_MEM & FLOW_TEAM
-  TMPL_ANDROID & TMPL_CARTE & TMPL_DEVCONTAINER & TMPL_GENERIC & TMPL_GITHUB & TMPL_OC & TMPL_PREVIEW & TMPL_RESEARCH & TMPL_MCP --> MC_MGR
-  CRON_TOKEN & CRON_WATCH & CRON_CLEAN & CRON_SECURITY & CRON_EVOLUTION & CRON_BOOTSTRAP & CRON_SCRIPTS --> MEM_ENGINE
-  INFRA_CONFIG & INFRA_MEMORY & INFRA_SETTINGS & INFRA_BEST & INFRA_METRICS & INFRA_VAULT & INFRA_SECURITY --> CC_CORE
+  FLOW_CONFIG --> FLOW_SESSIONS and FLOW_REPORTS and FLOW_DATA and FLOW_MEM and FLOW_TEAM
+  TMPL_ANDROID and TMPL_CARTE and TMPL_DEVCONTAINER and TMPL_GENERIC and TMPL_GITHUB and TMPL_OC and TMPL_PREVIEW and TMPL_RESEARCH and TMPL_MCP --> MC_MGR
+  CRON_TOKEN and CRON_WATCH and CRON_CLEAN and CRON_SECURITY and CRON_EVOLUTION and CRON_BOOTSTRAP and CRON_SCRIPTS --> MEM_ENGINE
+  INFRA_CONFIG and INFRA_MEMORY and INFRA_SETTINGS and INFRA_BEST and INFRA_METRICS and INFRA_VAULT and INFRA_SECURITY --> CC_CORE
 
-  ANY_BRIDGE & ANY_MCP & ANY_PLUGIN & ANY_SKILL & ANY_AGENT & ANY_TEMPLATE --> L11_ANY
+  ANY_BRIDGE and ANY_MCP and ANY_PLUGIN and ANY_SKILL and ANY_AGENT and ANY_TEMPLATE --> L11_ANY
 
   style L0_OC fill:#1a1a2e,stroke:#e94560,color:#fff
   style L1b_MODELS fill:#0f3460,stroke:#e94560,color:#fff
