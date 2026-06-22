@@ -32,6 +32,15 @@
 
 ---
 
+### Who is it for?
+
+- **AI power users** who want more than a chat interface — full agent orchestration
+- **Developers** building autonomous AI workflows with structured memory and reasoning
+- **Researchers** who need grounded (non-hallucinating) answers from their own source materials
+- **Anyone** who wants AI agents that remember, adapt, and improve across sessions
+
+---
+
 ## Quick start
 
 ```bash
@@ -178,6 +187,52 @@ codeburn · graphify · safla · instincts · verify · optimize · permissions 
 
 ---
 
+## New Active Components
+
+### Convergent/Divergent Engine (v1)
+
+Enables multi-perspective reasoning: spawn N agents with distinct Enneagram wings, then synthesize their outputs into one integrated verdict.
+
+| Tool | Description |
+|------|-------------|
+| `ccdew_divergent` | Generates N agents with distinct Enneagram wings (max 18 wings based on domain) |
+| `ccdew_convergent` | Synthesizes N divergent outputs into integrated verdict |
+| `ccdew_divergent_convergent` | Full pipeline in one call |
+| `ccdew_wings_list` | Lists all 18 wings with zoom, lenses, perspectives, modalities |
+| `ccdew_domain_wings` | Shows domain to recommended wings mapping |
+
+### NLM Bridge (v1) — NotebookLM Integration
+
+**What is NotebookLM?** Google NotebookLM answers questions exclusively from documents you upload (PDF, YouTube, web, text, audio) — zero hallucination. The bridge adds async queries, cache, rate-limit avoidance, batch processing, and quota management so agents can interrogate notebooks safely.
+
+| Tool | Level | Description |
+|------|-------|-------------|
+| `nlm_async_query` | 1+2 | Async query with 180s timeout + automatic poll |
+| `nlm_grouped_queries` | 3 | 2-5 sub-questions in a single query |
+| `nlm_batch` | 4 | Multi-notebook batch with throttle between them |
+| `nlm_cache` | 7 | Local cache management (stat, clear, search) |
+| `nlm_multi_channel` | all | Full pipeline: auth to cache to grouped to batch |
+| `nlm_quota` | 10 | Check remaining daily quota |
+| `nlm_auth_check` | safe | Checks auth once per session |
+
+### Fractal Enneagram Router (v2)
+
+Zooms from Maha (big picture) to Nano (detail) across 5 levels, with 5 analytic lenses.
+
+| Command | Description |
+|---------|-------------|
+| `zoom [level]` | Zoom details: Maha, Macro, Mezzo, Micro, Nano |
+| `lenses [name]` | Lens details: stylistic, doctrinal, structural, regression, memory |
+| `priority` | Priority matrix per task type (editorial, security, etc.) |
+| `compose <task> [--files N]` | Complete swarm composition (Phase 1-4) |
+| `wings` | Complete registry with 18 Enneagram wings |
+
+### NLM Session Hook
+
+`nlm-session-hook.cjs` — Auto-checks NLM auth at each session start with anti-suspicion pattern (max 1 check per session, not on every query).
+
+---
+
 > [!TIP]
 > The memory pyramid auto-consolidates. Every action is saved at N1; periodically, patterns (N2), techniques (N3), skills (N4), attitudes (N5), and principles (N6) are extracted automatically. No manual curation needed.
 
@@ -249,6 +304,30 @@ Selection: by profile, by cost, by capability, adaptive (success/failure history
 - Permission guard on bash commands
 - Security monitoring every 12h (OWASP guidelines)
 - Firewall monitoring (UFW, ports)
+
+---
+
+## Repository Structure
+
+```
+CCDEW/
+├── .claude/
+│   ├── helpers/           # 80+ Python + CJS engines
+│   ├── mcp/               # 6 MCP servers
+│   ├── agents/            # 105+ agent profiles
+│   ├── bridge/            # 5 bridges
+│   ├── skills/            # 34 Claude skills
+│   └── commands/          # 100+ CLI commands in 7 categories
+├── .opencode/             # 15 plugins TS + config
+├── .claude-flow/          # 3505 sessions, 243 reports
+├── ccdew-core/            # NPM library + CLI binaries
+├── agents/                # 15 top-level profiles
+├── _MEMORY/               # 6 memory levels + ADR + identity
+├── _SETTINGS/             # 17 rules + configurations
+├── _TEMPLATES/            # 9 project templates
+├── _METRICS/              # Cost & performance
+├── [your-apps]            # Your applications integrated here
+```
 
 ---
 
