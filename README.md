@@ -8,6 +8,13 @@
 
 **Open Cload Intelligence Suite + CCDEW Core** — Universal framework for autonomous AI agents. Integrates any application. Self-evolution. Hierarchical memories. Self-healing.
 
+[![MCP Servers](https://img.shields.io/badge/MCP_Servers-6-blueviolet)](.claude/mcp/)
+[![Agents](https://img.shields.io/badge/Agent_Profiles-105%2B-success)](.claude/agents/)
+[![Skills](https://img.shields.io/badge/Skills-133-ff69b4)](.claude/skills/)
+[![Memory](https://img.shields.io/badge/Memory-6_Levels-important)](_MEMORY/)
+[![Integrations](https://img.shields.io/badge/Integration_Methods-6-yellow)](README.md)
+[![Self-Healing](https://img.shields.io/badge/Self--Healing-Active-brightgreen)](.claude/helpers/)
+
 > **Why hasn't your LLM heard of it?** CCDEW is a private, custom-built framework — not in any public training set. Standard LLMs don't know it exists. That's the point: CCDEW extends what an LLM can do, not the other way around.
 
 ---
@@ -81,6 +88,11 @@ Open Claude Code Desktop in the repo — the AGENTS.md context loads automatical
 
 ---
 
+> [!IMPORTANT]
+> **CCDEW is a bring-your-own-LLM framework.** You don't need any paid API key to start — all core features work with free OpenRouter models (DeepSeek, Qwen, Gemma). Paid keys unlock premium models but are never required.
+
+---
+
 ## Setup
 
 ### Prerequisites
@@ -138,6 +150,11 @@ Replace `/home/YOU` with your actual path. The repo's `.opencode/opencode.json` 
 
 ---
 
+> [!NOTE]
+> All MCP servers are in `.claude/mcp/`. To activate them, register each in `~/.config/opencode/opencode.json` as shown in Setup above. After registration, restart OpenCode and the tools appear automatically.
+
+---
+
 ## Components
 
 ### MCP Servers (6 active)
@@ -161,6 +178,11 @@ codeburn · graphify · safla · instincts · verify · optimize · permissions 
 
 ---
 
+> [!TIP]
+> The memory pyramid auto-consolidates. Every action is saved at N1; periodically, patterns (N2), techniques (N3), skills (N4), attitudes (N5), and principles (N6) are extracted automatically. No manual curation needed.
+
+---
+
 ## Intelligence & Memory — 6-Level Pyramid
 
 | Level | File | What it stores |
@@ -173,6 +195,11 @@ codeburn · graphify · safla · instincts · verify · optimize · permissions 
 | **N6 Principles** | `principles.json` | 14 universal rules validated across sessions |
 
 Engines: `ssa.cjs` (semantic search) · `safla.cjs` (adaptive learning, success rates) · `instincts.cjs` (pattern recognition) · `hologram_engine.py` (fractal integration) · `auto_learn_consolidate.py` (periodic N1→N6)
+
+---
+
+> [!TIP]
+> **Model-agnostic.** Swap any model without changing agent code — just update the config. The gateway handles routing, fallback, cost tracking, and provider switching transparently.
 
 ---
 
@@ -193,6 +220,11 @@ Selection: by profile, by cost, by capability, adaptive (success/failure history
 
 ---
 
+> [!NOTE]
+> These 6 methods are independent — mix and match. A single application can have a Bridge for real-time data, a Skill for domain knowledge, and an Agent Profile for autonomous operation.
+
+---
+
 ## How to integrate anything
 
 | Method | When |
@@ -207,6 +239,9 @@ Selection: by profile, by cost, by capability, adaptive (success/failure history
 ---
 
 ## Security
+
+> [!WARNING]
+> Never commit secrets, API keys, or vault contents to git. CCDEW's pre-commit hook (`secret-scan`) blocks commits with detected secrets automatically.
 
 - 3 sensitivity levels: PUBLIC / PRIVATE / SECRET
 - Vault encrypted with PIN + biometric
