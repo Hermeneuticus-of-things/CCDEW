@@ -9,6 +9,12 @@
   ╚══════════════════════════════════════════════════════════════════╝
                                     │
   ╔══════════════════════════════════════════════════════════════════╗
+  ║         LLM & MODELS — OpenRouter Gateway · Free Models        ║
+  ║  deepseek-v4:free · qwen3-80b:free · gemma-4 · mistral ·       ║
+  ║  llama · minimax · pricing · benchmark · agent→model mapping    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+                                    │
+  ╔══════════════════════════════════════════════════════════════════╗
   ║                    CCDEW CORE                                   ║
   ║  ccdew-core · MCP ×4 · Bridges ×5 · Ruflo · Swarm · Plugins    ║
   ╚══════════════════════════════════════════════════════════════════╝
@@ -69,6 +75,16 @@ graph TB
     CC_PL1["codeburn · graphify · safla<br/>instincts · verify · optimize<br/>permissions · secret-scan<br/>session · statusline · ssa<br/>project-scope · quality-gate<br/>red-hat · hermes-orch"]
     CC_ENN["Enneagram Router<br/>9 personality types"]
     CC_ENN1["T1:Reformer T2:Helper T3:Achiever<br/>T4:Individualist T5:Investigator<br/>T6:Loyalist T7:Enthusiast<br/>T8:Challenger T9:Peacemaker"]
+  end
+
+  subgraph L1b_MODELS["LLM & MODELS — Gateway & Free Models"]
+    MODEL_GW["OpenRouter Gateway<br/>opencode-llm-mcp.cjs<br/>5 tools: models, chat<br/>embedding, providers, cost"]
+    MODEL_FREE["Free Models Available<br/>deepseek/deepseek-v4-flash:free<br/>qwen/qwen3-80b:free<br/>google/gemma-4-*:free<br/>mistralai/*:free · meta-llama/*:free<br/>minimax/m2.5:free · and more"]
+    MODEL_DIR["Model Directory & Pricing<br/>pricing.cjs · openrouter-pricing.cjs<br/>check-openrouter-free.cjs<br/>openrouter-note.md"]
+    MODEL_BENCH["LLM Benchmark Suite<br/>llm-benchmark.py<br/>Open Cload cognitive tests<br/>performance comparison"]
+    MODEL_MAP["Agent → Model Mapping<br/>Hermes → qwen3-80b:free<br/>Claude Agents → Anthropic Claude<br/>GX Phone → minimax-m2.5:free<br/>OpenCode → deepseek-v4:free<br/>Swarm → varies by task"]
+    MODEL_OCONFIG["OpenCode Model Config<br/>.opencode.json · free list<br/>model fallback chain<br/>provider routing"]
+    MODEL_HERMES["Hermes Model Usage<br/>Enneagram routing per node<br/>SAFLA selects best model<br/>auto-fallback on failure"]
   end
 
   subgraph L2_MC["MISSION CONTROL"]
@@ -195,7 +211,10 @@ graph TB
     ANY_TEMPLATE["⑥ Template<br/>full project scaffold<br/>copy + customize"]
   end
 
-  OC_DASH & OC_NOTE & OC_MONITOR & OC_BENCH & OC_COG --> CC_CORE
+  OC_DASH & OC_NOTE & OC_MONITOR & OC_BENCH & OC_COG --> MODEL_GW
+  MODEL_GW --> MODEL_FREE & MODEL_DIR & MODEL_BENCH & MODEL_MAP & MODEL_OCONFIG & MODEL_HERMES
+  MODEL_GW --> CC_CORE
+  MODEL_MAP --> CC_MCP2
   CC_CORE --> CC_MCP1 & CC_MCP2 & CC_MCP3 & CC_MCP4
   CC_CORE --> CC_BR1 & CC_BR2 & CC_BR3 & CC_BR4 & CC_BR5
   CC_CORE --> CC_RUFLO & CC_SWARM & CC_PLUGINS
@@ -225,6 +244,7 @@ graph TB
   ANY_BRIDGE & ANY_MCP & ANY_PLUGIN & ANY_SKILL & ANY_AGENT & ANY_TEMPLATE --> L11_ANY
 
   style L0_OC fill:#1a1a2e,stroke:#e94560,color:#fff
+  style L1b_MODELS fill:#0f3460,stroke:#e94560,color:#fff
   style L1_CCDEW fill:#16213e,stroke:#0f3460,color:#fff
   style L2_MC fill:#0f3460,stroke:#e94560,color:#fff
   style L3_MEM fill:#533483,stroke:#e94560,color:#fff
@@ -252,6 +272,33 @@ graph TB
 | **N6 Principles** | `principles.json` | 14 reguli universale | consolidare N5 |
 
 Motoare suplimentare: `ssa.cjs` (semantic search), `safla.cjs` (adaptive learning), `instincts.cjs` (pattern recognition), `hologram_engine.py` (fractal integration), `auto_learn_consolidate.py` (periodic N1→N6).
+
+---
+
+## LLM & Modele — Gateway și modele gratuite
+
+### OpenRouter Gateway
+Tot traficul LLM trece prin `opencode-llm-mcp.cjs` — gateway-ul OpenRouter. Expune 5 tool-uri: list models, chat completion, embedding, provider info, cost estimation.
+
+### Modele gratuite disponibile
+| Model | Furnizor | Folosit de |
+|-------|----------|-----------|
+| `deepseek/deepseek-v4-flash:free` | DeepSeek | OpenCode Desktop implicit |
+| `qwen/qwen3-80b:free` | Alibaba | Hermes (Enneagram routing), agenți grei |
+| `google/gemma-4-*:free` | Google | Task-uri ușoare, fallback |
+| `mistralai/*:free` | Mistral | Analiză text, embeddings |
+| `meta-llama/*:free` | Meta | Reasoning, planning |
+| `minimax/minimax-m2.5:free` | MiniMax | GX Phone agent (mobil) |
+
+### Cum selectează agenții modelul
+- **Hermes** — Enneagram router alege tipul de model pe baza profilului task-ului; SAFLA ajustează în funcție de succes/eșec
+- **Claude Agents** — folosesc modelul implicit Claude (Anthropic) prin Claude Desktop
+- **OpenCode** — configurat în `.opencode.json` cu listă de modele free + fallback chain
+- **GX Phone** — rulează pe mobil cu `minimax-m2.5:free` prin OpenRouter
+- **Swarm** — fiecare nod alege dinamic pe baza încărcării și a ratei de succes
+
+### Benchmark & Monitorizare
+`llm-benchmark.py` în Open-Cload testează performanța modelelor. `check-openrouter-free.cjs` verifică periodic ce modele gratuite sunt disponibile. Costul per sesiune e urmărit în CodeBurn (`pricing.cjs`).
 
 ---
 
