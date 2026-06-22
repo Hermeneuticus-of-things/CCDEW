@@ -36,7 +36,62 @@ npm install
 pip install -r requirements.txt  # if present
 ```
 
-Point your Claude Code Desktop config to the repo and the `.claude/` structure will be auto-discovered.
+### Setup After Clone — Configuring OpenCode Desktop
+
+CCDEW works **inside** [Claude Code Desktop](https://opencode.ai) (OpenCode). To make it discoverable, you need two things:
+
+#### 1. The context files (auto-loaded at each session)
+
+OpenCode reads `AGENTS.md` from the repo root and `~/.config/opencode/AGENTS.md` from the system. These files tell OpenCode:
+- What CCDEW is and how it works
+- Which MCP servers are available and where they live
+- Which agents, skills, and commands it can use
+- The architecture, principles, and navigation shortcuts
+
+These files are already in the repo — just clone and OpenCode will find them.
+
+#### 2. Register MCP servers in `opencode.json`
+
+MCP servers are the tools that agents call (status, memory, NLM queries, Enneagram routing, etc.). To register them:
+
+```jsonc
+// ~/.config/opencode/opencode.json
+{
+  "mcpServers": {
+    "ccdew-mcp": {
+      "command": "node",
+      "args": ["/home/YOUR_USER/CCDEW/.claude/mcp/ccdew-mcp.cjs"]
+    },
+    "ccdew-notebooklm": {
+      "command": "node",
+      "args": ["/home/YOUR_USER/CCDEW/.claude/mcp/ccdew-notebooklm-mcp.cjs"]
+    },
+    "ccdew-convergent-divergent": {
+      "command": "node",
+      "args": ["/home/YOUR_USER/CCDEW/.claude/mcp/ccdew-convergent-divergent.cjs"]
+    },
+    "ccdew-nlm-bridge": {
+      "command": "node",
+      "args": ["/home/YOUR_USER/CCDEW/.claude/mcp/ccdew-nlm-bridge.cjs"]
+    }
+    // ... mission-control, opencode-llm, hermes-agent, etc.
+  }
+}
+```
+
+Each server path points to a `.cjs` or `.py` file in `.claude/mcp/`. The version in the repo (`opencode.json`) uses relative paths — copy it to `~/.config/opencode/opencode.json` and fix the absolute paths.
+
+#### 3. Bootstrap the ecosystem (optional but recommended)
+
+```bash
+# Start Mission Control (status API + dashboard on port 8899)
+python3 ~/CCDEW/.claude/helpers/mission-control.py &
+
+# Run the bootstrap script to start all background services
+bash ~/CCDEW/scripts/bootstrap-ccdew.sh
+```
+
+After this, every OpenCode session will auto-load the CCDEW context. Ask "what can you do?" and the agent will know the full ecosystem.
 
 ### What can you do with it?
 
