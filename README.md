@@ -380,7 +380,11 @@ CCDEW/
 | `ccdew_wings_list` | Lists all 18 wings (zoom, lenses, perspectives, modalities) |
 | `ccdew_domain_wings` | Shows domain → recommended wings mapping |
 
-### NLM Bridge (v1)
+### NLM Bridge (v1) — NotebookLM Integration
+**What is NotebookLM?** Google NotebookLM is an AI that answers questions exclusively from documents you upload (PDF, YouTube, web, text, audio) — zero hallucination, because it never invents outside your sources. Think of it as a personal research assistant that *only* talks about what you've given it.
+
+**How it helps CCDEW:** Agents get secure, grounded access to your notebooks (knowledge bases). Instead of guessing or hallucinating, they query NotebookLM and get factual answers from your curated sources. The bridge adds async queries, cache, rate-limit avoidance, batch processing, and quota management — so agents can interrogate notebooks efficiently without triggering Google's anti-suspicion throttles.
+
 `ccdew-nlm-bridge.cjs` — Implements the async 10-level protocol from `nlm_async_multi_channel_protocol.md` + `nlm_anti_suspicion.md`.
 
 | Tool | Level | Description |
