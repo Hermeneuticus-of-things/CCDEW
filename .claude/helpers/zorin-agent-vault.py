@@ -13,7 +13,10 @@ VAULT_DIR = os.path.join(HOME, ".hermes", ".sys_1dd21f77ace54b6d")
 STATE_DIR = os.path.join(HOME, ".local", "state", "zorin-agent", "vault")
 os.makedirs(STATE_DIR, exist_ok=True)
 ACCESS_LOG = os.path.join(STATE_DIR, "access.json")
-PIN = os.environ.get("HERMES_VAULT_PIN") or "CHANGE_ME"
+PIN = os.environ.get("HERMES_VAULT_PIN")
+if not PIN:
+    print(json.dumps({"error": "HERMES_VAULT_PIN not set — run: export HERMES_VAULT_PIN=<your_new_pin>"}), file=sys.stderr)
+    sys.exit(1)
 
 class AgentVault:
     def __init__(self):
