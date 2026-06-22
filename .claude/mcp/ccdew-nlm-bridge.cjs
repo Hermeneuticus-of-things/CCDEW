@@ -8,12 +8,11 @@
  *   _SETTINGS/RULES/nlm_anti_suspicion.md
  *
  * Tools:
- *   nlm_async_query      — Async query with polling (Nivel 1)
- *   nlm_grouped_queries  — Multiple sub-questions in one query (Nivel 3)
- *   nlm_batch            — Multi-notebook batch (Nivel 4)
- *   nlm_cache            — Local cache management (Nivel 7)
- *   nlm_multi_channel    — Full pipeline query across all notebooks
- *   nlm_quota            — Check remaining daily quota (Nivel 10)
+ *   nlm_async_query      — Async query with polling (Level 1)
+ *   nlm_grouped_queries  — Multiple sub-questions in one query (Level 3)
+ *   nlm_batch            — Multi-notebook batch (Level 4)
+ *   nlm_cache            — Local cache management (Level 7)
+ *   nlm_quota            — Check remaining daily quota (Level 10)
  *   nlm_auth_check       — Verify NLM auth status (anti-suspicion safe)
  */
 
@@ -33,9 +32,9 @@ const { execSync } = require('child_process');
 const MEMORY_DIR = process.env.HERMES_MEMORY_DIR || '/home/think/.hermes/memories';
 const CACHE_DIR = path.join(MEMORY_DIR, 'nlm-cache');
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
-const THROTTLE_MS = 3000; // Nivel 9: ≥3s între queries
-const MULTI_NOTEBOOK_THROTTLE_MS = 5000; // ≥5s între notebook-uri
-const BATCH_THROTTLE_MS = 10000; // ≥10s între batches mari
+const THROTTLE_MS = 3000; // Level 9: ≥3s between queries
+const MULTI_NOTEBOOK_THROTTLE_MS = 5000; // ≥5s between notebooks
+const BATCH_THROTTLE_MS = 10000; // ≥10s between large batches
 
 // ── Throttle state ───────────────────────────────────────────────
 
@@ -139,8 +138,8 @@ function checkAuth() {
 function detectDomain(task) {
   const lower = (task || '').toLowerCase();
   if (lower.includes('karma') || lower.includes('jain') || lower.includes('vedanta')) return 'karma-book';
-  if (lower.includes('glosar') || lower.includes('glossary') || lower.includes('termen')) return 'glossary';
-  if (lower.includes('research') || lower.includes('cercetare') || lower.includes('investig')) return 'research';
+  if (lower.includes('glossary') || lower.includes('glosar') || lower.includes('termen')) return 'glossary';
+  if (lower.includes('research') || lower.includes('investig')) return 'research';
   return 'general';
 }
 
@@ -148,8 +147,8 @@ function detectDomain(task) {
 
 const NOTEBOOKS = {
   'karma-book': { id: '6696523d', name: 'Karma Book', throttle: MULTI_NOTEBOOK_THROTTLE_MS },
-  'glossary':    { id: '6acbbc90', name: 'Glosar',     throttle: MULTI_NOTEBOOK_THROTTLE_MS },
-  'research':    { id: '669ee18c', name: 'Cercetare',  throttle: MULTI_NOTEBOOK_THROTTLE_MS },
+  'glossary':    { id: '6acbbc90', name: 'Glossary',     throttle: MULTI_NOTEBOOK_THROTTLE_MS },
+  'research':    { id: '669ee18c', name: 'Research',  throttle: MULTI_NOTEBOOK_THROTTLE_MS },
 };
 
 // ── Server ───────────────────────────────────────────────────────
@@ -162,28 +161,28 @@ const server = new Server(
 const TOOLS = [
   {
     name: 'nlm_async_query',
-    description: 'Nivel 1+2: Async query cu timeout mărit (180s) și poll automat',
+    description: 'Level 1+2: Async query with increased timeout (180s) and auto-poll',
     inputSchema: {
       type: 'object',
       properties: {
-        notebook_id: { type: 'string', description: 'ID-ul notebook-ului NLM' },
-        query: { type: 'string', description: 'Întrebarea' },
-        timeout: { type: 'number', description: 'Timeout în secunde (default 180)' },
+        notebook_id: { type: 'string', description: 'NLM notebook ID' },
+        query: { type: 'string', description: 'The question' },
+        timeout: { type: 'number', description: 'Timeout in seconds (default 180)' },
       },
       required: ['notebook_id', 'query'],
     },
   },
   {
     name: 'nlm_grouped_queries',
-    description: 'Nivel 3: Multiple sub-întrebări într-un singur query structurat',
+    description: 'Level 3: Multiple sub-questions in a single structured query',
     inputSchema: {
       type: 'object',
       properties: {
-        notebook_id: { type: 'string', description: 'ID-ul notebook-ului' },
+        notebook_id: { type: 'string', description: 'Notebook ID' },
         queries: {
           type: 'array',
           items: { type: 'string' },
-          description: '3-5 sub-întrebări',
+          description: '3-5 sub-questions',
         },
       },
       required: ['notebook_id', 'queries'],
@@ -191,15 +190,15 @@ const TOOLS = [
   },
   {
     name: 'nlm_batch',
-    description: 'Nivel 4: Multi-notebook batch cu throttle între notebook-uri',
+    description: 'Level 4: Multi-notebook batch with throttle between notebooks',
     inputSchema: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: 'Întrebarea pentru toate notebook-urile' },
+        query: { type: 'string', description: 'Query for all notebooks' },
         notebooks: {
           type: 'array',
           items: { type: 'string', enum: ['karma-book', 'glossary', 'research'] },
-          description: 'Notebook-urile de interogat',
+          description: 'Notebooks to query',
         },
       },
       required: ['query'],
@@ -207,12 +206,12 @@ const TOOLS = [
   },
   {
     name: 'nlm_cache',
-    description: 'Nivel 7: Gestionare cache local (stat, clear, search)',
+    description: 'Level 7: Local cache management (stats, clear, search)',
     inputSchema: {
       type: 'object',
       properties: {
-        action: { type: 'string', enum: ['stats', 'clear', 'search'], description: 'Acțiune' },
-        query: { type: 'string', description: 'Căutare în cache (când action=search)' },
+        action: { type: 'string', enum: ['stats', 'clear', 'search'], description: 'Action' },
+        query: { type: 'string', description: 'Search in cache (when action=search)' },
       },
       required: ['action'],
     },
@@ -223,30 +222,30 @@ const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        primary_query: { type: 'string', description: 'Întrebarea principală' },
+        primary_query: { type: 'string', description: 'Primary query' },
         sub_questions: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Sub-întrebări pentru grouped query',
+          description: 'Sub-questions for grouped query',
         },
         notebooks: {
           type: 'array',
           items: { type: 'string', enum: ['karma-book', 'glossary', 'research'] },
-          description: 'Notebook-uri de interogat',
+          description: 'Notebooks to query',
         },
-        bypass_cache: { type: 'boolean', description: 'Ignoră cache-ul' },
+        bypass_cache: { type: 'boolean', description: 'Ignore cache' },
       },
       required: ['primary_query'],
     },
   },
   {
     name: 'nlm_quota',
-    description: 'Nivel 10: Verifică quota zilnică rămasă',
+    description: 'Level 10: Check remaining daily quota',
     inputSchema: { type: 'object', properties: {} },
   },
   {
     name: 'nlm_auth_check',
-    description: 'Verifică auth NLM o singură dată per sesiune (anti-suspicion safe)',
+    description: 'Check NLM auth once per session (anti-suspicion safe)',
     inputSchema: { type: 'object', properties: {} },
   },
 ];
@@ -262,7 +261,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'nlm_async_query': {
         const { notebook_id, query, timeout = 180 } = args;
 
-        // Check cache first (Nivel 7)
+        // Check cache first (Level 7)
         if (!args.bypass_cache) {
           const cached = cacheGet(query);
           if (cached) {
@@ -270,7 +269,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
-        // Throttle (Nivel 9)
+        // Throttle (Level 9)
         throttle(THROTTLE_MS);
 
         return {
@@ -281,12 +280,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               params: { notebook_id, query, timeout },
               anti_suspicion: {
                 throttle_ms: THROTTLE_MS,
-                note: 'Respectă ≥3s între queries consecutive. Rulează o singură dată.',
+                note: 'Respect ≥3s between consecutive queries. Run once only.',
               },
               next_steps: [
-                'Folosește `notebook_query_start` cu timeout:180 pentru a porni query-ul',
-                'Apoi poll cu `notebook_query_status` până la status:completed',
-                'Sau folosește research_start ca endpoint alternativ (Nivel 5)',
+                'Use `notebook_query_start` with timeout:180 to start the query',
+                'Then poll with `notebook_query_status` until status:completed',
+                'Or use research_start as an alternative endpoint (Level 5)',
               ],
             }, null, 2),
           }],
@@ -296,10 +295,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'nlm_grouped_queries': {
         const { notebook_id, queries } = args;
         if (!queries || queries.length < 2) {
-          return { content: [{ type: 'text', text: 'Ai nevoie de cel puțin 2 sub-întrebări.' }], isError: true };
+          return { content: [{ type: 'text', text: 'You need at least 2 sub-questions.' }], isError: true };
         }
         if (queries.length > 5) {
-          return { content: [{ type: 'text', text: 'Maximum 5 sub-întrebări per query grupat.' }], isError: true };
+          return { content: [{ type: 'text', text: 'Maximum 5 sub-questions per grouped query.' }], isError: true };
         }
 
         const groupedPrompt = queries.map((q, i) => `${i + 1}. ${q}`).join('\n');
@@ -311,10 +310,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               action: 'notebooklm-mcp.notebook_query',
               params: {
                 notebook_id,
-                query: `Răspunde la următoarele întrebări:\n\n${groupedPrompt}\n\n\nRăspunde numerotat, pentru fiecare întrebare separat.`,
+                query: `Answer the following questions:\n\n${groupedPrompt}\n\n\nAnswer numbered, for each question separately.`,
                 timeout: 180,
               },
-              savings: `1 query în loc de ${queries.length} (${queries.length - 1} economisite)`,
+              savings: `1 query instead of ${queries.length} (${queries.length - 1} saved)`,
               tier: 'Plus: 500/zi',
             }, null, 2),
           }],
@@ -350,7 +349,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               anti_suspicion: {
                 throttle_between_notebooks: `${MULTI_NOTEBOOK_THROTTLE_MS}ms`,
                 throttle_after_batch: `${BATCH_THROTTLE_MS}ms`,
-                note: 'Rulează queries secvențial cu throttle între notebook-uri. Nu în paralel!',
+                note: 'Run queries sequentially with throttle between notebooks. Not in parallel!',
               },
             }, null, 2),
           }],
@@ -388,7 +387,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: 'text',
               text: JSON.stringify({
                 error: 'NLM auth invalid',
-                action: 'Rulează nlm_auto_login.py --force înainte de query',
+                action: 'Run nlm_auto_login.py --force before querying',
                 output: auth.output,
               }, null, 2),
             }],
@@ -410,7 +409,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           steps: [],
         };
 
-        // If sub_questions exist, use grouped query (Nivel 3)
+        // If sub_questions exist, use grouped query (Level 3)
         if (sub_questions && sub_questions.length >= 2) {
           const groupedPrompt = sub_questions.map((q, i) => `${i + 1}. ${q}`).join('\n');
           pipeline.steps.push({
@@ -419,7 +418,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             type: 'notebook_query',
             params: {
               notebook_id: NOTEBOOKS[notebooks[0]]?.id || notebooks[0],
-              query: `Răspunde la următoarele întrebări:\n\n${groupedPrompt}\n\n\nRăspunde numerotat, pentru fiecare întrebare separat.\n\nÎntrebarea principală de context: ${primary_query}`,
+              query: `Answer the following questions:\n\n${groupedPrompt}\n\n\nAnswer numbered, for each question separately.\n\nPrimary context question: ${primary_query}`,
               timeout: 180,
             },
           });
@@ -456,8 +455,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             text: JSON.stringify({
               tier: 'Plus',
               daily_limit: 500,
-              note: 'Folosește nlm_auto_login.py --check > /dev/null pentru a verifica quota exactă în CLI NLM.',
-              conservation_tip: 'Folosește grouped queries (nlm_grouped_queries) pentru a consuma 1 query în loc de N.',
+              note: 'Use nlm_auto_login.py --check > /dev/null to check the exact quota in NLM CLI.',
+              conservation_tip: 'Use grouped queries (nlm_grouped_queries) to consume 1 query instead of N.',
             }, null, 2),
           }],
         };
@@ -472,7 +471,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               ok: auth.ok,
               output: auth.output,
               anti_suspicion: {
-                note: 'Acest check rulează MAXIM o dată per sesiune. Nu pe fiecare query.',
+                note: 'This check runs MAXIMUM once per session. Not on every query.',
                 next_if_invalid: 'python3 .claude/scripts/nlm_auto_login.py --force',
               },
             }, null, 2),

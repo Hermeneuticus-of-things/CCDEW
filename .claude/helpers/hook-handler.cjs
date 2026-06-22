@@ -371,7 +371,37 @@ async function main() {
           }).trim();
           if (out) console.log(out);
         }
-      } catch { /* non-fatal — Python or script may be absent */ }
+      } catch { /* non-fatal — Python or script may be absent */       }
+      // NLM auth check at session start (anti-suspicion: max 1x per session)
+      try {
+        const nlmHookPath = path.join(helpersDir, 'nlm-session-hook.cjs');
+        if (fs.existsSync(nlmHookPath)) {
+          const { execSync } = require('child_process');
+          const out = execSync(`node "${nlmHookPath}" --check`, {
+            encoding: 'utf-8', timeout: 15000, stdio: ['ignore', 'pipe', 'ignore'],
+          }).trim();
+          if (out) console.log(`[NLM] ${out}`);
+        }
+      } catch { /* non-fatal — NLM auth check is optional */ }
+    },
+
+    'nlm-auth': async () => {
+      try {
+        const nlmHookPath = path.join(helpersDir, 'nlm-session-hook.cjs');
+        if (!fs.existsSync(nlmHookPath)) {
+          console.log('[NLM] Hook not found');
+          return;
+        }
+        const { execSync } = require('child_process');
+        const out = execSync(`node "${nlmHookPath}"`, {
+          encoding: 'utf-8', timeout: 30000, stdio: ['ignore', 'pipe', 'pipe'],
+        }).trim();
+        const err = execSync(`node "${nlmHookPath}"`, {
+          encoding: 'utf-8', timeout: 30000, stdio: ['ignore', 'pipe', 'pipe'],
+        }).stderr?.trim();
+        if (err) console.warn(`[NLM] ${err}`);
+        if (out) console.log(`[NLM] ${out}`);
+      } catch { console.log('[NLM] Auth check failed (optional)'); }
     },
 
     'session-end': async () => {

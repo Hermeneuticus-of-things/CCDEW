@@ -20,7 +20,7 @@ const CCDEW_ROOT = process.env.CCDEW_PROJECT_DIR || '/home/think/CCDEW';
 const MEMORY_DIR = process.env.HERMES_MEMORY_DIR || '/home/think/.hermes/memories';
 const CACHE_TTL = 5000; // 5s cache
 
-// ── Cache (evită citiri repetitive de disc) ──────────────────────
+// ── Cache (avoid repeated disk reads) ───────────────────────────
 const cache = new Map();
 function cached(key, fn, ttl = CACHE_TTL) {
   const now = Date.now();
@@ -88,14 +88,14 @@ const server = new Server(
 
 // ── Tools ────────────────────────────────────────────────────────
 const TOOLS = [
-  { name: 'ccdew_status', description: 'Status complet CCDEW', inputSchema: { type: 'object', properties: {} } },
-  { name: 'ccdew_memory', description: 'Caută în memoria SSA (Jaccard trigram)', inputSchema: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] } },
-  { name: 'ccdew_instincts', description: 'Pattern-uri învățate', inputSchema: { type: 'object', properties: {} } },
-  { name: 'ccdew_session', description: 'Status sesiune activă', inputSchema: { type: 'object', properties: {} } },
-  { name: 'ccdew_burn', description: 'Cost tracking (astăzi/lună)', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_status', description: 'Complete CCDEW status', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_memory', description: 'Search SSA memory (Jaccard trigram)', inputSchema: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] } },
+  { name: 'ccdew_instincts', description: 'Learned patterns', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_session', description: 'Active session status', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_burn', description: 'Cost tracking (today/month)', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_optimize', description: 'Auto-optimize prompt stats', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_safla', description: 'SAFLA adaptive learning stats', inputSchema: { type: 'object', properties: {} } },
-  { name: 'ccdew_project', description: 'Detectează proiectul activ', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_project', description: 'Detect active project', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_verify', description: 'Pre-commit verification', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_quality_gate', description: 'Pre-push quality gate', inputSchema: { type: 'object', properties: {} } },
 ];
@@ -117,17 +117,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         return { content: [{ type: 'text', text: `## CCDEW Status v2
 
-**Memorie:**
-- Episoade: ${episodes.length}
-- Pattern-uri: ${Object.keys(patterns).length}
-- Skill-uri: ${Object.keys(skills).length}
+**Memory:**
+- Episodes: ${episodes.length}
+- Patterns: ${Object.keys(patterns).length}
+- Skills: ${Object.keys(skills).length}
 
 **SAFLA Learning:**
 - Total feedback: ${safla.total_feedbacks || 0}
 - Noduri active: ${Object.keys(safla.nodes || {}).length}
 
-**Sistem:** 🟢 Activ
-**Cache:** ${cache.size} intrări` }] };
+**System:** 🟢 Active
+**Cache:** ${cache.size} entries` }] };
       }
 
       case 'ccdew_memory': {
@@ -154,30 +154,30 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .sort((a, b) => b.score - a.score)
           .slice(0, 5);
 
-        if (scored.length === 0) return { content: [{ type: 'text', text: 'Nicio potrivire pentru: ' + prompt }] };
+        if (scored.length === 0) return { content: [{ type: 'text', text: 'No match for: ' + prompt }] };
 
         const results = scored.map(({ ep, score }) =>
           `- **${score.toFixed(2)}** [${ep.type || 'unknown'}] ${ep.summary || ep.principle || JSON.stringify(ep).slice(0, 100)}`
         ).join('\n');
 
-        return { content: [{ type: 'text', text: `## Rezultate pentru: "${prompt}"\n\n${results}` }] };
+        return { content: [{ type: 'text', text: `## Results for: "${prompt}"\n\n${results}` }] };
       }
 
       case 'ccdew_instincts': {
         const patterns = cached('patterns', getPatterns);
         const entries = Object.entries(patterns);
 
-        if (entries.length === 0) return { content: [{ type: 'text', text: '## Instincts\n\n0 pattern-uri învățate încă.' }] };
+        if (entries.length === 0) return { content: [{ type: 'text', text: '## Instincts\n\n0 patterns learned yet.' }] };
 
         const table = entries.map(([k, v]) =>
           `| ${k} | ${v.count || 0} | ${(v.confidence || 0).toFixed(2)} |`
         ).join('\n');
 
-        return { content: [{ type: 'text', text: `## Instincts (${entries.length} pattern-uri)\n\n| Pattern | Count | Confidence |\n|---------|-------|------------|\n${table}` }] };
+        return { content: [{ type: 'text', text: `## Instincts (${entries.length} patterns)\n\n| Pattern | Count | Confidence |\n|---------|-------|------------|\n${table}` }] };
       }
 
       case 'ccdew_session': {
-        return { content: [{ type: 'text', text: `## Sesiune Activă\n\n**Status:** 🟢 Running\n**PID:** ${process.pid}\n**Uptime:** ${(process.uptime()).toFixed(0)}s\n**Memorie:** ${(process.memoryUsage().rss / 1024 / 1024).toFixed(1)}MB` }] };
+        return { content: [{ type: 'text', text: `## Active Session\n\n**Status:** 🟢 Running\n**PID:** ${process.pid}\n**Uptime:** ${(process.uptime()).toFixed(0)}s\n**Memory:** ${(process.memoryUsage().rss / 1024 / 1024).toFixed(1)}MB` }] };
       }
 
       case 'ccdew_burn': {
@@ -185,11 +185,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           const burnFile = path.join(MEMORY_DIR, 'burn.json');
           return readJSON(burnFile) || { today: 0, month: 0, calls: 0 };
         });
-        return { content: [{ type: 'text', text: `## Cost Tracking\n\n**Astăzi:** $${log.today?.toFixed(2) || '0.00'}\n**Lună:** $${log.month?.toFixed(2) || '0.00'}\n**Apeluri:** ${log.calls || 0}` }] };
+        return { content: [{ type: 'text', text: `## Cost Tracking\n\n**Today:** $${log.today?.toFixed(2) || '0.00'}\n**Month:** $${log.month?.toFixed(2) || '0.00'}\n**Calls:** ${log.calls || 0}` }] };
       }
 
       case 'ccdew_optimize': {
-        return { content: [{ type: 'text', text: '## Auto-Optimize\n\nSistem de comprimare context: 🟢 Activ' }] };
+        return { content: [{ type: 'text', text: '## Auto-Optimize\n\nContext compression system: 🟢 Active' }] };
       }
 
       case 'ccdew_safla': {
@@ -198,7 +198,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `| ${k} | ${v.success || 0} | ${v.failure || 0} | ${((v.rate || 0) * 100).toFixed(0)}% |`
         ).join('\n');
 
-        return { content: [{ type: 'text', text: `## SAFLA Stats\n\nTotal: ${safla.total_feedbacks || 0} feedbacks\n\n| Nod | Succes | Eșec | Rate |\n|-----|--------|------|------|\n${nodes || '| - | - | - | - |'}` }] };
+        return { content: [{ type: 'text', text: `## SAFLA Stats\n\nTotal: ${safla.total_feedbacks || 0} feedbacks\n\n| Node | Success | Failure | Rate |\n|------|---------|---------|------|\n${nodes || '| - | - | - | - |'}` }] };
       }
 
       case 'ccdew_project': {
@@ -206,7 +206,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const gitDir = path.join(cwd, '.git');
         const isGit = fs.existsSync(gitDir);
         const name = path.basename(cwd);
-        return { content: [{ type: 'text', text: `## Proiect Activ\n\n**Nume:** ${name}\n**CWD:** ${cwd}\n**Git:** ${isGit ? '✅' : '❌'}` }] };
+        return { content: [{ type: 'text', text: `## Active Project\n\n**Name:** ${name}\n**CWD:** ${cwd}\n**Git:** ${isGit ? '✅' : '❌'}` }] };
       }
 
       case 'ccdew_verify': {
@@ -215,11 +215,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (fs.existsSync(path.join(cwd, 'package.json'))) checks.push('npm: ✅');
         if (fs.existsSync(path.join(cwd, 'tsconfig.json'))) checks.push('typescript: ✅');
         if (fs.existsSync(path.join(cwd, '.git'))) checks.push('git: ✅');
-        return { content: [{ type: 'text', text: `## Pre-commit Verify\n\n${checks.join('\n') || 'Niciun check disponibil'}` }] };
+        return { content: [{ type: 'text', text: `## Pre-commit Verify\n\n${checks.join('\n') || 'No checks available'}` }] };
       }
 
       case 'ccdew_quality_gate': {
-        return { content: [{ type: 'text', text: '## Quality Gate\n\n🟢 Gate deschis — gata de push' }] };
+        return { content: [{ type: 'text', text: '## Quality Gate\n\n🟢 Gate open — ready to push' }] };
       }
 
       default:

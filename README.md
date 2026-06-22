@@ -1,6 +1,6 @@
 # CCDEW — Claude Code Desktop Ecosystem Workspace
 
-**Open Cload Intelligence Suite + CCDEW Core** — Framework universal pentru agenți AI autonomi. Integrează orice aplicație. Auto-evoluție. Memorii ierarhice. Auto-vindecare.
+**Open Cload Intelligence Suite + CCDEW Core** — Universal framework for autonomous AI agents. Integrates any application. Self-evolution. Hierarchical memories. Self-healing.
 
 ```
   ╔══════════════════════════════════════════════════════════════════╗
@@ -26,7 +26,7 @@
   ╚══════════════════════════════════════════════════════════════════╝
                                     │
   ╔══════════════════════════════════════════════════════════════════╗
-  ║           INTELLIGENCE & MEMORY — PIRAMIDA 6 NIVELE             ║
+  ║           INTELLIGENCE & MEMORY — 6 LEVEL PYRAMID               ║
   ║  N1 Episodic → N2 Patterns → N3 Techniques → N4 Skills          ║
   ║  → N5 Attitudes → N6 Principles                                 ║
   ║  SSA · SAFLA · Instincts · Hologram · Auto-Consolidate          ║
@@ -45,7 +45,7 @@
 
 ---
 
-## Arhitectura completă
+## Complete Architecture
 
 ```mermaid
 graph TB
@@ -99,7 +99,7 @@ graph TB
     MC_METRICS["Metrics<br/>_METRICS/ · growth log"]
   end
 
-  subgraph L3_MEM["INTELLIGENCE & MEMORY — PIRAMIDA 6 NIVELE"]
+  subgraph L3_MEM["INTELLIGENCE & MEMORY — 6 LEVEL PYRAMID"]
     MEM_N1["N1: EPISODIC<br/>episodic.jsonl<br/>every action saved"]
     MEM_N2["N2: PATTERNS<br/>patterns.json<br/>Jaccard trigram clusters"]
     MEM_N3["N3: TECHNIQUES<br/>techniques.json<br/>reusable methods"]
@@ -153,7 +153,7 @@ graph TB
     SK_OCL["Open-Cload Skills x5<br/>5-zoom-audit · cost-tracking<br/>enneagram-routing<br/>safla-feedback · secret-scanning"]
   end
 
-  subgraph L6_CMDS["CLI COMMANDS — 7 categorii"]
+  subgraph L6_CMDS["CLI COMMANDS — 7 Categories"]
     CMD_ANALYSIS["analysis x7<br/>bottleneck-detect · performance<br/>token-efficiency · etc"]
     CMD_AUTO["automation x7<br/>auto-agent · self-healing<br/>session-memory · smart-spawn"]
     CMD_GITHUB["github x19<br/>code-review · pr-manager<br/>release-manager · swarm-*"]
@@ -172,7 +172,7 @@ graph TB
     FLOW_TEAM["team config<br/>anonymous data"]
   end
 
-  subgraph L8_TMPL["TEMPLATES — 9 proiecte"]
+  subgraph L8_TMPL["TEMPLATES — 9 Projects"]
     TMPL_ANDROID["Android App"]
     TMPL_CARTE["Book / Carte"]
     TMPL_DEVCONTAINER["Dev Container"]
@@ -263,58 +263,58 @@ graph TB
 
 ---
 
-## Piramida învățării — detalii
+## Learning Pyramid — Details
 
-| Nivel | Fișier | Conținut | Motor |
-|-------|--------|----------|-------|
-| **N1 Episodic** | `episodic.jsonl` | Acțiuni, comenzi, rezultate, timestamp | auto-hook post-task |
-| **N2 Patterns** | `patterns.json` | Cluster-uri Jaccard trigram, frecvență | `hermes-memory.py` match |
-| **N3 Techniques** | `techniques.json` | Metode reusable cu pași | consolidare N2 |
-| **N4 Skills** | `skills_db.json` | 133 skill-uri cu instrucțiuni | consolidare N3 |
-| **N5 Attitudes** | `tacit.json` | Mindset, atitudini, euristici | consolidare N4 |
-| **N6 Principles** | `principles.json` | 14 reguli universale | consolidare N5 |
+| Level | File | Content | Engine |
+|-------|------|---------|--------|
+| **N1 Episodic** | `episodic.jsonl` | Actions, commands, results, timestamp | auto-hook post-task |
+| **N2 Patterns** | `patterns.json` | Jaccard trigram clusters, frequency | `hermes-memory.py` match |
+| **N3 Techniques** | `techniques.json` | Reusable methods with steps | consolidation N2 |
+| **N4 Skills** | `skills_db.json` | 133 skills with instructions | consolidation N3 |
+| **N5 Attitudes** | `tacit.json` | Mindset, attitudes, heuristics | consolidation N4 |
+| **N6 Principles** | `principles.json` | 14 universal rules | consolidation N5 |
 
-Motoare suplimentare: `ssa.cjs` (semantic search), `safla.cjs` (adaptive learning), `instincts.cjs` (pattern recognition), `hologram_engine.py` (fractal integration), `auto_learn_consolidate.py` (periodic N1→N6).
+Additional engines: `ssa.cjs` (semantic search), `safla.cjs` (adaptive learning), `instincts.cjs` (pattern recognition), `hologram_engine.py` (fractal integration), `auto_learn_consolidate.py` (periodic N1→N6).
 
 ---
 
-## LLM & Modele — Gateway și modele gratuite
+## LLM & Models — Gateway and Free Models
 
 ### OpenRouter Gateway
-Tot traficul LLM trece prin `opencode-llm-mcp.cjs` — gateway-ul OpenRouter. Expune 5 tool-uri: list models, chat completion, embedding, provider info, cost estimation.
+All LLM traffic goes through `opencode-llm-mcp.cjs` — the OpenRouter gateway. Exposes 5 tools: list models, chat completion, embedding, provider info, cost estimation.
 
-### Modele gratuite disponibile
-| Model | Furnizor | Folosit de |
-|-------|----------|-----------|
-| `deepseek/deepseek-v4-flash:free` | DeepSeek | OpenCode Desktop implicit |
-| `qwen/qwen3-80b:free` | Alibaba | Hermes (Enneagram routing), agenți grei |
-| `google/gemma-4-*:free` | Google | Task-uri ușoare, fallback |
-| `mistralai/*:free` | Mistral | Analiză text, embeddings |
+### Free Models Available
+| Model | Provider | Used By |
+|-------|----------|---------|
+| `deepseek/deepseek-v4-flash:free` | DeepSeek | OpenCode Desktop default |
+| `qwen/qwen3-80b:free` | Alibaba | Hermes (Enneagram routing), heavy agents |
+| `google/gemma-4-*:free` | Google | Light tasks, fallback |
+| `mistralai/*:free` | Mistral | Text analysis, embeddings |
 | `meta-llama/*:free` | Meta | Reasoning, planning |
-| `minimax/minimax-m2.5:free` | MiniMax | GX Phone agent (mobil) |
+| `minimax/minimax-m2.5:free` | MiniMax | GX Phone agent (mobile) |
 
-### Cum selectează agenții modelul
-- **Hermes** — Enneagram router alege tipul de model pe baza profilului task-ului; SAFLA ajustează în funcție de succes/eșec
-- **Claude Agents** — folosesc modelul implicit Claude (Anthropic) prin Claude Desktop
-- **OpenCode** — configurat în `.opencode.json` cu listă de modele free + fallback chain
-- **GX Phone** — rulează pe mobil cu `minimax-m2.5:free` prin OpenRouter
-- **Swarm** — fiecare nod alege dinamic pe baza încărcării și a ratei de succes
+### How Agents Select the Model
+- **Hermes** — Enneagram router selects model type based on task profile; SAFLA adjusts based on success/failure
+- **Claude Agents** — use the default Claude model (Anthropic) through Claude Desktop
+- **OpenCode** — configured in `.opencode.json` with free model list + fallback chain
+- **GX Phone** — runs on mobile with `minimax-m2.5:free` through OpenRouter
+- **Swarm** — each node chooses dynamically based on load and success rate
 
-### Benchmark & Monitorizare
-`llm-benchmark.py` în Open-Cload testează performanța modelelor. `check-openrouter-free.cjs` verifică periodic ce modele gratuite sunt disponibile. Costul per sesiune e urmărit în CodeBurn (`pricing.cjs`).
+### Benchmark & Monitoring
+`llm-benchmark.py` in Open-Cload tests model performance. `check-openrouter-free.cjs` periodically checks which free models are available. Cost per session is tracked in CodeBurn (`pricing.cjs`).
 
 ---
 
-## Cum integrezi orice aplicație
+## How to Integrate Any Application
 
-| Metodă | Când se folosește | Exemple |
-|--------|-------------------|---------|
-| **Bridge** | Ai un protocol TCP/UDP/HTTP/WS/MQTT | streaming, IoT, APIs |
-| **MCP Server** | Vrei să expui tool-uri agenților | baze de date, servicii externe |
-| **Plugin** | Vrei hook-uri în ciclul de viață | pre-bash, pre-edit, post-task |
-| **Skill** | Vrei instrucțiuni de domeniu | orice specializare |
-| **Agent Profile** | Vrei un rol nou de agent | analyst, coder, researcher... |
-| **Template** | Vrei un proiect complet | android, carte, devcontainer... |
+| Method | When to Use | Examples |
+|--------|-------------|---------|
+| **Bridge** | You have a TCP/UDP/HTTP/WS/MQTT protocol | streaming, IoT, APIs |
+| **MCP Server** | You want to expose tools to agents | databases, external services |
+| **Plugin** | You want hooks in the lifecycle | pre-bash, pre-edit, post-task |
+| **Skill** | You want domain instructions | any specialization |
+| **Agent Profile** | You want a new agent role | analyst, coder, researcher... |
+| **Template** | You want a complete project | android, book, devcontainer... |
 
 ---
 
@@ -324,7 +324,7 @@ Tot traficul LLM trece prin `opencode-llm-mcp.cjs` — gateway-ul OpenRouter. Ex
 # Bootstrap
 bash bootstrap-ccdew.sh
 
-# Pornește Mission Control
+# Start Mission Control
 python3 .claude/helpers/mission-control.py
 
 # Status
@@ -333,81 +333,81 @@ curl http://localhost:8899/status.json
 
 ---
 
-## Structură
+## Structure
 
 ```
 CCDEW/
 ├── .claude/
-│   ├── helpers/           # 80+ Python + CJS motoare
+│   ├── helpers/           # 80+ Python + CJS engines
 │   ├── mcp/               # 6 MCP servers
 │   ├── agents/            # 105+ agent profiles
 │   ├── bridge/            # 5 bridges
 │   ├── skills/            # 34 Claude skills
-│   └── commands/          # 100+ CLI comenzi în 7 categorii
+│   └── commands/          # 100+ CLI commands in 7 categories
 ├── .opencode/             # 15 plugins TS + config
-├── .claude-flow/          # 3505 sesiuni, 243 rapoarte
+├── .claude-flow/          # 3505 sessions, 243 reports
 ├── ccdew-core/            # NPM library + CLI binaries
 ├── agents/                # 15 top-level profiles
-├── _MEMORY/               # 6 nivele memorie + ADR + identitate
-├── _SETTINGS/             # 17 reguli + configurații
-├── _TEMPLATES/            # 9 șabloane de proiect
+├── _MEMORY/               # 6 memory levels + ADR + identity
+├── _SETTINGS/             # 17 rules + configurations
+├── _TEMPLATES/            # 9 project templates
 ├── _METRICS/              # Cost & performance
-├── [your-apps]            # Aplicațiile tale integrate aici
+├── [your-apps]            # Your applications integrated here
 ```
 
 ---
 
-## Componente noi active
+## New Active Components
 
 ### Convergent/Divergent Engine (v1)
-`ccdew-convergent-divergent.cjs` — Implementează protocolul din `multi_agent_divergent_convergent.md` ca MCP server activ.
+`ccdew-convergent-divergent.cjs` — Implements the protocol from `multi_agent_divergent_convergent.md` as an active MCP server.
 
-| Tool | Descriere |
-|------|-----------|
-| `ccdew_divergent` | Generează N agenți cu aripe Enneagram distincte (max 18 wings) |
-| `ccdew_convergent` | Sintetizează N outputuri divergente în verdict integrat |
-| `ccdew_divergent_convergent` | Full pipeline într-un call |
-| `ccdew_wings_list` | Listează toate cele 18 aripi (zoom, lentile, perspective, modalități) |
-| `ccdew_domain_wings` | Arată maparea domeniu → aripe recomandate |
+| Tool | Description |
+|------|-------------|
+| `ccdew_divergent` | Generates N agents with distinct Enneagram wings (max 18 wings) |
+| `ccdew_convergent` | Synthesizes N divergent outputs into integrated verdict |
+| `ccdew_divergent_convergent` | Full pipeline in one call |
+| `ccdew_wings_list` | Lists all 18 wings (zoom, lenses, perspectives, modalities) |
+| `ccdew_domain_wings` | Shows domain → recommended wings mapping |
 
 ### NLM Bridge (v1)
-`ccdew-nlm-bridge.cjs` — Implementează protocolul async pe 10 nivele din `nlm_async_multi_channel_protocol.md` + `nlm_anti_suspicion.md`.
+`ccdew-nlm-bridge.cjs` — Implements the async 10-level protocol from `nlm_async_multi_channel_protocol.md` + `nlm_anti_suspicion.md`.
 
-| Tool | Nivel | Descriere |
-|------|-------|-----------|
-| `nlm_async_query` | 1+2 | Async query cu timeout 180s + poll automat |
-| `nlm_grouped_queries` | 3 | 2-5 sub-întrebări într-un singur query |
-| `nlm_batch` | 4 | Multi-notebook batch cu throttle între ele |
-| `nlm_cache` | 7 | Gestionare cache local (stat, clear, search) |
+| Tool | Level | Description |
+|------|-------|-------------|
+| `nlm_async_query` | 1+2 | Async query with 180s timeout + automatic poll |
+| `nlm_grouped_queries` | 3 | 2-5 sub-questions in a single query |
+| `nlm_batch` | 4 | Multi-notebook batch with throttle between them |
+| `nlm_cache` | 7 | Local cache management (stat, clear, search) |
 | `nlm_multi_channel` | all | Full pipeline: auth → cache → grouped → batch |
-| `nlm_quota` | 10 | Verifică daily quota rămasă |
-| `nlm_auth_check` | safe | Verifică auth o singură dată per sesiune |
+| `nlm_quota` | 10 | Check remaining daily quota |
+| `nlm_auth_check` | safe | Checks auth once per session |
 
 ### Fractal Enneagram Router (v2)
-`enneagram_router.py` — Acum suportă zoom-uri fractale + lentile.
+`enneagram_router.py` — Now supports fractal zooms + lenses.
 
-| Comandă | Descriere |
-|---------|-----------|
-| `zoom [level]` | Detalii zoom: Maha, Macro, Mezzo, Micro, Nano |
-| `lenses [name]` | Detalii lentilă: stylistic, doctrinal, structural, regression, memory |
-| `priority` | Matricea de priorități per task type (editorial, security, etc.) |
-| `compose <task> [--files N]` | Compoziție swarm completă (Phase 1-4) pe baza META-014 |
-| `wings` | Registry complet cu 18 aripi Enneagram |
+| Command | Description |
+|---------|-------------|
+| `zoom [level]` | Zoom details: Maha, Macro, Mezzo, Micro, Nano |
+| `lenses [name]` | Lens details: stylistic, doctrinal, structural, regression, memory |
+| `priority` | Priority matrix per task type (editorial, security, etc.) |
+| `compose <task> [--files N]` | Complete swarm composition (Phase 1-4) based on META-014 |
+| `wings` | Complete registry with 18 Enneagram wings |
 
 ### NLM Session Hook
-`nlm-session-hook.cjs` — Auto-check auth NLM la fiecare sesiune, cu anti-suspicion pattern (max 1 check/sesiune, nu pe fiecare query).
+`nlm-session-hook.cjs` — Auto-check NLM auth at each session, with anti-suspicion pattern (max 1 check/session, not on every query).
 
 ---
 
-## Securitate
+## Security
 
-- 3 nivele de sensibilitate: PUBLIC / PRIVATE / SECRET
-- Vault criptat cu PIN + biometric
-- Secret scanning automat (pre-commit)
-- Permission guard pe comenzi bash
-- Security monitoring la 12h (OWASP guidelines)
-- Firewall monitoring (UFW, porturi)
+- 3 sensitivity levels: PUBLIC / PRIVATE / SECRET
+- Vault encrypted with PIN + biometric
+- Automatic secret scanning (pre-commit)
+- Permission guard on bash commands
+- Security monitoring every 12h (OWASP guidelines)
+- Firewall monitoring (UFW, ports)
 
 ---
 
-*CCDEW — Framework universal. Integrează orice. Auto-vindecare. Auto-evoluție.*
+*CCDEW — Universal framework. Integrates anything. Self-healing. Self-evolution.*

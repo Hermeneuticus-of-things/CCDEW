@@ -21,24 +21,24 @@ const {
 // ── Wings Registry (18 wings from the protocol document) ──────────
 
 const WINGS = [
-  { id: 'maha',            category: 'zoom',     name: 'Zoom-aripa Maha',       desc: 'Vedere de ansamblu cosmic/sistemic' },
-  { id: 'macro',           category: 'zoom',     name: 'Zoom-aripa Macro',      desc: 'Vedere structurală inter-componente' },
-  { id: 'mezzo',           category: 'zoom',     name: 'Zoom-aripa Mezzo',      desc: 'Vedere de proces/flux' },
-  { id: 'micro',           category: 'zoom',     name: 'Zoom-aripa Micro',      desc: 'Vedere intra-componentă' },
-  { id: 'nano',            category: 'zoom',     name: 'Zoom-aripa Nano',       desc: 'Vedere atomică/microsecundă' },
-  { id: 'stylistic',       category: 'lens',     name: 'Lentilă-aripa stilistică',  desc: 'Filtru estetic/literar' },
-  { id: 'doctrinal',       category: 'lens',     name: 'Lentilă-aripa doctrinară',  desc: 'Filtru fidelitate sursă' },
-  { id: 'structural',      category: 'lens',     name: 'Lentilă-aripa structurală',  desc: 'Filtru arhitectural' },
-  { id: 'regression',      category: 'lens',     name: 'Lentilă-aripa regression',   desc: 'Filtru ce nu funcționează' },
-  { id: 'memory',          category: 'lens',     name: 'Lentilă-aripa memorie',      desc: 'Filtru continuitate cu trecutul' },
-  { id: 'agent-perspective',  category: 'perspective', name: 'Perspectivă-aripa agent',  desc: 'Din vedere actor' },
-  { id: 'observer-perspective', category: 'perspective', name: 'Perspectivă-aripa observator', desc: 'Din vedere extern neutru' },
-  { id: 'cosmic-perspective',   category: 'perspective', name: 'Perspectivă-aripa cosmos',   desc: 'Din vedere sistemic' },
-  { id: 'sakshi-perspective',   category: 'perspective', name: 'Perspectivă-aripa Sākṣī',   desc: 'Din vedere martor non-implicat' },
-  { id: 'descriptive',     category: 'modality',  name: 'Modalitate-aripa descriptivă', desc: 'Cum este' },
-  { id: 'normative',       category: 'modality',  name: 'Modalitate-aripa normativă',   desc: 'Cum ar trebui' },
-  { id: 'generative',      category: 'modality',  name: 'Modalitate-aripa generativă',  desc: 'Ce-ar fi dacă' },
-  { id: 'critical',        category: 'modality',  name: 'Modalitate-aripa critică',     desc: 'Ce nu merge' },
+  { id: 'maha',            category: 'zoom',     name: 'Zoom-wing Maha',       desc: 'Cosmic/systemic overview' },
+  { id: 'macro',           category: 'zoom',     name: 'Zoom-wing Macro',      desc: 'Structural inter-component view' },
+  { id: 'mezzo',           category: 'zoom',     name: 'Zoom-wing Mezzo',      desc: 'Process/flow view' },
+  { id: 'micro',           category: 'zoom',     name: 'Zoom-wing Micro',      desc: 'Intra-component view' },
+  { id: 'nano',            category: 'zoom',     name: 'Zoom-wing Nano',       desc: 'Atomic/microsecond view' },
+  { id: 'stylistic',       category: 'lens',     name: 'Lens-wing stylistic',  desc: 'Aesthetic/literary filter' },
+  { id: 'doctrinal',       category: 'lens',     name: 'Lens-wing doctrinal',  desc: 'Source fidelity filter' },
+  { id: 'structural',      category: 'lens',     name: 'Lens-wing structural',  desc: 'Architectural filter' },
+  { id: 'regression',      category: 'lens',     name: 'Lens-wing regression',   desc: 'What doesn\'t work filter' },
+  { id: 'memory',          category: 'lens',     name: 'Lens-wing memory',      desc: 'Continuity with past filter' },
+  { id: 'agent-perspective',  category: 'perspective', name: 'Perspective-wing agent',  desc: 'From actor viewpoint' },
+  { id: 'observer-perspective', category: 'perspective', name: 'Perspective-wing observer', desc: 'From neutral external viewpoint' },
+  { id: 'cosmic-perspective',   category: 'perspective', name: 'Perspective-wing cosmos',   desc: 'From systemic viewpoint' },
+  { id: 'sakshi-perspective',   category: 'perspective', name: 'Perspective-wing Sākṣī',   desc: 'From non-involved witness viewpoint' },
+  { id: 'descriptive',     category: 'modality',  name: 'Modality-wing descriptive', desc: 'As it is' },
+  { id: 'normative',       category: 'modality',  name: 'Modality-wing normative',   desc: 'As it should be' },
+  { id: 'generative',      category: 'modality',  name: 'Modality-wing generative',  desc: 'What if' },
+  { id: 'critical',        category: 'modality',  name: 'Modality-wing critical',     desc: 'What doesn\'t work' },
 ];
 
 // ── Domain-to-Wing mapping ────────────────────────────────────────
@@ -70,17 +70,17 @@ function pickWings(task, count) {
 }
 
 function wingToPrompt(wing, task) {
-  return `Abordează acest task DOAR prin ${wing.name}: ${wing.desc}.
+  return `Approach this task ONLY through ${wing.name}: ${wing.desc}.
 
-NU folosi alte unghiuri. Output-ul tău e perspectiva "${wing.name}" pură pe următorul task.
+DO NOT use other angles. Your output is the pure "${wing.name}" perspective on the following task.
 
 Task: ${task}
 
-Reguli:
-- Fii 100% fidel perspectivei asignate
-- Nu încerca să acoperi alte unghiuri (alte agenți le acoperă)
-- Raportează clar din ce unghi vorbești
-- Output-ul poate fi scurt (1-3 paragrafe) dar complet din perspectiva ta`;
+Rules:
+- Be 100% faithful to the assigned perspective
+- Do not try to cover other angles (other agents cover them)
+- Clearly report which angle you are speaking from
+- Output can be short (1-3 paragraphs) but complete from your perspective`;
 }
 
 function generateDivergent(task, count) {
@@ -98,27 +98,27 @@ function buildConvergentPrompt(task, outputs) {
     `=== Output Agent ${o.agent_id} (${o.wing?.name || 'unknown'}) ===\n${o.content}`
   ).join('\n\n');
 
-  return `Ești Reformer/Sintetizator Convergent. Primești ${outputs.length} perspective divergente pe același task.
+  return `You are the Convergent Reformer/Synthesizer. You receive ${outputs.length} divergent perspectives on the same task.
 
-Sarcina ta:
-1. Identifică CONVERGENȚE — unde toate perspectivele sunt de acord
-2. Identifică DIVERGENȚE PRODUCTIVE — unde perspectivele spun lucruri diferite și utile
-3. Identifică TENSIUNI NEREZOLVATE — unde perspectivele se contrazic și NU se pot reconcilia
-4. Produce un OUTPUT UNIC care păstrează diversitatea perspectivelor dar dă un verdict integrat
+Your task:
+1. Identify CONVERGENCES — where all perspectives agree
+2. Identify PRODUCTIVE DIVERGENCES — where perspectives say different and useful things
+3. Identify UNRESOLVED TENSIONS — where perspectives contradict and CANNOT be reconciled
+4. Produce a UNIFIED OUTPUT that preserves perspective diversity but gives an integrated verdict
 
-Task original: ${task}
+Original task: ${task}
 
 ${outputsText}
 
 --
-Răspunde cu:
-## Convergențe
+Respond with:
+## Convergences
 ...
-## Divergențe productive
+## Productive divergences
 ...
-## Tensiuni nerezolvate
+## Unresolved tensions
 ...
-## Verdict integrat
+## Integrated verdict
 ...`;
 }
 
@@ -132,24 +132,24 @@ const server = new Server(
 const TOOLS = [
   {
     name: 'ccdew_divergent',
-    description: 'Generează N agenți divergenți cu aripe Enneagram distincte pe un task',
+    description: 'Generates N divergent agents with distinct Enneagram wings for a task',
     inputSchema: {
       type: 'object',
       properties: {
-        task: { type: 'string', description: 'Descrierea task-ului' },
-        count: { type: 'number', description: 'Număr de agenți divergenți (default 5, max 18)' },
-        domain: { type: 'string', description: 'Domeniu (editorial, code-review, architecture, bug, content, research)' },
+        task: { type: 'string', description: 'Task description' },
+        count: { type: 'number', description: 'Number of divergent agents (default 5, max 18)' },
+        domain: { type: 'string', description: 'Domain (editorial, code-review, architecture, bug, content, research)' },
       },
       required: ['task'],
     },
   },
   {
     name: 'ccdew_convergent',
-    description: 'Sintetizează N outputuri divergente într-un verdict integrat',
+    description: 'Synthesizes N divergent outputs into an integrated verdict',
     inputSchema: {
       type: 'object',
       properties: {
-        task: { type: 'string', description: 'Task-ul original' },
+        task: { type: 'string', description: 'Original task' },
         outputs: {
           type: 'array',
           items: {
@@ -161,7 +161,7 @@ const TOOLS = [
             },
             required: ['agent_id', 'content'],
           },
-          description: 'Outputurile agenților divergenți',
+          description: 'Outputs of divergent agents',
         },
       },
       required: ['task', 'outputs'],
@@ -169,25 +169,25 @@ const TOOLS = [
   },
   {
     name: 'ccdew_divergent_convergent',
-    description: 'Full pipeline: alege aripe + generează prompturi divergente + convergente',
+    description: 'Full pipeline: pick wings + generate divergent prompts + convergent',
     inputSchema: {
       type: 'object',
       properties: {
-        task: { type: 'string', description: 'Descrierea task-ului' },
-        count: { type: 'number', description: 'Număr de agenți divergenți (default 5)' },
-        domain: { type: 'string', description: 'Domeniu opțional' },
+        task: { type: 'string', description: 'Task description' },
+        count: { type: 'number', description: 'Number of divergent agents (default 5)' },
+        domain: { type: 'string', description: 'Optional domain' },
       },
       required: ['task'],
     },
   },
   {
     name: 'ccdew_wings_list',
-    description: 'Listează toate aripile Enneagram disponibile (18 wings)',
+    description: 'List all available Enneagram wings (18 wings)',
     inputSchema: { type: 'object', properties: {} },
   },
   {
     name: 'ccdew_domain_wings',
-    description: 'Arată maparea domeniu → aripe recomandate',
+    description: 'Show domain → recommended wings mapping',
     inputSchema: { type: 'object', properties: {} },
   },
 ];
@@ -211,7 +211,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               task,
               count: agents.length,
               agents,
-              usage: 'Folosește aceste prompturi ca input pentru agenții reali, apoi colectează outputurile și trimite-le la ccdew_convergent.',
+              usage: 'Use these prompts as input for the real agents, then collect the outputs and send them to ccdew_convergent.',
             }, null, 2),
           }],
         };
@@ -222,7 +222,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const outputs = args.outputs || [];
         if (outputs.length < 2) {
           return {
-            content: [{ type: 'text', text: 'Ai nevoie de cel puțin 2 outputuri divergente pentru sinteză.' }],
+            content: [{ type: 'text', text: 'You need at least 2 divergent outputs for synthesis.' }],
             isError: true,
           };
         }
@@ -234,7 +234,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               task,
               convergent_prompt: convergentPrompt,
               output_count: outputs.length,
-              note: 'Trimite acest prompt unui agent Reformer pentru sinteză finală.',
+              note: 'Send this prompt to a Reformer agent for final synthesis.',
             }, null, 2),
           }],
         };
@@ -247,7 +247,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const placeholderOutputs = agents.map(a => ({
           agent_id: a.agent_id,
           wing: a.wing,
-          content: `[PLACEHOLDER — înlocuiește cu outputul real al agentului ${a.agent_id}]`,
+          content: `[PLACEHOLDER — replace with the actual output of agent ${a.agent_id}]`,
         }));
         const convergentPrompt = buildConvergentPrompt(task, placeholderOutputs);
         return {
@@ -262,10 +262,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 prompt: convergentPrompt,
               },
               workflow: [
-                '1. Rulează fiecare agent divergent cu promptul său (paralel)',
-                '2. Colectează toate outputurile',
-                '3. Trimite outputurile la ccdew_convergent cu task-ul original',
-                '4. Trimite convergent_prompt unui agent Reformer pentru sinteză finală',
+                '1. Run each divergent agent with its prompt (parallel)',
+                '2. Collect all outputs',
+                '3. Send outputs to ccdew_convergent with the original task',
+                '4. Send convergent_prompt to a Reformer agent for final synthesis',
               ],
             }, null, 2),
           }],

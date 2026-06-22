@@ -4,12 +4,12 @@
  * NLM Session Hook — Auto-check NLM auth at session start
  *
  * Implements anti-suspicion rules from _SETTINGS/RULES/nlm_anti_suspicion.md:
- *   - Check auth MAXIM o dată per sesiune (NU pe fiecare query)
- *   - NU --refresh sau --keep-alive (declanșează detection)
- *   - Throttle: ≥3s între queries
- *   - Single channel: o singură metodă per sesiune
+ *   - Check auth MAXIMUM once per session (NOT on every query)
+ *   - NO --refresh or --keep-alive (triggers detection)
+ *   - Throttle: ≥3s between queries
+ *   - Single channel: one method per session
  *
- * Integration: Rulează la SessionStart via hook-handler.cjs
+ * Integration: Runs at SessionStart via hook-handler.cjs
  *
  * Usage:
  *   node nlm-session-hook.cjs        # Check + warn if invalid
@@ -71,7 +71,7 @@ function main() {
   const isForce = args.includes('--force');
   const isCheck = args.includes('--check');
 
-  // Anti-suspicion: check auth MAXIM o dată per sesiune
+  // Anti-suspicion: check auth MAXIMUM once per session
   if (!isForce && !isNewSession()) {
     if (!isCheck) {
       console.log('[NLM Hook] Skipping auth check — already checked this session (anti-suspicion)');
@@ -89,14 +89,14 @@ function main() {
   });
 
   if (!auth.ok && !isCheck) {
-    console.warn(`[NLM Hook] ⚠ Auth invalid. Rulează manual: python3 .claude/scripts/nlm_auto_login.py --force`);
+    console.warn(`[NLM Hook] ⚠ Auth invalid. Run manually: python3 .claude/scripts/nlm_auto_login.py --force`);
     console.warn(`[NLM Hook] Output: ${auth.output.slice(0, 200)}`);
     process.exit(1);
   }
 
   if (!isCheck) {
     console.log(`[NLM Hook] ✅ Auth ${auth.ok ? 'valid' : 'invalid'} — anti-suspicion pattern respected`);
-    console.log(`[NLM Hook] Not checking again this session (max 1× per sesiune)`);
+    console.log(`[NLM Hook] Not checking again this session (max 1× per session)`);
   }
 
   process.exit(auth.ok ? 0 : 1);
