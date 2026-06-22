@@ -1,9 +1,0 @@
-{
-  "newFileLocation": "folder",
-  "newFileFolderPath": "Accounts",
-  "attachmentFolderPath": "Attachments",
-  "alwaysUpdateLinks": true,
-  "newLinkFormat": "shortest",
-  "useMarkdownLinks": false,
-  "readableLineLength": true
-}
