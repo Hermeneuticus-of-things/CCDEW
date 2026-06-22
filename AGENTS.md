@@ -60,38 +60,38 @@ node .claude/helpers/intelligence.cjs stats --json
 ```
 
 ### Hermes Agent (OpenCode Desktop)
-**OpenCode Desktop** este orchestratorul care expune tool-urile `hermes_*` pentru toate LLM-urile.
+**OpenCode Desktop** is the orchestrator that exposes `hermes_*` tools to all LLMs.
 
-**Hermes Autonomous Agent** - Agent Zero-style cu loop reflexiv:
+**Hermes Autonomous Agent** — Agent Zero-style reflexive loop:
 - Loop: `THINK → ACT → OBSERVE → REFLECT → CORRECT`
-- Memory persistent în `~/.hermes/memories/autonomous.json`
-- Self-correction automată la erori
-- Tool autonomy - folosește tool-urile fără confirmare
-- **Auto-Evoluție** - învață din Agent Zero și se îmbunătățește continuu
+- Persistent memory in `~/.hermes/memories/autonomous.json`
+- Automatic self-correction on errors
+- Tool autonomy — uses tools without confirmation
+- **Auto-Evolution** — learns from Agent Zero and improves continuously
 
-**Prima sarcină Hermes**: Studiază Agent Zero (github.com/agent0ai/agent-zero) și extrage pattern-urile pentru auto-evoluție.
+**First Hermes task**: Study Agent Zero (github.com/agent0ai/agent-zero) and extract patterns for self-evolution.
 
-Tool-urile disponibile (doar în OpenCode Desktop):
-- `hermes conversations_list` - Lista conversații active
-- `hermes conversation_get [key]` - Detalii conversație
-- `hermes messages_read [key] [lim]` - Citește mesaje
-- `hermes messages_send [tgt] [msg]` - Trimite mesaj
-- `hermes channels_list` - Lista canale disponibile
-- `hermes events_poll [cursor]` - Poll pentru evenimente
-- `hermes events_wait` - Long-poll pentru evenimente
-- `hermes attachments_fetch` - Preia attachmente
-- `hermes permissions_list_open` - Lista permisiuni pending
-- `hermes permissions_respond` - Răspunde la permisiune
+Available tools (OpenCode Desktop only):
+- `hermes conversations_list` — List active conversations
+- `hermes conversation_get [key]` — Conversation details
+- `hermes messages_read [key] [lim]` — Read messages
+- `hermes messages_send [tgt] [msg]` — Send message
+- `hermes channels_list` — List available channels
+- `hermes events_poll [cursor]` — Poll for events
+- `hermes events_wait` — Long-poll for events
+- `hermes attachments_fetch` — Fetch attachments
+- `hermes permissions_list_open` — List pending permissions
+- `hermes permissions_respond` — Respond to permission
 
-**Configurare:** `~/.config/opencode/mcp.json` → Hermes MCP server se spawn-ează automat.
+**Setup:** `~/.config/opencode/mcp.json` → Hermes MCP server spawns automatically.
 
-## Comenzi Rapide
+## Quick Commands
 
-| Comanda | Descriere |
-|---------|-----------|
-| `opencode status` | Afiseaza metrici cost |
-| `opencode audit` | Ruleaza 5-zoom audit |
-| `opencode route [task]` | Recomanda nodul optim |
+| Command | Description |
+|---------|-------------|
+| `opencode status` | Show cost metrics |
+| `opencode audit` | Run 5-zoom audit |
+| `opencode route [task]` | Recommend optimal node |
 | `opencode dashboard` | Deschide dashboard web |
 | `opencode snapshot` | Salveaza stare sesiune |
 

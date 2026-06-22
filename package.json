@@ -1,7 +1,7 @@
 {
   "name": "ccdew",
   "version": "3.9.8",
-  "description": "Claude Code Efficient Workspace v6.1 — Enneagram routing, SAFLA, Circuit 9, 5-Layer Memory, SSA 24%",
+  "description": "OpenCode Desktop Ecosystem Workspace — Enneagram routing, SAFLA, Circuit 9, 5-Layer Memory, SSA",
   "private": true,
   "engines": {
     "node": ">=18.0.0"

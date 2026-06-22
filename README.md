@@ -1,4 +1,4 @@
-# CCDEW — Claude Code Desktop Ecosystem Workspace
+# CCDEW — OpenCode Desktop Ecosystem Workspace
 
 [![CI](https://github.com/Hermeneuticus-of-things/CCDEW/actions/workflows/ci.yml/badge.svg)](https://github.com/Hermeneuticus-of-things/CCDEW/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -21,11 +21,13 @@
 
 ## [MAHA] What CCDEW Actually Is — 10-second read
 
-**CCDEW is a workspace that turns Claude Code Desktop from a chat into an autonomous AI agent ecosystem.** It's not a product you install — it's a structure you clone.
+**CCDEW is a workspace that turns [OpenCode Desktop](https://opencode.ai) (formerly Claude Code Desktop) from a chat into an autonomous AI agent ecosystem.** It's not a product you install — it's a structure you clone.
+
+> **Naming note:** OpenCode Desktop (opencode.ai) is the open-source AI CLI that hosts CCDEW. **Open Cload** is a custom dashboard/UI layer built as part of CCDEW on top of OpenCode. They are not the same thing.
 
 ### The core mechanism
 
-Claude Code Desktop (OpenCode) reads two files at session start:
+OpenCode Desktop reads two files at session start:
 
 1. **`AGENTS.md`** — tells the LLM: "You are not just a chat. You are an ecosystem. Here are your agents, your tools (MCP servers), your skills, your memory system, your commands. This is how you organize yourself, learn from mistakes, and improve over time."
 
@@ -68,7 +70,7 @@ bash scripts/bootstrap-ccdew.sh          # start background services
 python3 .claude/helpers/mission-control.py  # API + dashboard on :8899
 ```
 
-Open Claude Code Desktop in the repo — the AGENTS.md context loads automatically. Ask "what can you do?" and the ecosystem answers.
+Open OpenCode Desktop in the repo — the AGENTS.md context loads automatically. Ask "what can you do?" and the ecosystem answers.
 
 ### Architecture at a glance
 
@@ -125,7 +127,7 @@ Open Claude Code Desktop in the repo — the AGENTS.md context loads automatical
 |------|---------|
 | [Node.js](https://nodejs.org) | 20+ |
 | [Python](https://python.org) | 3.10+ |
-| [Claude Code Desktop](https://opencode.ai) | latest |
+| [OpenCode Desktop](https://opencode.ai) | latest |
 | git | any |
 | (optional) [OpenRouter key](https://openrouter.ai) | for LLM gateway |
 | (optional) [NotebookLM CLI](https://pypi.org/project/notebooklm/) | for NLM integration |
@@ -141,7 +143,7 @@ pip install -r requirements.txt  # optional: Python deps
 
 ### Configure
 
-CCDEW works *inside* Claude Code Desktop. Two files make it discoverable:
+CCDEW works *inside* OpenCode Desktop. Two files make it discoverable:
 
 **`AGENTS.md`** (in repo root + `~/.config/opencode/AGENTS.md`) — auto-loaded at every session. Tells OpenCode what CCDEW is, which MCP servers exist, what agents and skills are available.
 

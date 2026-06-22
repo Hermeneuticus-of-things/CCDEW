@@ -1,0 +1,17 @@
+# CCDEW Python dependencies
+# pip install -r requirements.txt
+
+numpy>=1.24.0
+requests>=2.31.0
+pyyaml>=6.0
+
+# Optional: NotebookLM integration
+# notebooklm
+
+# Optional: Voice / Audio
+# faster-whisper
+# sounddevice
+# soundfile
+
+# Optional: Computer vision
+# opencv-python

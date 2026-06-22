@@ -116,43 +116,42 @@ Add project details → `PROJECTS/<Name>/CLAUDE.md` + `BEST_PRACTICES.md` + `doc
 
 **Scope routing:** task on project → work in `PROJECTS/<N>/`; meta task → root or `_SETTINGS/`/`_BEST_PRACTICES/`/`_TEMPLATES/`. "Remember for the future" → write in physical `.md` files (if not on disk, it's lost).
 
-## Anthropic → OpenRouter proxy (fallback automat credite)
+## Anthropic → OpenRouter proxy (automatic credit fallback)
 
-Dacă Anthropic rămâne fără credite, proxy-ul local preia automat cu OpenRouter gratuit:
+When Anthropic runs out of credits, the local proxy takes over automatically with free OpenRouter models:
 
 ```bash
-# Terminal 1 — porneste proxy (ruleaza in background)
+# Terminal 1 — start proxy (runs in background)
 python3 PROJECTS/Consiliu/anthropic_proxy.py &
 
-# Terminal 2 — spune Claude Code sa foloseasca proxy-ul
+# Terminal 2 — tell Claude Code to use the proxy
 export ANTHROPIC_BASE_URL=http://localhost:8082
-claude  # porneste Claude Code normal, dar cu fallback automat
+claude  # starts Claude Code normally, but with automatic fallback
 ```
 
-Proxy-ul ascultă pe `:8082`. Când Anthropic returnează 402 (credit epuizat) → waterfall OpenRouter automat.
-Claude Code nu știe diferența — primește răspuns în format Anthropic identic.
+The proxy listens on `:8082`. When Anthropic returns 402 (credit exhausted) → automatic OpenRouter waterfall. Claude Code doesn't know the difference — it receives an identical Anthropic-format response.
 Log: `/tmp/anthropic_proxy.log` | Status: `curl http://localhost:8082/health`
 
 ---
 
 ## OpenRouter CLI (Think local)
 
-Fallback automat: **Anthropic → OpenRouter** (dacă Anthropic nu e disponibil):
+Automatic fallback: **Anthropic → OpenRouter** (when Anthropic is unavailable):
 
 ```bash
-# Recomandatt: incearca Anthropic, fallback automat pe OpenRouter
-python3 PROJECTS/Consiliu/think_ai.py "orice intrebare"
-python3 PROJECTS/Consiliu/think_ai.py --verbose "code: ..."   # vede ce backend foloseste
-python3 PROJECTS/Consiliu/think_ai.py --force-or "sare direct pe OpenRouter"
+# Recommended: try Anthropic first, automatic fallback to OpenRouter
+python3 PROJECTS/Consiliu/think_ai.py "any question"
+python3 PROJECTS/Consiliu/think_ai.py --verbose "code: ..."   # shows which backend is used
+python3 PROJECTS/Consiliu/think_ai.py --force-or "skip directly to OpenRouter"
 
-# Doar OpenRouter (fara Anthropic)
+# OpenRouter only (no Anthropic)
 python3 PROJECTS/Consiliu/think_openrouter.py "calc: ..."
-python3 PROJECTS/Consiliu/think_openrouter.py --list          # modele disponibile
+python3 PROJECTS/Consiliu/think_openrouter.py --list          # available models
 ```
 
-Logica: Anthropic (claude-haiku) → daca pica (429/down/no key) → OpenRouter waterfall:
+Logic: Anthropic (claude-haiku) → if it fails (429/down/no key) → OpenRouter waterfall:
 `qwen3-coder:free` → `glm-4.5-air:free` → `gpt-oss-120b:free` → `nemotron-120b:free` → `llama-3.3-70b:free` → `hermes-405b:free` → `gemma-4-31b:free` → `qwen3-80b:free` → `gpt-4o-mini`.
-Keys: `ANTHROPIC_API_KEY` env var (optional) + `OPENROUTER_KEY` hardcodat în script.
+Keys: `ANTHROPIC_API_KEY` env var (optional) + `OPENROUTER_KEY` hardcoded in script.
 
 ---
 
