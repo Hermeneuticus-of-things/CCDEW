@@ -135,7 +135,7 @@ graph TB
     SK_OC["OpenCode Skills (7)"]
     SK_OC1["hermes-ccdew · zorin-tv-system<br/>zorin-tv-repair · gx-monitor<br/>graphify · tv-identifier<br/>auto-skill"]
     SK_H["Hermes Skills (87)"]
-    SK_H1["zorin-romania-tv · zorin-auto-heal<br/>zorin-disk-watch · zorin-kernel-watch<br/>zorin-memory-opt · zorin-service-guard<br/>zorin-auto-* (3)"
+    SK_H1["zorin-romania-tv · zorin-auto-heal<br/>zorin-disk-watch · zorin-kernel-watch<br/>zorin-memory-opt · zorin-service-guard<br/>zorin-auto-* (3)"]
     SK_H2["universal-techniques<br/>qnap-access · deep-stream-finder<br/>autonomous-ai-agents"]
     SK_H3["apple (6): macos-computer-use<br/>imessage · findmy · reminders<br/>apple-notes"]
     SK_H4["creative (11): comfyui · touchdesigner<br/>songwriting · sketch · pretext<br/>pixel-art · p5js · manim · ascii<br/>architecture-diagram · design-md"]
@@ -234,7 +234,7 @@ graph TB
   SK_C --> SK_C1
   SK_OCL --> SK_OCL
   MEM_N4 --> SK_OC & SK_H & SK_C & SK_OCL
-  MC_MGR --> CMD_ANALYSIS & CMD_AUTO & CMD_GITHUB & CMD_HOOKS & CMD_MONITOR & CMD_OPT & MD_SPARC
+  MC_MGR --> CMD_ANALYSIS & CMD_AUTO & CMD_GITHUB & CMD_HOOKS & CMD_MONITOR & CMD_OPT & CMD_SPARC
   CC_RUFLO --> FLOW_CONFIG
   FLOW_CONFIG --> FLOW_SESSIONS & FLOW_REPORTS & FLOW_DATA & FLOW_MEM & FLOW_TEAM
   TMPL_ANDROID & TMPL_CARTE & TMPL_DEVCONTAINER & TMPL_GENERIC & TMPL_GITHUB & TMPL_OC & TMPL_PREVIEW & TMPL_RESEARCH & TMPL_MCP --> MC_MGR
