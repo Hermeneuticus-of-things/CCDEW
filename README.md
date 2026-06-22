@@ -75,43 +75,43 @@ Open OpenCode Desktop in the repo — the AGENTS.md context loads automatically.
 ### Architecture at a glance
 
 ```
-  ┌──────────────────────────────────────────────┐
-  │          OPEN CLOAD (Desktop UI)              │
-  │  Dashboard · NotebookLM · Monitor · Benchmark │
-  └──────────────────┬───────────────────────────┘
-                     │
-  ┌──────────────────▼───────────────────────────┐
-  │    LLM & MODELS — OpenRouter Gateway         │
-  │  deepseek-v4:free · qwen3-80b:free · gemma-4 │
-  └──────────────────┬───────────────────────────┘
-                     │
-  ┌──────────────────▼───────────────────────────┐
-  │              CCDEW CORE                      │
+  ┌─────────────────────────────────────────────┐
+  │         OPEN CLOAD (Desktop UI)             │
+  │  Dashboard · NotebookLM · Monitor · Bench   │
+  └──────────────────┬──────────────────────────┘
+                      │
+  ┌───────────────────▼─────────────────────────┐
+  │   LLM & MODELS — OpenRouter Gateway         │
+  │  deepseek-v4 · qwen3-80b · gemma-4 · more   │
+  └───────────────────┬─────────────────────────┘
+                      │
+  ┌───────────────────▼─────────────────────────┐
+  │              CCDEW CORE                     │
   │  MCP x6 · Bridges x5 · Swarm · Plugins x15  │
-  │  Convergent/Divergent · NLM · Fractal Enneag │
-  │  (you can add, modify, or replace any layer) │
-  └──────────────────┬───────────────────────────┘
-                     │
-  ┌──────────────────▼───────────────────────────┐
-  │         MISSION CONTROL (:8899)              │
-  │  Status · Dashboard · CodeBurn · QualityGate │
-  └──────────────────┬───────────────────────────┘
-                     │
-  ┌──────────────────▼───────────────────────────┐
-  │    INTELLIGENCE & MEMORY — 6-Level Pyramid   │
-  │  Episodic → Patterns → Techniques → Skills   │
-  │  → Attitudes → Principles (auto-consolidate) │
-  └──────────────────┬───────────────────────────┘
-                     │
-  ┌──────────────────▼───────────────────────────┐
-  │     AGENTS · SKILLS · COMMANDS · TEMPLATES   │
-  │  105+ agents · 133 skills · 7 cmd cats · 9tm │
-  └──────────────────┬───────────────────────────┘
-                     │
-  ┌──────────────────▼───────────────────────────┐
-  │       UNIVERSAL INTEGRATION FRAMEWORK        │
-  │  Bridge · MCP · Plugin · Skill · Agent · Tpl │
-  └──────────────────────────────────────────────┘
+  │  Convergent/Divergent · NLM · Enneagram     │
+  │  (you can add, modify, or replace any part) │
+  └───────────────────┬─────────────────────────┘
+                      │
+  ┌───────────────────▼─────────────────────────┐
+  │        MISSION CONTROL (:8899)              │
+  │  Status · CodeBurn · Dashboard · QualityGate│
+  └───────────────────┬─────────────────────────┘
+                      │
+  ┌───────────────────▼─────────────────────────┐
+  │   INTELLIGENCE & MEMORY — 6-Level Pyramid   │
+  │  Episodic → Patterns → Techniques → Skills  │
+  │  → Attitudes → Principles (auto-consolidate)│
+  └───────────────────┬─────────────────────────┘
+                      │
+  ┌───────────────────▼─────────────────────────┐
+  │    AGENTS · SKILLS · COMMANDS · TEMPLATES   │
+  │  105+ agents · 133 skills · 7 cmds · 9 tpls │
+  └───────────────────┬─────────────────────────┘
+                      │
+  ┌───────────────────▼─────────────────────────┐
+  │       UNIVERSAL INTEGRATION FRAMEWORK       │
+  │  Bridge · MCP · Plugin · Skill · Agent · Tpl│
+  └─────────────────────────────────────────────┘
 ```
 
 ---
