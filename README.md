@@ -8,6 +8,59 @@
 
 **Open Cload Intelligence Suite + CCDEW Core** — Universal framework for autonomous AI agents. Integrates any application. Self-evolution. Hierarchical memories. Self-healing.
 
+---
+
+## What is CCDEW?
+
+CCDEW is a **custom** AI agent ecosystem built on top of [Claude Code Desktop](https://opencode.ai). It's not a public product you can install from a package manager — it's a complete, opinionated framework that you clone and run yourself.
+
+### Prerequisites
+
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| [Node.js](https://nodejs.org) | 20+ | Runtime for MCP servers and JS tools |
+| [Python](https://python.org) | 3.10+ | Runtime for AI engines and helpers |
+| [Claude Code Desktop](https://opencode.ai) | latest | The AI CLI that hosts the ecosystem |
+| git | any | To clone the repo |
+| (optional) [OpenRouter key](https://openrouter.ai) | — | For LLM gateway features |
+| (optional) [Google NotebookLM CLI](https://pypi.org/project/notebooklm/) | — | For NLM integration |
+
+### Installation
+
+```bash
+git clone https://github.com/Hermeneuticus-of-things/CCDEW.git ~/CCDEW
+cd ~/CCDEW
+# Optional: install dependencies (if using ccdew-core NPM tools)
+npm install
+# Optional: install Python helpers
+pip install -r requirements.txt  # if present
+```
+
+Point your Claude Code Desktop config to the repo and the `.claude/` structure will be auto-discovered.
+
+### What can you do with it?
+
+| Use Case | How CCDEW Helps |
+|----------|----------------|
+| **Multi-agent thinking** | Divergent/Convergent pipeline generates many perspectives, then synthesizes one verdict |
+| **Long-running research** | NLM Bridge queries your NotebookLM notebooks with async + cache — never lose context |
+| **Self-improving agents** | 6-level memory pyramid (N1 episodic → N6 principles) — agents learn from every session |
+| **Fractal analysis** | Enneagram Router zooms from Maha (big picture) to Nano (detail) across 5 levels |
+| **CI/CD for AI** | Quality gate, pre-commit verification, cost tracking — treat AI like code |
+| **Any app integration** | 6 methods (Bridge, MCP, Plugin, Skill, Agent, Template) to connect anything |
+| **Security-first** | 3 sensitivity levels, encrypted vault, secret scanning, permission guards |
+
+### Who is it for?
+
+- **AI power users** who want more than a chat interface — full agent orchestration
+- **Developers** building autonomous AI workflows with structured memory and reasoning
+- **Researchers** who need grounded (non-hallucinating) answers from their own source materials
+- **Anyone** who wants AI agents that remember, adapt, and improve across sessions
+
+### Why hasn't your LLM heard of it?
+
+CCDEW is a **private, custom-built framework** — it lives in this GitHub repo and on the creator's machine. It's not trained into any public LLM's weights. OpenRouter models (DeepSeek, Qwen, Gemma, etc.) don't know about it unless they read this repo. That's normal and expected — CCDEW is designed to extend what an LLM can do, not to be known by one.
+
 ```
   ╔══════════════════════════════════════════════════════════════════╗
   ║                    OPEN CLOAD (UI Layer)                        ║
