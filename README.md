@@ -281,27 +281,31 @@ Additional engines: `ssa.cjs` (semantic search), `safla.cjs` (adaptive learning)
 ## LLM & Models — Gateway and Free Models
 
 ### OpenRouter Gateway
-All LLM traffic goes through `opencode-llm-mcp.cjs` — the OpenRouter gateway. Exposes 5 tools: list models, chat completion, embedding, provider info, cost estimation.
+Any agent can route LLM traffic through an OpenRouter gateway (e.g., `opencode-llm-mcp.cjs`). Exposes tools for model discovery, chat completion, embeddings, provider info, and cost estimation. Swap models without changing agent code — just update config.
 
-### Free Models Available
-| Model | Provider | Used By |
-|-------|----------|---------|
-| `deepseek/deepseek-v4-flash:free` | DeepSeek | OpenCode Desktop default |
-| `qwen/qwen3-80b:free` | Alibaba | Hermes (Enneagram routing), heavy agents |
+### Free Models Available — Any Provider
+| Model | Provider | Typical Use |
+|-------|----------|-------------|
+| `deepseek/deepseek-*:free` | DeepSeek | Default general purpose |
+| `qwen/qwen3-*:free` | Alibaba | Heavy tasks, long context |
 | `google/gemma-4-*:free` | Google | Light tasks, fallback |
 | `mistralai/*:free` | Mistral | Text analysis, embeddings |
 | `meta-llama/*:free` | Meta | Reasoning, planning |
-| `minimax/minimax-m2.5:free` | MiniMax | GX Phone agent (mobile) |
+| `minimax/*:free` | MiniMax | Mobile/edge agents |
 
-### How Agents Select the Model
-- **Hermes** — Enneagram router selects model type based on task profile; SAFLA adjusts based on success/failure
-- **Claude Agents** — use the default Claude model (Anthropic) through Claude Desktop
-- **OpenCode** — configured in `.opencode.json` with free model list + fallback chain
-- **GX Phone** — runs on mobile with `minimax-m2.5:free` through OpenRouter
-- **Swarm** — each node chooses dynamically based on load and success rate
+More free models appear regularly. The gateway auto-discovers available ones.
+
+### How Any Agent Can Select a Model
+- **By profile** — route heavy tasks to capable models, light tasks to fast ones
+- **By cost** — prefer free models, fall back to paid only when needed
+- **By capability** — reasoning, code generation, embeddings, vision, etc.
+- **Adaptive** — success/failure history adjusts model selection over time
+- **Configurable** — model lists, fallback chains, and routing rules live in a single config file
 
 ### Benchmark & Monitoring
-`llm-benchmark.py` in Open-Cload tests model performance. `check-openrouter-free.cjs` periodically checks which free models are available. Cost per session is tracked in CodeBurn (`pricing.cjs`).
+Use benchmark tools to compare models on your specific tasks. Monitor cost per session. Track which models succeed or fail on which task types. Adapt routing dynamically.
+
+The MCP gateway (`opencode-llm-mcp.cjs`) exposes `list_models`, `chat_completion`, `embedding`, `provider_info`, and `cost_estimation` tools — integrate from any agent or application.
 
 ---
 
