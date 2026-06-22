@@ -16,7 +16,8 @@
                                     │
   ╔══════════════════════════════════════════════════════════════════╗
   ║                    CCDEW CORE                                   ║
-  ║  ccdew-core · MCP ×4 · Bridges ×5 · Ruflo · Swarm · Plugins    ║
+  ║  ccdew-core · MCP ×6 · Bridges ×5 · Ruflo · Swarm · Plugins    ║
+║  Convergent/Divergent · NLM Bridge · Fractal Enneagram          ║
   ╚══════════════════════════════════════════════════════════════════╝
                                     │
   ╔══════════════════════════════════════════════════════════════════╗
@@ -58,11 +59,13 @@ graph TB
 
   subgraph L1_CCDEW["CCDEW CORE"]
     CC_CORE["ccdew-core (NPM library)"]
-    CC_MCP["MCP Servers x4"]
+    CC_MCP["MCP Servers x6"]
     CC_MCP1["ccdew-mcp<br/>11 tools: route, safla<br/>audit, cost, snapshot..."]
     CC_MCP2["opencode-llm<br/>5 tools: models, chat<br/>embedding, providers"]
     CC_MCP3["notebooklm<br/>content intelligence"]
     CC_MCP4["hermes-mission-control<br/>system health & snapshot"]
+    CC_MCP5["ccdew-convergent-divergent<br/>5 tools: divergent, convergent<br/>pipeline, wings, domains"]
+    CC_MCP6["ccdew-nlm-bridge<br/>7 tools: async, grouped, batch<br/>cache, multi, quota, auth"]
     CC_BRIDGES["Bridges x5"]
     CC_BR1["A2A Agent-to-Agent"]
     CC_BR2["MCP Bridge"]
@@ -73,7 +76,7 @@ graph TB
     CC_SWARM["Swarm Engine<br/>adaptive · hierarchical · mesh"]
     CC_PLUGINS["Plugin System x15"]
     CC_PL1["codeburn · graphify · safla<br/>instincts · verify · optimize<br/>permissions · secret-scan<br/>session · statusline · ssa<br/>project-scope · quality-gate<br/>red-hat · hermes-orch"]
-    CC_ENN["Enneagram Router<br/>9 personality types"]
+    CC_ENN["Enneagram Router<br/>9 types + 5 zooms + 5 lenses<br/>18 wings · priority matrix"]
     CC_ENN1["T1:Reformer T2:Helper T3:Achiever<br/>T4:Individualist T5:Investigator<br/>T6:Loyalist T7:Enthusiast<br/>T8:Challenger T9:Peacemaker"]
   end
 
@@ -215,13 +218,13 @@ graph TB
   MODEL_GW --> MODEL_FREE & MODEL_DIR & MODEL_BENCH & MODEL_MAP & MODEL_OCONFIG & MODEL_HERMES
   MODEL_GW --> CC_CORE
   MODEL_MAP --> CC_MCP2
-  CC_CORE --> CC_MCP1 & CC_MCP2 & CC_MCP3 & CC_MCP4
+  CC_CORE --> CC_MCP1 & CC_MCP2 & CC_MCP3 & CC_MCP4 & CC_MCP5 & CC_MCP6
   CC_CORE --> CC_BR1 & CC_BR2 & CC_BR3 & CC_BR4 & CC_BR5
   CC_CORE --> CC_RUFLO & CC_SWARM & CC_PLUGINS
   CC_CORE --> CC_ENN
   CC_ENN --> CC_ENN1
   CC_PLUGINS --> CC_PL1
-  CC_MCP1 & CC_MCP2 & CC_MCP3 & CC_MCP4 --> MC_API
+  CC_MCP1 & CC_MCP2 & CC_MCP3 & CC_MCP4 & CC_MCP5 & CC_MCP6 --> MC_API
   MC_API --> MC_DASH & MC_MGR & MC_BURN & MC_QUALITY & MC_METRICS
   MC_MGR --> MEM_ENGINE
   MEM_ENGINE --> MEM_N1 & MEM_N2 & MEM_N3 & MEM_N4 & MEM_N5 & MEM_N6
@@ -336,7 +339,7 @@ curl http://localhost:8899/status.json
 CCDEW/
 ├── .claude/
 │   ├── helpers/           # 80+ Python + CJS motoare
-│   ├── mcp/               # 4 MCP servers
+│   ├── mcp/               # 6 MCP servers
 │   ├── agents/            # 105+ agent profiles
 │   ├── bridge/            # 5 bridges
 │   ├── skills/            # 34 Claude skills
@@ -351,6 +354,48 @@ CCDEW/
 ├── _METRICS/              # Cost & performance
 ├── [your-apps]            # Aplicațiile tale integrate aici
 ```
+
+---
+
+## Componente noi active
+
+### Convergent/Divergent Engine (v1)
+`ccdew-convergent-divergent.cjs` — Implementează protocolul din `multi_agent_divergent_convergent.md` ca MCP server activ.
+
+| Tool | Descriere |
+|------|-----------|
+| `ccdew_divergent` | Generează N agenți cu aripe Enneagram distincte (max 18 wings) |
+| `ccdew_convergent` | Sintetizează N outputuri divergente în verdict integrat |
+| `ccdew_divergent_convergent` | Full pipeline într-un call |
+| `ccdew_wings_list` | Listează toate cele 18 aripi (zoom, lentile, perspective, modalități) |
+| `ccdew_domain_wings` | Arată maparea domeniu → aripe recomandate |
+
+### NLM Bridge (v1)
+`ccdew-nlm-bridge.cjs` — Implementează protocolul async pe 10 nivele din `nlm_async_multi_channel_protocol.md` + `nlm_anti_suspicion.md`.
+
+| Tool | Nivel | Descriere |
+|------|-------|-----------|
+| `nlm_async_query` | 1+2 | Async query cu timeout 180s + poll automat |
+| `nlm_grouped_queries` | 3 | 2-5 sub-întrebări într-un singur query |
+| `nlm_batch` | 4 | Multi-notebook batch cu throttle între ele |
+| `nlm_cache` | 7 | Gestionare cache local (stat, clear, search) |
+| `nlm_multi_channel` | all | Full pipeline: auth → cache → grouped → batch |
+| `nlm_quota` | 10 | Verifică daily quota rămasă |
+| `nlm_auth_check` | safe | Verifică auth o singură dată per sesiune |
+
+### Fractal Enneagram Router (v2)
+`enneagram_router.py` — Acum suportă zoom-uri fractale + lentile.
+
+| Comandă | Descriere |
+|---------|-----------|
+| `zoom [level]` | Detalii zoom: Maha, Macro, Mezzo, Micro, Nano |
+| `lenses [name]` | Detalii lentilă: stylistic, doctrinal, structural, regression, memory |
+| `priority` | Matricea de priorități per task type (editorial, security, etc.) |
+| `compose <task> [--files N]` | Compoziție swarm completă (Phase 1-4) pe baza META-014 |
+| `wings` | Registry complet cu 18 aripi Enneagram |
+
+### NLM Session Hook
+`nlm-session-hook.cjs` — Auto-check auth NLM la fiecare sesiune, cu anti-suspicion pattern (max 1 check/sesiune, nu pe fiecare query).
 
 ---
 

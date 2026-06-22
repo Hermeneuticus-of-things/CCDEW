@@ -104,6 +104,41 @@ ROLES = {
     },
 }
 
+# ─── FRACTAL ZOOM LEVELS (META-014 multi-zoom protocol) ─────────────────────
+
+ZOOM_LEVELS = [
+    {"id": "MAHA",  "scope": "Whole system/project",              "key_question": "Is the global architecture still coherent?",             "bug_types": "Center of gravity shifted, broken introductory promise, component imbalance"},
+    {"id": "MACRO", "scope": "Cross-module / cross-chapter",       "key_question": "Do components still communicate?",                      "bug_types": "Broken cross-references, broken structural parallels, drift"},
+    {"id": "MEZZO", "scope": "Module / chapter / subsection",      "key_question": "Canonical host respected? Rhythm/style consistent?",     "bug_types": "Duplicated/missing host, broken rhythm, voice shift"},
+    {"id": "MICRO", "scope": "Function / paragraph",               "key_question": "Internal logic intact?",                                "bug_types": "Logic bug, fine distinction lost, incorrect merge"},
+    {"id": "NANO",  "scope": "Character / token / sentence",        "key_question": "Lexical details clean?",                               "bug_types": "ASCII vs Unicode, doubled punctuation, double space, broken markup"},
+]
+
+LENSES = [
+    {"id": "stylistic",     "name": "Stylistic",         "node": 4, "subagent": "researcher",         "checks": "Rhythm, voice, reader-experience, fluency"},
+    {"id": "doctrinal",     "name": "Doctrinal/Technical","node": 5, "subagent": "analyst",           "checks": "Conceptual precision, pattern detection, fine distinctions"},
+    {"id": "structural",    "name": "Structural",        "node": 7, "subagent": "system-architect",   "checks": "Design coherence, narrative arc, balance"},
+    {"id": "regression",    "name": "Regression",        "node": 6, "subagent": "tester",             "checks": "Introduced bugs, broken grammar, mechanical consistency"},
+    {"id": "memory",        "name": "Memory/Consistency", "node": 9, "subagent": "memory-coordinator", "checks": "Cross-file consistency, indexes, references"},
+]
+
+# Priority matrix: which zoom wins when conflicted (META-014 §D)
+PRIORITY_MATRIX = {
+    "editorial":      ["MEZZO", "MICRO", "NANO", "MACRO", "MAHA"],
+    "security":       ["NANO", "MICRO", "MACRO", "MEZZO", "MAHA"],
+    "performance":    ["MICRO", "MACRO", "MEZZO", "NANO", "MAHA"],
+    "architectural":  ["MAHA", "MACRO", "MEZZO", "MICRO", "NANO"],
+    "refactoring":    ["MACRO", "MICRO", "MEZZO", "MAHA", "NANO"],
+    "default":        ["MEZZO", "MICRO", "MACRO", "NANO", "MAHA"],
+}
+
+# Thresholds for mandatory multi-zoom (META-014 §Applicability)
+THRESHOLDS = {
+    "min_files_multi_zoom": 3,
+    "min_files_all_lenses": 5,
+    "min_files_orchestrator_split": 10,
+}
+
 # ─── ROUTING HINTS (task type → recommended start node) ──────────────────────
 
 TASK_ROUTING = {
@@ -320,6 +355,181 @@ await mcp__claude_flow__agent_spawn({{
 }});
 """)
 
+# ─── NEW COMMANDS (Fractal Zoom + Lenses) ──────────────────────────────────
+
+def cmd_zoom(args):
+    """Show zoom level details."""
+    if not args:
+        print("Fractal Zoom Levels (META-014):\n")
+        for z in ZOOM_LEVELS:
+            print(f"  {z['id']:6s} | {z['scope']:35s} | {z['key_question']}")
+        print(f"\n  No zoom can be skipped. NANO bugs are invisible at MAHA. MAHA bugs are invisible at NANO.")
+        return
+    zoom_id = args[0].upper()
+    for z in ZOOM_LEVELS:
+        if z['id'] == zoom_id:
+            print(f"\n{'='*60}")
+            print(f"  {z['id']} — Scope: {z['scope']}")
+            print(f"{'='*60}")
+            print(f"  Key question : {z['key_question']}")
+            print(f"  Bug types    : {z['bug_types']}")
+            print()
+            return
+    print(f"Unknown zoom: {zoom_id}. Options: {', '.join(z['id'] for z in ZOOM_LEVELS)}")
+
+def cmd_lenses(args):
+    """Show lens details."""
+    if not args:
+        print("\nMulti-Lens Verification (META-014):\n")
+        print(f"{'Lens':20s} {'Node':6s} {'Agent':20s} {'What it checks'}")
+        print("-" * 80)
+        for l in LENSES:
+            print(f"  {l['name']:20s} Node {l['node']:<2d} {l['subagent']:20s} {l['checks']}")
+        print("\n  Cross-check protocol: combined reports = real coverage.")
+        print("  A single agent covers at most 1 lens × 2 zoom levels.\n")
+    else:
+        lens_id = args[0].lower()
+        for l in LENSES:
+            if l['id'] == lens_id:
+                print(f"\n{'='*60}")
+                print(f"  {l['name']}")
+                print(f"{'='*60}")
+                print(f"  Node     : {l['node']} ({ROLES[l['node']]['name']})")
+                print(f"  Agent    : {l['subagent']}")
+                print(f"  Checks   : {l['checks']}")
+                print()
+                return
+        print(f"Unknown lens: {lens_id}. Options: {', '.join(l['id'] for l in LENSES)}")
+
+def cmd_priority(args):
+    """Show priority matrix per task type (conflict resolution)."""
+    print("\nPriority Matrix — which zoom wins when conflicted:\n")
+    print(f"{'Domain':16s} {'Priority order':40s}")
+    print("-" * 60)
+    for domain, zooms in PRIORITY_MATRIX.items():
+        print(f"  {domain:16s} {' → '.join(zooms)}")
+    print()
+
+def cmd_compose(args):
+    """Full swarm composition for a task (Phase 1-4)."""
+    if not args:
+        print("Usage: compose <task_description> [--files N]")
+        return
+    
+    task = args[0]
+    n_files = 1
+    if len(args) > 1 and args[1].startswith('--files'):
+        try:
+            n_files = int(args[2])
+        except (ValueError, IndexError):
+            pass
+
+    lower = task.lower()
+    
+    # Detect domain
+    domain = "default"
+    for key in ["editorial", "security", "performance", "architectural", "refactoring", "code", "bug"]:
+        if key in lower:
+            domain = key
+            break
+    
+    # Determine mandatory levels
+    need_multi_zoom = n_files >= THRESHOLDS["min_files_multi_zoom"]
+    need_all_lenses = n_files >= THRESHOLDS["min_files_all_lenses"]
+    need_split = n_files >= THRESHOLDS["min_files_orchestrator_split"]
+    
+    priority = PRIORITY_MATRIX.get(domain, PRIORITY_MATRIX["default"])
+    
+    print(f"\n{'='*70}")
+    print(f"  Swarm Composition — \"{task}\"")
+    print(f"  Domain: {domain}  |  Files: {n_files}")
+    print(f"{'='*70}")
+    
+    print(f"\n  ⚙ Thresholds:")
+    print(f"    Multi-zoom check: {'MANDATORY' if need_multi_zoom else 'optional'} ({n_files} ≥ {THRESHOLDS['min_files_multi_zoom']})")
+    print(f"    All 5 lenses:     {'MANDATORY' if need_all_lenses else 'optional'} ({n_files} ≥ {THRESHOLDS['min_files_all_lenses']})")
+    print(f"    Orchestrator:     {'MANDATORY' if need_split else 'optional'}  ({n_files} ≥ {THRESHOLDS['min_files_orchestrator_split']})")
+    
+    print(f"\n  🔍 Priority (conflict resolution): {' → '.join(priority)}")
+    
+    # Phase 1: Decomposition
+    print(f"\n  Phase 1 — Decomposition (Node 8 Orchestrator)")
+    print(f"    Break task into executable sub-tasks")
+    
+    # Phase 2: Execution
+    start_node = TASK_ROUTING.get(domain, TASK_ROUTING.get("default", 8))
+    exec_agent = ROLES[start_node]
+    print(f"\n  Phase 2 — Execution (Node {start_node}: {exec_agent['name']})")
+    print(f"    Agent: {exec_agent['subagent']} | {exec_agent['short']}")
+    
+    # Phase 3: Multi-zoom + Multi-lens
+    print(f"\n  Phase 3 — Multi-zoom + Multi-lens cross-check:")
+    ph3_nodes = [(4, "Mezzo + Micro stylistic"),
+                 (5, "Micro + Nano doctrinal/technical"),
+                 (6, "Nano regression"),
+                 (7, "Maha + Macro structural"),
+                 (9, "Macro consistency cross-file")]
+    
+    if not need_multi_zoom:
+        print(f"    (optional — skip for <{THRESHOLDS['min_files_multi_zoom']} files)")
+    else:
+        for node, desc in ph3_nodes:
+            r = ROLES[node]
+            print(f"    Agent {node} {r['name']:25s} → {desc}")
+    
+    # Phase 4: Consolidation
+    print(f"\n  Phase 4 — Consolidation (Node 1 Reformer)")
+    print(f"    Synthesize reports, decide which fixes to apply")
+    
+    print(f"\n  Anti-patterns to avoid:")
+    print(f"    ❌ 8 × general-purpose parallel (that is not enneagram, it is parallel-spawn)")
+    print(f"    ❌ All agents report 0 issues without cross-check")
+    print(f"    ❌ Skipping Validator (Node 6) for 'mechanical/trivial' tasks")
+    
+    print()
+
+def cmd_wings(args):
+    """Show Enneagram wings information (18 wings from convergent/divergent protocol)."""
+    print(f"\n{'='*70}")
+    print(f"  Enneagram Wings Registry — 18 wings (convergent/divergent protocol)")
+    print(f"{'='*70}\n")
+    
+    categories = {
+        'zoom': 'Zoom Levels (5)',
+        'lens': 'Lenses (5)',
+        'perspective': 'Perspectives (4)',
+        'modality': 'Modalities (4)',
+    }
+    
+    wing_data = [
+        ('maha', 'zoom', 'Zoom-aripa Maha', 'System-level view'),
+        ('macro', 'zoom', 'Zoom-aripa Macro', 'Component-level view'),
+        ('mezzo', 'zoom', 'Zoom-aripa Mezzo', 'Process/flow view'),
+        ('micro', 'zoom', 'Zoom-aripa Micro', 'Intra-component view'),
+        ('nano', 'zoom', 'Zoom-aripa Nano', 'Atomic view'),
+        ('stylistic', 'lens', 'Lentila stylistica', 'Aesthetic/literary filter'),
+        ('doctrinal', 'lens', 'Lentila doctrinala', 'Source fidelity filter'),
+        ('structural', 'lens', 'Lentila structurala', 'Architectural filter'),
+        ('regression', 'lens', 'Lentila regression', 'What doesn\'t work'),
+        ('memory', 'lens', 'Lentila memorie', 'Continuity with past'),
+        ('agent', 'perspective', 'Perspectiva agent', 'From actor view'),
+        ('observer', 'perspective', 'Perspectiva observator', 'External neutral'),
+        ('cosmic', 'perspective', 'Perspectiva cosmic', 'Systemic view'),
+        ('sakshi', 'perspective', 'Perspectiva Saksi', 'Non-involved witness'),
+        ('descriptive', 'modality', 'Modalitate descriptiva', 'As it is'),
+        ('normative', 'modality', 'Modalitate normativa', 'As it should be'),
+        ('generative', 'modality', 'Modalitate generativa', 'What if'),
+        ('critical', 'modality', 'Modalitate critica', 'What doesn\'t work'),
+    ]
+    
+    for cat, label in categories.items():
+        print(f"  [{label}]")
+        print(f"  {'─' * 60}")
+        for w_id, w_cat, w_name, w_desc in wing_data:
+            if w_cat == cat:
+                print(f"    {w_id:20s} {w_name:30s} {w_desc}")
+        print()
+
 # ─── MAIN ──────────────────────────────────────────────────────────────────────
 
 COMMANDS = {
@@ -330,12 +540,32 @@ COMMANDS = {
     "describe":  cmd_describe,
     "route":     cmd_route,
     "spawn":     cmd_spawn,
+    "zoom":      cmd_zoom,
+    "lenses":    cmd_lenses,
+    "priority":  cmd_priority,
+    "compose":   cmd_compose,
+    "wings":     cmd_wings,
 }
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
-        print("Enneagram Agent Router — 9 nodes, 27 directed arcs")
-        print(f"Usage: enneagram_router.py <cmd> [args]")
-        print(f"Commands: {', '.join(COMMANDS)}")
+        print("Enneagram Agent Topology Router — Fractal Zoom Edition v2.0")
+        print()
+        print("Enneagram graph commands:")
+        print(f"  matrix                  Adjacency matrix (9×9)")
+        print(f"  path <s> <d>            Shortest path BFS")
+        print(f"  all_paths <s> <d>       All paths (max 5 hops)")
+        print(f"  neighbors <n>           Arcs from node n")
+        print(f"  describe <n>            Role + detailed transitions")
+        print(f"  route <task_type>       Recommended start node for task")
+        print(f"  spawn <task_type>       Generate swarm_init snippet")
+        print()
+        print("Fractal zoom + lens commands (META-014):")
+        print(f"  zoom [level]            Show zoom level details")
+        print(f"  lenses [name]           Show lens details")
+        print(f"  priority                Show priority matrix (conflict resolution)")
+        print(f"  compose <task> [--files N]  Full swarm composition")
+        print(f"  wings                   Show 18 wings registry")
+        print()
         sys.exit(0)
     COMMANDS[sys.argv[1]](sys.argv[2:])
