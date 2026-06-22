@@ -1,5 +1,11 @@
 # CCDEW — Claude Code Desktop Ecosystem Workspace
 
+[![CI](https://github.com/Hermeneuticus-of-things/CCDEW/actions/workflows/ci.yml/badge.svg)](https://github.com/Hermeneuticus-of-things/CCDEW/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 **Open Cload Intelligence Suite + CCDEW Core** — Universal framework for autonomous AI agents. Integrates any application. Self-evolution. Hierarchical memories. Self-healing.
 
 ```

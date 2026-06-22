@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      working-directory: .claude/mcp
+      run: npm ci || npm install
+
+    - name: Run convergent-divergent tests
+      run: node .claude/helpers/tests/convergent-divergent.test.cjs
+
+    - name: Run NLM bridge tests
+      run: node .claude/helpers/tests/nlm-bridge.test.cjs
+
+    - name: Syntax check MCP servers
+      run: |
+        node -c .claude/mcp/ccdew-convergent-divergent.cjs
+        node -c .claude/mcp/ccdew-nlm-bridge.cjs
+        node -c .claude/mcp/ccdew-mcp.cjs
+        node -c .claude/mcp/ccdew-notebooklm-mcp.cjs
+        node -c .claude/mcp/hermes-mission-control.mjs
+
+    - name: Python syntax check
+      run: |
+        python3 -m py_compile .claude/helpers/enneagram_router.py
+        python3 -m py_compile .claude/helpers/enneagram_compose.py
+        python3 -m py_compile .claude/helpers/ccdew-feedback-loop.py
+        python3 -m py_compile .claude/helpers/nlm-cache-warmer.py
+
+    - name: Check README spelling
+      run: |
+        pip install codespell --quiet
+        codespell --skip=".git,node_modules,_MEMORY" README.md
