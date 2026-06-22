@@ -19,15 +19,25 @@
 
 ---
 
-## [MAHA] Overview — 10-second read
+## [MAHA] What CCDEW Actually Is — 10-second read
 
-**What:** A complete, opinionated AI agent ecosystem built on top of Claude Code Desktop.
+**CCDEW is a workspace that turns Claude Code Desktop from a chat into an autonomous AI agent ecosystem.** It's not a product you install — it's a structure you clone.
 
-**Why:** Turn a chat LLM into an autonomous multi-agent system with memory, tools, CI/CD, and self-evolution.
+### The core mechanism
 
-**How:** 6 MCP servers → 105+ agents → 133 skills → 6-level memory pyramid → auto-consolidation → self-healing.
+Claude Code Desktop (OpenCode) reads two files at session start:
 
-### Who is it for?
+1. **`AGENTS.md`** — tells the LLM: "You are not just a chat. You are an ecosystem. Here are your agents, your tools (MCP servers), your skills, your memory system, your commands. This is how you organize yourself, learn from mistakes, and improve over time."
+
+2. **`opencode.json`** — registers MCP servers. Each MCP server is a set of tools the LLM can call: query a database, run a divergent/convergent thinking pipeline, check system health, ask NotebookLM, track costs.
+
+That's the fundamental idea. Everything else — 105+ agent profiles, 133 skills, 6-level memory, CI/CD, bridges, plugins — is just the *content* of those two files. You clone the repo, OpenCode reads the context, and the LLM suddenly has a complete operating system for autonomous work.
+
+### In one sentence
+
+> CCDEW = AGENTS.md (context) + MCP servers (tools) + structured directories (memory, agents, skills, templates). That's it. Everything else is what fills those directories.
+
+### Who it's for
 
 - **AI power users** who want more than a chat interface — full agent orchestration
 - **Developers** building autonomous AI workflows with structured memory and reasoning
