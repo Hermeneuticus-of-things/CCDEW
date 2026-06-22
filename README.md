@@ -87,6 +87,7 @@ Open Claude Code Desktop in the repo — the AGENTS.md context loads automatical
   │              CCDEW CORE                      │
   │  MCP x6 · Bridges x5 · Swarm · Plugins x15  │
   │  Convergent/Divergent · NLM · Fractal Enneag │
+  │  (you can add, modify, or replace any layer) │
   └──────────────────┬───────────────────────────┘
                      │
   ┌──────────────────▼───────────────────────────┐
