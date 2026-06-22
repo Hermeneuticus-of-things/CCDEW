@@ -1,11 +1,11 @@
 # CCDEW — Claude Code Desktop Ecosystem Workspace
 
-**Open Cload Intelligence Suite + CCDEW Core** — Un ecosistem complet pentru agenți AI autonomi, cu învățare continuă, memorii ierarhice, rutare Enneagram și auto-evoluție.
+**Open Cload Intelligence Suite + CCDEW Core** — Un framework universal pentru agenți AI autonomi, cu integrare pentru orice tip de aplicație, învățare continuă, memorii ierarhice și auto-evoluție.
 
 ```
   ┌──────────────────────────────────────────────────────────────────┐
   │                      OPEN CLOAD (Desktop UI)                    │
-  │  dashboard · cognitive test · notebook · benchmark · monitor    │
+  │  dashboard · notebook · monitor · LLM benchmark                 │
   └────────────────────────┬─────────────────────────────────────────┘
                            │
   ┌────────────────────────▼─────────────────────────────────────────┐
@@ -15,121 +15,114 @@
                            │
   ┌────────────────────────▼─────────────────────────────────────────┐
   │                      MISSION CONTROL                             │
-  │   mission-control.py · dashboard API · agents · metrics          │
+  │   API server · dashboard · agent manager · metrics · health      │
   └────────────────────────┬─────────────────────────────────────────┘
                            │
   ┌────────────────────────▼─────────────────────────────────────────┐
   │            INTELLIGENCE & MEMORY (Piramida 6 nivele)            │
-  │  N1 Episodic → N2 Patterns → N3 Techniques → N4 Skills          │
-  │  → N5 Attitudes → N6 Principles                                 │
-  │  SSA semantic · SAFLA learning · Instincts · Hologram           │
+  │  Episodic → Patterns → Techniques → Skills → Attitudes → Princ  │
+  │  SSA · SAFLA · Instincts · Hologram · Auto-Learner              │
   └────────────────────────┬─────────────────────────────────────────┘
                            │
   ┌────────────────────────▼─────────────────────────────────────────┐
-  │  AGENTS · SKILLS · BRIDGES · APPS                               │
-  │  Hermes · Claude · Zorin · Swarm · GitHub · GX · TV · Email     │
+  │  ANY APPLICATION — via Universal Integration Framework           │
+  │  Bridges · MCP · Plugins · Agents · Skills · Templates          │
   └──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Arhitectura completă
+## Ce este CCDEW
+
+CCDEW este un **ecosistem modular** pentru construirea și rularea de agenți AI autonomi. Nu este legat de nicio aplicație anume — oferă infrastructura prin care **orice** aplicație, serviciu sau sistem poate fi integrat și controlat de agenți.
+
+### Principii de design
+
+- **Universal** — poți integra orice: streaming, email, home automation, social media, baze de date, APIs, device-uri, rețele
+- **Auto-evolutiv** — sistemul învață din fiecare acțiune și se optimizează singur
+- **Decuplat** — fiecare componentă e independentă; nimic nu depinde de o aplicație specifică
+- **Securizat** — vault criptat, secret scanning, permission guard pe 3 nivele
+- **Extensibil** — adaugi aplicații prin bridges, MCP servers, plugins sau skills
+
+---
+
+## Arhitectura
 
 ```mermaid
 graph TB
   subgraph OC["Open Cload"]
     OC_DASH["Dashboard UI"]
-    OC_COG["Cognitive Test"]
     OC_NOTE["Notebook LM"]
     OC_BENCH["LLM Benchmark"]
-    OC_MONITOR["OpenCode Monitor"]
+    OC_MONITOR["Monitor"]
   end
 
   subgraph CCDEW["CCDEW Core"]
-    CC_CORE["ccdew-core<br/>(npm library)"]
-    CC_MCP["MCP Servers<br/>ccdew-mcp · opencode-llm<br/>notebooklm · mission-control"]
-    CC_BRIDGE["Bridges<br/>A2A · Claude-OpenCode<br/>Bridge-MCP · Hermes A0"]
-    CC_RUFLO["Ruflo Engine<br/>(agent flow execution)"]
-    CC_SWARM["Swarm Config<br/>swarm.yaml + swarm_api.py"]
-    CC_PLUGINS["OpenCode Plugins<br/>(15 TypeScript plugins)"]
+    CC_CORE["ccdew-core (npm)"]
+    CC_MCP["MCP Servers<br/>orchestrator · LLM gateway<br/>content · mission-control"]
+    CC_BRIDGE["Bridge Layer<br/>A2A (Agent-to-Agent)<br/>MCP Bridge · Hermes Bridge<br/>External System Bridge"]
+    CC_RUFLO["Ruflo Engine<br/>agent flow execution"]
+    CC_SWARM["Swarm Engine<br/>adaptive · hierarchical · mesh"]
+    CC_PLUGINS["Plugin System<br/>15 OpenCode plugins"]
   end
 
   subgraph MC["Mission Control"]
-    MC_API["mission-control.py<br/>REST API :8899"]
-    MC_DASH["Dashboard HTML<br/>components.js"]
-    MC_AGENTS["Agent Manager<br/>stats · health · control"]
-    MC_METRICS["Metrics · CodeBurn<br/>cost · session · quality"]
+    MC_API["REST API :8899"]
+    MC_DASH["Dashboard UI"]
+    MC_AGENTS["Agent Manager"]
+    MC_COST["CodeBurn Cost Tracking"]
+    MC_QUALITY["Quality Gate"]
   end
 
-  subgraph MEM["Memory & Learning Pyramid"]
-    L1["N1: Episodic<br/>episodic.jsonl<br/>actions + outcomes"]
-    L2["N2: Patterns<br/>Jaccard trigram<br/>clustering"]
-    L3["N3: Techniques<br/>reusable methods<br/>techniques.json"]
-    L4["N4: Skills<br/>133 skills total<br/>skills_db.json"]
-    L5["N5: Attitudes<br/>tacit knowledge<br/>tacit.json"]
-    L6["N6: Principles<br/>universal rules<br/>principles.json"]
-    MEM_CORE["hermes-memory.py<br/>save_episode · consolidate<br/>match · pyramid engine"]
-    MEM_SSA["SSA Semantic Search<br/>Jaccard trigram index"]
-    MEM_SAFLA["SAFLA Adaptive Learning<br/>success rates · feedback"]
-    MEM_INST["Instincts<br/>pattern recognition"]
-    MEM_HOLO["Hologram Engine<br/>fractal integration"]
-    MEM_AUTO["Auto-Learner<br/>auto_learn_consolidate.py"]
+  subgraph MEM["Memory & Intelligence"]
+    MEM_PYRAMID["Learning Pyramid (6 levels)"]
+    MEM_P1["N1: Episodic — every action logged"]
+    MEM_P2["N2: Patterns — Jaccard trigram clustering"]
+    MEM_P3["N3: Techniques — reusable methods"]
+    MEM_P4["N4: Skills — domain knowledge (133)"]
+    MEM_P5["N5: Attitudes — tacit knowledge, mindset"]
+    MEM_P6["N6: Principles — universal rules"]
+    MEM_SSA["SSA Semantic Search"]
+    MEM_SAFLA["SAFLA Adaptive Learning"]
+    MEM_INST["Instincts Pattern Recognition"]
+    MEM_HOLO["Hologram Fractal Engine"]
+    MEM_AUTO["Auto-Consolidation Engine"]
+    MEM_CORE["hermes-memory.py<br/>save → match → consolidate"]
   end
 
-  subgraph AGENTS["Agent Layer"]
-    HERMES_AGENTS["Hermes Agents<br/>core · autonomous · memory<br/>voice · notifier · dashboard"]
-    CLAUDE_AGENTS["Claude Agents (105)<br/>core · v3 · github · flow-nexus<br/>sparc · swarm · sublinear<br/>consensus · optimization"]
-    ZORIN_AGENTS["Zorin Agents (17)<br/>tv · media · network · browser<br/>home · hardware · vault · voice<br/>scheduler · bus · dev · personal"]
-    SWARM_AGENTS["Swarm Agents<br/>adaptive · hierarchical · mesh"]
-    GX_AGENTS["GX Agents<br/>monitor · dispatcher · agent-zero"]
-    EMAIL_AGENTS["Email Intelligence<br/>bb-safe-reader · dashboard<br/>inbox triage · raport"]
+  subgraph INTEGRATION["Universal Integration Framework"]
+    BRIDGE_A2A["A2A Bridge<br/>Agent-to-Agent protocol"]
+    BRIDGE_MCP["MCP Bridge<br/>Model Context Protocol"]
+    BRIDGE_EXT["External Bridge<br/>any TCP/UDP service"]
+    BRIDGE_CLAUDE["Claude-OpenCode Bridge"]
+    PLUGIN_SYS["Plugin System<br/>pre/post hooks · event bus<br/>secret scan · permission guard"]
+    AGENT_LAYER["Agent Layer<br/>any agent profile<br/>(Hermes · Claude · Swarm · custom)"]
+    SKILL_LAYER["Skill Layer<br/>any domain skill<br/>(133+ installed)"]
+    TEMPLATE_SYS["Template System<br/>project scaffolding<br/>for any application type"]
   end
 
-  subgraph SKILLS["Skills Layer — 133 total"]
-    SK_OPENCODE["OpenCode Skills (7)<br/>hermes-ccdew · zorin-tv<br/>gx-monitor · graphify<br/>tv-identifier · tv-repair"]
-    SK_HERMES["Hermes Skills (87)<br/>zorin · qnap · apple · creative<br/>data-science · devops · email<br/>github · gaming · media · mlops<br/>research · self-evolution<br/>smart-home · social-media<br/>universal-techniques"]
-    SK_CLAUDE["Claude Skills (34)<br/>agent-browser · flow-nexus<br/>github-* · hooks-automation<br/>sparc-methodology · swarm-*<br/>v3-* · reasoningbank"]
-    SK_OCLOAD["Open-Cload Skills (5)<br/>5-zoom-audit · cost-tracking<br/>enneagram-routing · safla-feedback<br/>secret-scanning"]
-  end
-
-  subgraph APPS["Applications"]
-    APP_TV["Zorin TV<br/>176 channels · 13 categories<br/>failover · proxy · token refresh"]
-    APP_EMAIL["BetterBird Email<br/>extension · dashboard · triage<br/>intelligence · cache reader"]
-    APP_DASH["Dashboards<br/>hermes · email · status<br/>control panel · overlay"]
-    APP_OBS["OBS Integration<br/>streaming · scenes"]
-    APP_OBSIDIAN["Obsidian Vault<br/>Hermes-Command-Center"]
-  end
-
-  subgraph INFRA["Infrastructure & Config"]
-    INFRA_MCP[".mcp.json · .opencode.json<br/>swarm.yaml · package.json"]
-    INFRA_FLOW["claude-flow engine<br/>3505 sessions · 243 reports"]
-    INFRA_SCRIPTS["Shell Scripts (15)<br/>bootstrap · setup · watchdogs"]
-    INFRA_TEMPLATES["Templates (9)<br/>android · carte · devcontainer<br/>github-workflows · research"]
-    INFRA_MEM["_MEMORY · _SETTINGS · _BEST_PRACTICES<br/>METRICS · decisions · ADR"]
-    INFRA_VAULT["Vault · Secrets<br/>encrypted · PIN protected"]
-  end
-
-  subgraph ENNEAGRAM["Enneagram Routing"]
-    E9["Type 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8 · 9"]
-    ER["Router<br/>enneagram_router.py"]
-    EC["Composer<br/>enneagram_compose.py"]
+  subgraph ANY_APP["Any Application — Examples Only"]
+    APP_ANY["Your application<br/>or service here"]
+    APP_EXAMPLE1["Streaming service<br/>(via proxy + token bridge)"]
+    APP_EXAMPLE2["Email system<br/>(via extension + API)"]
+    APP_EXAMPLE3["Social media<br/>(via web bridge)"]
+    APP_EXAMPLE4["Smart home<br/>(via MQTT bridge)"]
+    APP_EXAMPLE5["Database / API<br/>(via direct bridge)"]
+    APP_EXAMPLE6["Custom<br/>(via template)"]
   end
 
   OC --> CCDEW
   CCDEW --> MC
   CCDEW --> MEM
-  CCDEW --> ENNEAGRAM
-  MEM --> AGENTS
-  MEM --> SKILLS
-  AGENTS --> APPS
-  SKILLS --> APPS
-  MC --> AGENTS
-  ENNEAGRAM --> AGENTS
-  MC --> APPS
-  CC_RUFLO --> AGENTS
-  CC_BRIDGE --> AGENTS
-  CC_PLUGINS --> MC
-  MEM_CORE --> L1 & L2 & L3 & L4 & L5 & L6
+  MC --> INTEGRATION
+  MEM --> INTEGRATION
+  INTEGRATION --> ANY_APP
+
+  CC_BRIDGE --> BRIDGE_A2A & BRIDGE_MCP & BRIDGE_EXT & BRIDGE_CLAUDE
+  CC_PLUGINS --> PLUGIN_SYS
+  AGENT_LAYER & SKILL_LAYER --> INTEGRATION
+
+  MEM_CORE --> MEM_P1 & MEM_P2 & MEM_P3 & MEM_P4 & MEM_P5 & MEM_P6
   MEM_SSA --> MEM_CORE
   MEM_SAFLA --> MEM_CORE
   MEM_INST --> MEM_CORE
@@ -140,132 +133,144 @@ graph TB
   style CCDEW fill:#16213e,stroke:#0f3460,color:#fff
   style MC fill:#0f3460,stroke:#e94560,color:#fff
   style MEM fill:#533483,stroke:#e94560,color:#fff
-  style AGENTS fill:#e94560,stroke:#1a1a2e,color:#fff
-  style SKILLS fill:#16213e,stroke:#0f3460,color:#fff
-  style APPS fill:#1a1a2e,stroke:#e94560,color:#fff
-  style INFRA fill:#16213e,stroke:#0f3460,color:#fff
-  style ENNEAGRAM fill:#533483,stroke:#e94560,color:#fff
+  style INTEGRATION fill:#e94560,stroke:#1a1a2e,color:#fff
+  style ANY_APP fill:#1a1a2e,stroke:#0f3460,color:#fff,stroke-dasharray: 5 5
 ```
 
 ---
 
 ## Piramida Învățării — 6 Nivele
 
-| Nivel | Ce conține | Unde |
-|-------|-----------|------|
-| **N1 — Episodic** | Acțiuni, comenzi, rezultate | `episodic.jsonl` |
-| **N2 — Patterns** | Pattern-uri Jaccard trigram | `patterns.json` |
-| **N3 — Techniques** | Metode reusable | `techniques.json` |
-| **N4 — Skills** | 133 skill-uri specializate | `skills_db.json` |
-| **N5 — Attitudes** | Cunoștințe tacite, mindset | `tacit.json` |
-| **N6 — Principles** | 14 principii universale | `principles.json` |
+| Nivel | Ce face | Motor |
+|-------|---------|-------|
+| **N1 — Episodic** | Salvează fiecare acțiune și rezultat | `episodic.jsonl` |
+| **N2 — Patterns** | Grupează acțiuni similare (Jaccard trigram) | `patterns.json` |
+| **N3 — Techniques** | Extrage metode reutilizabile | `techniques.json` |
+| **N4 — Skills** | Construiește skill-uri specializate | `skills_db.json` |
+| **N5 — Attitudes** | Modelează atitudini și mindset | `tacit.json` |
+| **N6 — Principles** | Stabilește principii universale | `principles.json` |
 
-Motor: `hermes-memory.py` — salvare episoade, match pattern-uri, consolidare automată.
+Consolidare automată: `hermes-memory.py` + `auto_learn_consolidate.py`
 
 ---
 
-## Componente cheie
+## Cum integrezi o aplicație
 
-### MCP Servers
-| Server | Tools | Rol |
-|--------|-------|-----|
-| **ccdew-mcp** | 11 (route, safla, audit, cost, snapshot, compact...) | Orchestrator principal |
-| **opencode-llm** | 5 (models, providers, chat, embedding, cost) | Gateway LLM (OpenRouter) |
-| **notebooklm** | NotebookLM integration | Content intelligence |
-| **hermes-mission-control** | Hermes MC API | System snapshot & health |
+CCDEW oferă mai multe căi de integrare, în funcție de ce fel de aplicație/serviciu ai:
 
-### Agenți principali
-- **Hermes** — Agent central cu autonomie, voce, notificări, dashboard
-- **105 Claude Agents** — Core, v3, GitHub, Flow-Nexus, SPARC, Swarm, Sublinear, Consensus, Optimization
-- **17 Zorin Agents** — TV, media, rețea, browser, home, hardware, vault, voice, etc.
-- **Swarm Agents** — Adaptive, hierarchical, mesh coordinators
-- **GX Agents** — Monitor, dispatcher, agent-zero
+### 1. Bridge — pentru orice serviciu extern
+```python
+# Un bridge poate conecta ORICE protocol:
+# HTTP, WebSocket, MQTT, TCP, UDP, gRPC, serial, etc.
+from claude.bridge import ExternalBridge
+
+bridge = ExternalBridge(protocol="mqtt", host="...")
+bridge.register_handler("sensors/#", on_sensor_data)
+bridge.start()
+```
+
+### 2. MCP Server — pentru tool-uri expuse agenților
+```javascript
+// Un MCP Server expune tool-uri pe care agenții le pot apela
+server.tool("search_database", { query: "string" }, async (args) => {
+  return await db.query(args.query);
+});
+```
+
+### 3. Plugin — pentru hook-uri în ciclul de viață
+```typescript
+// Plugin-urile se atașează la: pre-bash, pre-edit, post-task, session-end
+export const plugin: Plugin = {
+  "tool.execute.before": (ctx) => { /* permission check */ },
+  "tool.execute.after":  (ctx) => { /* save episode */ },
+};
+```
+
+### 4. Skill — pentru cunoștințe de domeniu
+Un skill conține instrucțiuni, comenzi și workflow-uri pentru un domeniu specific. Se încarcă automat când task-ul se potrivește.
+
+### 5. Agent Profile — pentru roluri specializate
+```markdown
+# Un agent profile definește un rol: analyst, coder, researcher, etc.
+## Role: Database Administrator
+## Tools: query, backup, optimize
+## Instructions: Maintain all database systems
+```
+
+### 6. Template de proiect — pentru aplicații complete
+```bash
+# Creează un proiect nou din template
+cp -r _TEMPLATES/generic /path/to/new-app
+# Ajustează CLAUDE.md, bridges, skills
+```
+
+---
+
+## Componente interne
+
+### MCP Servers (4)
+| Server | Rol |
+|--------|-----|
+| **ccdew-mcp** | Orchestrator principal — 11 tool-uri |
+| **opencode-llm** | Gateway LLM (OpenRouter) |
+| **notebooklm** | Content intelligence |
+| **mission-control** | System snapshot & health |
 
 ### Bridges
-- **A2A Bridge** — Agent-to-Agent prin MCP
-- **Claude-OpenCode Bridge** — Conversație bidirectională
-- **Bridge-MCP Server** — MCP bridge extern
-- **Hermes A0** — Agent-Zero bridge
+- **A2A Bridge** — protocol Agent-to-Agent
+- **MCP Bridge** — conectare servicii externe
+- **External Bridge** — orice protocol TCP/UDP
+- **Claude-OpenCode Bridge** — conversație bidirecțională
 
 ### Ruflo Engine
-Motor de workflow pentru agenți — `ruflo.cjs`. Rulează flow-uri de agenți cu execuție secvențială/paralelă.
+Motor de workflow pentru agenți — `ruflo.cjs`. Rulează flow-uri secvențiale sau paralele.
 
 ### Enneagram Routing
-Rutare pe 9 noduri (tipurile Enneagram) — fiecare nod tratează task-uri după profilul său cognitiv. `enneagram_router.py` + `enneagram_compose.py`.
+Rutare pe 9 noduri cognitive — fiecare tip Enneagram tratează task-uri după profilul său.
 
 ---
 
-## Cum rulează
+## Quick start
 
 ```bash
-# Bootstrap complet
-bash /home/think/CCDEW/bootstrap-ccdew.sh
+# Bootstrap
+bash bootstrap-ccdew.sh
 
 # Pornește Mission Control
 python3 .claude/helpers/mission-control.py
 
-# Pornește Ruflo
-node .claude/helpers/ruflo.cjs
-
-# Status live
-http://localhost:8899/status.json
-http://localhost:8899/channels.json
+# Status
+curl http://localhost:8899/status.json
 ```
 
 ---
 
-## Structura directorului
+## Structură
 
 ```
 CCDEW/
 ├── .claude/
-│   ├── helpers/         # Python + CJS scripts (engine)
-│   ├── mcp/             # MCP servers
-│   ├── agents/          # 105 agent profiles
-│   ├── bridge/          # A2A + Claude-OpenCode bridges
-│   ├── skills/          # 34 Claude skill directories
-│   └── commands/        # CLI commands (analysis, automation, github, etc.)
-├── .opencode/           # OpenCode plugins + config
-├── .claude-flow/        # Flow engine (3505 sessions)
-├── agents/              # 15 top-level agent profiles
-├── ccdew-core/          # NPM library (CLI binaries)
-├── _MEMORY/             # Memory files (L0-L4, ADRs, identity)
-├── _SETTINGS/           # Rules, configs, changelogs
-├── _TEMPLATES/          # Project templates
-├── _METRICS/            # Cost & optimization metrics
-├── betterbird-ccdew/    # BetterBird Thunderbird extension
-├── Open-Cload/          # Open Cload desktop variant
-├── Hermes-Command-Center/ # Obsidian vault
-├── hermes-mcp-stdio/    # MCP stdio interface
-├── safla-weights/       # SAFLA adaptive weights
-└── project-arch/        # Architecture plugin
+│   ├── helpers/       # Motoare: memory, bridges, agents, skills
+│   ├── mcp/           # MCP servers
+│   ├── agents/        # Agent profiles
+│   ├── bridge/        # Bridge layer
+│   ├── skills/        # Domain skills
+│   └── commands/      # CLI commands
+├── .opencode/         # Plugin system
+├── ccdew-core/        # NPM library
+├── _TEMPLATES/        # Project templates (generic, android, carte, etc.)
+└── [your-apps]/       # Your integrated applications here
 ```
-
----
-
-## Aplicații integrate
-
-### Zorin TV Romania
-176 canale live, 13 categorii, failover automat p11→p13→p9, token refresh la 5 min, watchdog la 2 min, clean/probe la 6h.
-
-### BetterBird Email Intelligence
-Extensie Thunderbird cu dashboard, cache reader, raport brut, triaj inbox, intelligence engine.
-
-### Dashboards
-- Hermes Dashboard (`/status.json`)
-- Email Dashboard (`/claude/helpers/email-dashboard-server.py`)
-- CCDEW Control Panel (`ccdew-panel.html`)
-- Open Cload Dashboard (`/Open-Cload/.opencode/dashboard.html`)
 
 ---
 
 ## Securitate
 
-- Vault criptat cu PIN protected
-- Secret scanning automat (pre-commit hook)
+- **3 nivele de sensibilitate**: PUBLIC / PRIVATE / SECRET
+- Vault criptat cu PIN
+- Secret scanning automat (pre-commit)
 - Permission guard pe comenzi bash
 - Security monitoring la 12h
-- 3 nivele de sensibilitate: PUBLIC / PRIVATE / SECRET
 
 ---
 
@@ -275,4 +280,4 @@ MIT — vezi [LICENSE](./LICENSE).
 
 ---
 
-*CCDEW — Un ecosistem care crește singur. Auto-vindecare. Auto-optimizare. Auto-evoluție.*
+*CCDEW — Un framework care integrează orice. Auto-vindecare. Auto-optimizare. Auto-evoluție.*
