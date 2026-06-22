@@ -58,12 +58,12 @@ graph TB
 
   subgraph L1_CCDEW["CCDEW CORE"]
     CC_CORE["ccdew-core (NPM library)"]
-    CC_MCP["MCP Servers (4)"]
+    CC_MCP["MCP Servers x4"]
     CC_MCP1["ccdew-mcp<br/>11 tools: route, safla<br/>audit, cost, snapshot..."]
     CC_MCP2["opencode-llm<br/>5 tools: models, chat<br/>embedding, providers"]
     CC_MCP3["notebooklm<br/>content intelligence"]
     CC_MCP4["hermes-mission-control<br/>system health & snapshot"]
-    CC_BRIDGES["Bridges (5)"]
+    CC_BRIDGES["Bridges x5"]
     CC_BR1["A2A Agent-to-Agent"]
     CC_BR2["MCP Bridge"]
     CC_BR3["External Bridge"]
@@ -71,7 +71,7 @@ graph TB
     CC_BR5["Hermes A0 Bridge"]
     CC_RUFLO["Ruflo Engine<br/>agent flow execution"]
     CC_SWARM["Swarm Engine<br/>adaptive · hierarchical · mesh"]
-    CC_PLUGINS["Plugin System (15)"]
+    CC_PLUGINS["Plugin System x15"]
     CC_PL1["codeburn · graphify · safla<br/>instincts · verify · optimize<br/>permissions · secret-scan<br/>session · statusline · ssa<br/>project-scope · quality-gate<br/>red-hat · hermes-orch"]
     CC_ENN["Enneagram Router<br/>9 personality types"]
     CC_ENN1["T1:Reformer T2:Helper T3:Achiever<br/>T4:Individualist T5:Investigator<br/>T6:Loyalist T7:Enthusiast<br/>T8:Challenger T9:Peacemaker"]
@@ -188,7 +188,7 @@ graph TB
     CRON_SECURITY["security monitor 12h<br/>hermes-security · vault-monitor"]
     CRON_EVOLUTION["self-evolution<br/>auto_learn · consolidate"]
     CRON_BOOTSTRAP["startup services<br/>bootstrap-ccdew.sh"]
-    CRON_SCRIPTS["helpers (15+ scripts)<br/>guidance-hooks · statusline<br/>deploy-qnap-token · fix-brave"]
+    CRON_SCRIPTS["helpers 15+ scripts<br/>guidance-hooks · statusline<br/>deploy-qnap-token · fix-brave"]
   end
 
   subgraph L10_INFRA["INFRASTRUCTURE"]
