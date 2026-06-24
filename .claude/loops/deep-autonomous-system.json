@@ -1,0 +1,15 @@
+{
+  "name": "deep-autonomous-loops",
+  "version": "1.0.0",
+  "levels": {
+    "L1_execution": {"enabled": true, "priority": "high"},
+    "L2_structural": {"enabled": true, "priority": "medium"},
+    "L3_interaction": {"enabled": true, "priority": "low"},
+    "L4_purpose": {"enabled": true, "priority": "critical"}
+  },
+  "auto_evolution": {
+    "pattern_threshold": 3,
+    "success_threshold": 0.8,
+    "review_interval_hours": 24
+  }
+}
