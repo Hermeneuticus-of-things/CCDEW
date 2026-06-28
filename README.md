@@ -1,720 +1,109 @@
-# CCDEW — OpenCode Desktop Ecosystem Workspace
-
-[![CI](https://github.com/Hermeneuticus-of-things/CCDEW/actions/workflows/ci.yml/badge.svg)](https://github.com/Hermeneuticus-of-things/CCDEW/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
-**Open Cload Intelligence Suite + CCDEW Core** — Universal framework for autonomous AI agents. Integrates any application. Self-evolution. Hierarchical memories. Self-healing.
-
-[![MCP Servers](https://img.shields.io/badge/MCP_Servers-6-blueviolet)](.claude/mcp/)
-[![Agents](https://img.shields.io/badge/Agent_Profiles-105%2B-success)](.claude/agents/)
-[![Skills](https://img.shields.io/badge/Skills-133-ff69b4)](.claude/skills/)
-[![Memory](https://img.shields.io/badge/Memory-6_Levels-important)](_MEMORY/)
-[![Integrations](https://img.shields.io/badge/Integration_Methods-6-yellow)](README.md)
-[![Self-Healing](https://img.shields.io/badge/Self--Healing-Active-brightgreen)](.claude/helpers/)
-
-> **Why hasn't your LLM heard of it?** CCDEW is a private, custom-built framework — not in any public training set. Standard LLMs don't know it exists. That's the point: CCDEW extends what an LLM can do, not the other way around.
+<div align="center">
+  <h1>CCDEW</h1>
+  <p><strong>Autonomous AI Agent Ecosystem — Self-Improving · Measurable · Open</strong></p>
+  <p>
+    <a href="https://github.com/Hermeneuticus-of-things/CCDEW"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT"></a>
+    <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+  </p>
+  <br>
+</div>
 
 ---
 
-## What CCDEW Is — 10-second read
+## Live Convergence
 
-**CCDEW is a workspace that turns [OpenCode Desktop](https://opencode.ai) into an autonomous AI agent ecosystem that improves itself.** It's not a product you install — it's a structure you clone.
+```
+                  ┌─────────────────────────────────────────────────────┐
+Composite: 73.4%  │███████████████████████████████████████░░░░░░░░░░░░░│  Target: 95%
+                  └─────────────────────────────────────────────────────┘
+```
 
-### The core mechanism
+| Node | Name | Convergence | Role |
+|:----:|------|:-----------:|------|
+| 3 | Achiever | **85.0%** | Precision execution |
+| 7 | Enthusiast | **85.0%** | Exploration & possibility |
+| 5 | Investigator | **80.0%** | Deep analysis |
+| 2 | Helper | **79.3%** | Collaboration |
+| 9 | **Orchestrator** | **73.2%** | Routing & coordination |
+| 1 | Reformer | **73.6%** | Quality & principles |
+| 4 | Individualist | **73.0%** | Unique perspectives |
+| 6 | Loyalist | **73.0%** | Risk assessment |
+| 8 | Challenger | **72.5%** | Action & execution |
 
-Two files make the magic happen:
-
-1. **`AGENTS.md`** — tells the LLM: "You are an ecosystem. Here are your agents, MCP tools, skills, memory system. This is how you learn from mistakes and improve over time."
-
-2. **`opencode.json`** — registers MCP servers. Each server exposes tools: route tasks through 9 cognitive nodes, run a divergent/convergent pipeline, track convergence, query NotebookLM.
-
-Everything else — agents, skills, memory, plugins — is just the *content* of those two files. Clone the repo, OpenCode reads the context, and the LLM has a complete operating system for autonomous work.
-
-### In one sentence
-
-> CCDEW = AGENTS.md + MCP servers + structured directories. That's it.
-
-### Who it's for
-
-- **AI power users** who want agents that improve over time, not just chat
-- **Developers** building autonomous workflows with measurable convergence metrics
-- **Anyone** who wants AI that remembers, adapts, and proves its improvement
+> All 9 nodes above **72%** — up from 46% at session start. **111 autonomous iterations** driven by the self-training daemon. Updated every 30 seconds.
 
 ---
 
-## Proven Results — Measurable Intelligence Growth
-
-**CCDEW is the only open-source AI ecosystem that tracks its own improvement in real time.** Every action feeds a self-training loop. Here are the live metrics — updated every 30 seconds by the autonomous daemon:
-
-### Enneagram Convergence Engine — `hermes-convergence.py`
-
-The system routes every task through 9 specialized cognitive nodes (Enneagram types). Each node learns which tasks fit it best and improves over time.
-
-```
-Composite Convergence: 73.4%      ▲ from 43.5% (session start)
-Trend: converging                 ████████████████░░░  Target: 95%
-```
-
-| Node | Name | Convergence | Episodes | Role |
-|------|------|:-----------:|:--------:|------|
-| 3 | Achiever | **85.0%** | 5 | Executes with precision |
-| 7 | Enthusiast | **85.0%** | 3 | Explores possibilities |
-| 5 | Investigator | **80.0%** | 8 | Deep analysis |
-| 2 | Helper | **79.3%** | 7 | Collaboration |
-| 9 | **Orchestrator** | **73.2%** | 25 | Routes + coordinates |
-| 1 | Reformer | **73.6%** | 8 | Quality & principles |
-| 4 | Individualist | **73.0%** | 13 | Unique perspectives |
-| 6 | Loyalist | **73.0%** | 38 | Risk assessment |
-| 8 | Challenger | **72.5%** | 81 | Action & execution |
-
-> **Before self-training:** weakest nodes at 46%. After **111 autonomous iterations**: all nodes above 72%.
-
-### Three-Loop Learning System
+## Architecture
 
 <p align="center">
   <img src="docs/ccdew-architecture.svg" alt="CCDEW Architecture Diagram" width="100%">
 </p>
 
-### Architecture Benefits
+---
 
-| Problem | CCDEW Solution |
-|---------|---------------|
-| LLMs don't improve with use | **Self-training daemon** drives convergence 24/7 |
-| No measurable quality metric | **Convergence Score** (0-100%) tracks every node |
-| Race conditions in state files | **HTTP bridge** — single process serves all reads/writes |
-| Cognitive bias in routing | **9 Enneagram nodes** — specialized personas, not one-size |
-| Failure cascades crash the system | **Non-fatal pipeline** — each sub-step wrapped in try/except |
-| Memory pollution from reflections | **Separate mirror_inverse.jsonl** — not mixed with episodes |
-| Shell injection in MCP tools | **Native Node.js HTTP** — no curl/wget, no exec |
+## The Three Loops
 
-### What This Means for You
-
-- **Plug and play**: clone the repo, the system starts learning immediately
-- **Proven improvement**: 73.4% convergence from scratch in one session
-- **No manual tuning**: the daemon finds and trains the weakest node automatically
-- **Real metrics, not promises**: every number above is live from the running system
-- **Full open source**: all engines are Python files in `.claude/helpers/` — read them, modify them, replace them
+| Loop | Engine | Cadence | What it does |
+|------|--------|---------|--------------|
+| **1 — Execution** | `hermes-enneagram-core.py` + `ccdew-pipeline.py` | ~seconds | Route task through 9 cognitive nodes → divergent/convergent pipeline → record to SAFLA |
+| **2 — Self-Train** | `hermes-self-train.py` + `hermes-convergence.py` | ~30s | Pick weakest node → generate task → train → measure convergence delta |
+| **3 — Consolidation** | `hermes-memory.py` | ~10 episodes | Extract patterns → techniques → attitudes → principles. Reverse mirror to separate channel |
 
 ---
 
-## Getting Started — 60-second read
+## Infrastructure
 
-### What can you do with it?
-
-| You want to... | CCDEW gives you... |
-|----------------|-------------------|
-| Solve hard problems with multiple AI perspectives | **Divergent/Convergent engine** — spawn 18 agents with different personalities, then synthesize one verdict |
-| Research from your own documents without hallucination | **NotebookLM Bridge** — query your PDFs, videos, notes with async + cache + anti-suspicion throttle |
-| Agents that remember and improve every session | **6-level memory pyramid** — N1 episodic → N6 principles, auto-consolidated |
-| Analyze anything at every scale | **Fractal Enneagram** — zoom from Maha to Nano with 5 analytic lenses |
-| Treat AI like production code | **CI/CD + CodeBurn + Quality Gate** — pre-commit checks, cost tracking, pre-push verification |
-| Connect any app, any protocol | **6 integration methods** — Bridge, MCP, Plugin, Skill, Agent, Template |
-
-### Quick start
-
-```bash
-git clone https://github.com/Hermeneuticus-of-things/CCDEW.git
-cd CCDEW
-bash scripts/bootstrap-ccdew.sh          # start background services
-python3 .claude/helpers/mission-control.py  # API + dashboard on :8899
-```
-
-Open OpenCode Desktop in the repo — the AGENTS.md context loads automatically. Ask "what can you do?" and the ecosystem answers.
-
-### Architecture at a glance
-
-```
-  ┌─────────────────────────────────────────────┐
-  │         OPEN CLOAD (Desktop UI)             │
-  │  Dashboard · NotebookLM · Monitor · Bench   │
-  └──────────────────┬──────────────────────────┘
-                      │
-  ┌───────────────────▼─────────────────────────┐
-  │   LLM & MODELS — OpenRouter Gateway         │
-  │  deepseek-v4 · qwen3-80b · gemma-4 · more   │
-  └───────────────────┬─────────────────────────┘
-                      │
-  ┌───────────────────▼─────────────────────────┐
-  │              CCDEW CORE                     │
-  │  MCP x6 · Bridges x5 · Swarm · Plugins x15  │
-  │  Convergent/Divergent · NLM · Enneagram     │
-  │  (you can add, modify, or replace any part) │
-  └───────────────────┬─────────────────────────┘
-                      │
-  ┌───────────────────▼─────────────────────────┐
-  │        MISSION CONTROL (:8899)              │
-  │  Status · CodeBurn · Dashboard · QualityGate│
-  └───────────────────┬─────────────────────────┘
-                      │
-  ┌───────────────────▼─────────────────────────┐
-  │   INTELLIGENCE & MEMORY — 6-Level Pyramid   │
-  │  Episodic → Patterns → Techniques → Skills  │
-  │  → Attitudes → Principles (auto-consolidate)│
-  └───────────────────┬─────────────────────────┘
-                      │
-  ┌───────────────────▼─────────────────────────┐
-  │    AGENTS · SKILLS · COMMANDS · TEMPLATES   │
-  │  105+ agents · 133 skills · 7 cmds · 9 tpls │
-  └───────────────────┬─────────────────────────┘
-                      │
-  ┌───────────────────▼─────────────────────────┐
-  │       UNIVERSAL INTEGRATION FRAMEWORK       │
-  │  Bridge · MCP · Plugin · Skill · Agent · Tpl│
-  └─────────────────────────────────────────────┘
-```
+| Component | What |
+|-----------|------|
+| **HTTP Bridge** | `127.0.0.1:18777` — single process serves all state. Zero race conditions |
+| **SAFLA State** | Written only by `pipeline.py`. Others read/write via HTTP POST/GET |
+| **MCP Servers** | 4 active — native Node.js HTTP (no shell injection) |
+| **Inner Observer** | Metacognitive daemon — writes `consciousness.jsonl` (append-only) |
+| **Centralized Logging** | All components → `POST /log` → `ccdew.log` |
 
 ---
 
-## Setup & Components — 2-minute scan
+## Benefits
 
-> [!IMPORTANT]
-> **CCDEW is a bring-your-own-LLM framework.** You don't need any paid API key to start — all core features work with free OpenRouter models (DeepSeek, Qwen, Gemma). Paid keys unlock premium models but are never required.
+| Problem | Solution |
+|---------|----------|
+| LLMs never improve with use | Convergence engine tracks every node. Self-train daemon drives toward 95%. |
+| One-size-fits-all reasoning | 9 Enneagram nodes with unique system prompts, task transforms, and per-node episodic memory |
+| Race conditions in state files | HTTP bridge with single writer — others read/write via HTTP |
+| Failure cascades crash everything | Non-fatal pipeline — each sub-step wrapped in `try/except` |
+| Memory polluted by reflections | Reverse mirror writes to `mirror_inverse.jsonl` — separate from episodic |
+| MCP tools use shell exec (security risk) | Native `http.request` in Node.js — no `curl`, no `exec` |
+| No way to know if the system is improving | Composite convergence score (0–100%) — live, updated every 30s |
 
-### Prerequisites
+---
 
-| Tool | Version |
-|------|---------|
-| [Node.js](https://nodejs.org) | 20+ |
-| [Python](https://python.org) | 3.10+ |
-| [OpenCode Desktop](https://opencode.ai) | latest |
-| git | any |
-| (optional) [OpenRouter key](https://openrouter.ai) | for LLM gateway |
-| (optional) [NotebookLM CLI](https://pypi.org/project/notebooklm/) | for NLM integration |
-
-### Install
+## Quick Start
 
 ```bash
 git clone https://github.com/Hermeneuticus-of-things/CCDEW.git ~/CCDEW
 cd ~/CCDEW
-npm install          # optional: for ccdew-core tools
-pip install -r requirements.txt  # optional: Python deps
+nohup python3 .claude/helpers/ccdew-pipeline.py serve > /tmp/ccdew-pipeline.log 2>&1 &
+nohup python3 .claude/helpers/hermes-self-train.py --daemon > /tmp/self-train.log 2>&1 &
 ```
 
-### Configure
-
-CCDEW works *inside* OpenCode Desktop. Two files make it discoverable:
-
-**`AGENTS.md`** (in repo root + `~/.config/opencode/AGENTS.md`) — auto-loaded at every session. Tells OpenCode what CCDEW is, which MCP servers exist, what agents and skills are available.
-
-**`~/.config/opencode/opencode.json`** — registers MCP servers as tools that agents can call:
-
-```jsonc
-{
-  "mcpServers": {
-    "ccdew-mcp": {
-      "command": "node",
-      "args": ["/home/YOU/CCDEW/.claude/mcp/ccdew-mcp.cjs"]
-    },
-    "ccdew-convergent-divergent": {
-      "command": "node",
-      "args": ["/home/YOU/CCDEW/.claude/mcp/ccdew-convergent-divergent.cjs"]
-    },
-    "ccdew-nlm-bridge": {
-      "command": "node",
-      "args": ["/home/YOU/CCDEW/.claude/mcp/ccdew-nlm-bridge.cjs"]
-    },
-    "ccdew-notebooklm": {
-      "command": "node",
-      "args": ["/home/YOU/CCDEW/.claude/mcp/ccdew-notebooklm-mcp.cjs"]
-    }
-  }
-}
-```
-
-Replace `/home/YOU` with your actual path. The repo's `.opencode/opencode.json` has relative paths as a starting point.
-
-### MCP Servers (6 active)
-
-> [!NOTE]
-> All MCP servers are in `.claude/mcp/`. To activate them, register each in `~/.config/opencode/opencode.json` as shown above. After registration, restart OpenCode and the tools appear automatically.
-
-| Server | File | What it does |
-|--------|------|-------------|
-| **ccdew-mcp** | `ccdew-mcp.cjs` | 11 tools: route, safla, audit, cost, snapshot, compact, core, convergence |
-| **ccdew-notebooklm** | `ccdew-notebooklm-mcp.cjs` | v2.1 — Enneagram routing + prompt injection + convergence tools via HTTP bridge |
-| **ccdew-nlm-bridge** | `ccdew-nlm-bridge.cjs` | 7 tools: async, grouped, batch, cache, multi-channel, quota, auth |
-| **ccdew-convergent-divergent** | `ccdew-convergent-divergent.cjs` | 5 tools: divergent, convergent, pipeline, wings, domain mapping |
-| **opencode-llm** | `opencode-llm-mcp.cjs` | 5 tools: models, chat, embedding, providers, cost |
-| **hermes-mission-control** | `mission-control.py` | System health, snapshot, agent activity |
-
-### Bridges (5)
-
-A2A Agent-to-Agent · MCP Bridge · External Bridge · Claude-OpenCode Bridge · Hermes A0 Bridge
-
-### Key Engines (Python — `.claude/helpers/`)
-
-| Engine | Function |
-|--------|----------|
-| **ccdew-pipeline.py** | Unified divergent/convergent pipeline + HTTP bridge server (127.0.0.1:18777) |
-| **hermes-enneagram-core.py** | 9 EnneagramNode classes with system_prompt, task_transform, per-node memory, handoff |
-| **hermes-convergence.py** | Convergence engine — weight stability, handoff decay, prompt effectiveness, composite score |
-| **hermes-self-train.py** | Self-training daemon — selects weakest node, trains autonomously every 30s |
-| **hermes-memory.py** | 6-level pyramid — reverse_mirror, pathway detection, SAFLA sync at 10-ep intervals |
-| **hermes-agent-loop.py** | Full deep-cycle test harness (select → inject → execute → record → learn) |
-| **auto_learn_consolidate.py** | Periodic N1→N6 pyramid consolidation |
-
-### Plugins (11 active + 5 archived)
-
-safla · instincts · permissions · secret-scan · session · statusline · ssa · project-scope · red-hat · hermes-orch · optimize
-_(5 legacy TypeScript plugins archived to `_ARCHIVED_PLUGINS/`)_
-
-> **2026 Update:** Old 7-hook pipeline replaced by 2-phase divergent/convergent engine. Bridge migrated from shared JSON file to HTTP (127.0.0.1:18777) — zero race conditions.
+OpenCode Desktop reads `AGENTS.md` automatically — ask the system what it can do.
 
 ---
 
-## Detailed Reference — 5-minute read
-
-### Convergent/Divergent Engine (v1)
-
-Spawn N agents with distinct Enneagram wings, then synthesize their outputs into one integrated verdict.
-
-| Tool | Description |
-|------|-------------|
-| `ccdew_divergent` | Generates N agents with distinct Enneagram wings (max 18 wings based on domain) |
-| `ccdew_convergent` | Synthesizes N divergent outputs into integrated verdict |
-| `ccdew_divergent_convergent` | Full pipeline in one call |
-| `ccdew_wings_list` | Lists all 18 wings with zoom, lenses, perspectives, modalities |
-| `ccdew_domain_wings` | Shows domain to recommended wings mapping |
-
-### NLM Bridge (v1) — NotebookLM Integration
-
-**What is NotebookLM?** Google NotebookLM answers questions exclusively from documents you upload (PDF, YouTube, web, text, audio) — zero hallucination. The bridge adds async queries, cache, rate-limit avoidance, batch processing, and quota management so agents can interrogate notebooks safely.
-
-| Tool | Level | Description |
-|------|-------|-------------|
-| `nlm_async_query` | 1+2 | Async query with 180s timeout + automatic poll |
-| `nlm_grouped_queries` | 3 | 2-5 sub-questions in a single query |
-| `nlm_batch` | 4 | Multi-notebook batch with throttle between them |
-| `nlm_cache` | 7 | Local cache management (stat, clear, search) |
-| `nlm_multi_channel` | all | Full pipeline: auth to cache to grouped to batch |
-| `nlm_quota` | 10 | Check remaining daily quota |
-| `nlm_auth_check` | safe | Checks auth once per session |
-
-### Fractal Enneagram Router (v2)
-
-| Command | Description |
-|---------|-------------|
-| `zoom [level]` | Zoom details: Maha, Macro, Mezzo, Micro, Nano |
-| `lenses [name]` | Lens details: stylistic, doctrinal, structural, regression, memory |
-| `priority` | Priority matrix per task type (editorial, security, etc.) |
-| `compose <task> [--files N]` | Complete swarm composition (Phase 1-4) |
-| `wings` | Complete registry with 18 Enneagram wings |
-
-### NLM Session Hook
-
-`nlm-session-hook.cjs` — Auto-checks NLM auth at each session start with anti-suspicion pattern (max 1 check per session, not on every query).
-
-### Intelligence & Memory — 6-Level Pyramid
-
-> [!TIP]
-> The memory pyramid auto-consolidates. Every action is saved at N1; periodically, patterns (N2), techniques (N3), skills (N4), attitudes (N5), and principles (N6) are extracted automatically.
-
-| Level | File | What it stores |
-|-------|------|----------------|
-| **N1 Episodic** | `episodic.jsonl` | Every action, command, result, timestamp |
-| **N2 Patterns** | `patterns.json` | Clusters of repeated behavior (Jaccard trigram) |
-| **N3 Techniques** | `techniques.json` | Reusable methods with step-by-step instructions |
-| **N4 Skills** | `skills_db.json` | 133 domain-specific skills |
-| **N5 Attitudes** | `tacit.json` | Mindsets, heuristics, tacit knowledge |
-| **N6 Principles** | `principles.json` | 14 universal rules validated across sessions |
-
-Engines: `ssa.cjs` (semantic search) · `safla.cjs` (adaptive learning, success rates) · `instincts.cjs` (pattern recognition) · `hologram_engine.py` (fractal integration) · `auto_learn_consolidate.py` (periodic N1→N6)
-
-### LLM & Models — OpenRouter Gateway
-
-> [!TIP]
-> **Model-agnostic.** Swap any model without changing agent code — just update the config.
-
-**Any agent can use any model.** Gateway (`opencode-llm-mcp.cjs`) provides model discovery, chat completion, embeddings, provider info, cost estimation.
-
-| Model | Provider | Best for |
-|-------|----------|----------|
-| `deepseek/deepseek-*:free` | DeepSeek | General purpose |
-| `qwen/qwen3-*:free` | Alibaba | Heavy tasks, long context |
-| `google/gemma-4-*:free` | Google | Light tasks, fallback |
-| `mistralai/*:free` | Mistral | Text analysis, embeddings |
-| `meta-llama/*:free` | Meta | Reasoning, planning |
-| `minimax/*:free` | MiniMax | Mobile/edge agents |
-
-Selection: by profile, by cost, by capability, adaptive (success/failure history), or fully configurable.
-
-### How to integrate anything
-
-> [!NOTE]
-> These 6 methods are independent — mix and match.
-
-| Method | When |
-|--------|------|
-| **Bridge** | You have a TCP/UDP/HTTP/WS/MQTT protocol |
-| **MCP Server** | You want to expose tools to agents |
-| **Plugin** | You want lifecycle hooks (pre-bash, pre-edit, post-task) |
-| **Skill** | You want domain instructions auto-loaded on match |
-| **Agent Profile** | You want a new agent role with custom tools |
-| **Template** | You want a complete project scaffold |
-
-### Security
-
-> [!WARNING]
-> Never commit secrets, API keys, or vault contents to git. CCDEW's pre-commit hook (`secret-scan`) blocks commits with detected secrets automatically.
-
-- 3 sensitivity levels: PUBLIC / PRIVATE / SECRET
-- Vault encrypted with PIN + biometric
-- Automatic secret scanning (pre-commit)
-- Permission guard on bash commands
-- Security monitoring every 12h (OWASP guidelines)
-- Firewall monitoring (UFW, ports)
-
----
-
-## Implementation Detail — Deep Reference
-
-### Repository Structure
+## Project Structure
 
 ```
 CCDEW/
 ├── .claude/
-│   ├── helpers/           # 80+ Python + CJS engines
-│   ├── mcp/               # 6 MCP servers
-│   ├── agents/            # 105+ agent profiles
-│   ├── bridge/            # 5 bridges
-│   ├── skills/            # 34 Claude skills
-│   └── commands/          # 100+ CLI commands in 7 categories
-├── .opencode/             # 15 plugins TS + config
-├── .claude-flow/          # 3505 sessions, 243 reports
-├── ccdew-core/            # NPM library + CLI binaries
-├── agents/                # 15 top-level profiles
-├── _MEMORY/               # 6 memory levels + ADR + identity
-├── _SETTINGS/             # 17 rules + configurations
-├── _TEMPLATES/            # 9 project templates
-├── _METRICS/              # Cost & performance
-├── [your-apps]            # Your applications integrated here
-```
-
-### Complete Architecture (Mermaid)
-
-```mermaid
-graph TB
-  subgraph L0_OC["OPEN CLOAD — Desktop UI"]
-    OC_DASH["Dashboard / Control Panel"]
-    OC_NOTE["Notebook LM Integration"]
-    OC_MONITOR["System Monitor"]
-    OC_BENCH["LLM Benchmark"]
-    OC_COG["Cognitive Testing"]
-  end
-
-  subgraph L1_CCDEW["CCDEW CORE"]
-    CC_CORE["ccdew-core (NPM library)"]
-    CC_MCP["MCP Servers x6"]
-    CC_MCP1["ccdew-mcp<br/>11 tools: route, safla<br/>audit, cost, snapshot..."]
-    CC_MCP2["opencode-llm<br/>5 tools: models, chat<br/>embedding, providers"]
-    CC_MCP3["notebooklm<br/>content intelligence"]
-    CC_MCP4["hermes-mission-control<br/>system health and snapshot"]
-    CC_MCP5["ccdew-convergent-divergent<br/>5 tools: divergent, convergent<br/>pipeline, wings, domains"]
-    CC_MCP6["ccdew-nlm-bridge<br/>7 tools: async, grouped, batch<br/>cache, multi, quota, auth"]
-    CC_BRIDGES["Bridges x5"]
-    CC_BR1["A2A Agent-to-Agent"]
-    CC_BR2["MCP Bridge"]
-    CC_BR3["External Bridge"]
-    CC_BR4["Claude-OpenCode"]
-    CC_BR5["Hermes A0 Bridge"]
-    CC_RUFLO["Ruflo Engine<br/>agent flow execution"]
-    CC_SWARM["Swarm Engine<br/>adaptive · hierarchical · mesh"]
-    CC_PLUGINS["Plugin System x15"]
-    CC_PL1["codeburn · graphify · safla<br/>instincts · verify · optimize<br/>permissions · secret-scan<br/>session · statusline · ssa<br/>project-scope · quality-gate<br/>red-hat · hermes-orch"]
-    CC_PIPE["ccdew-pipeline.py<br/>divergent/convergent engine<br/>HTTP bridge :18777<br/>SAFLA single writer<br/>centralized logging"]
-    CC_ENN["Enneagram Intelligence Core<br/>hermes-enneagram-core.py<br/>9 cognitive nodes + handoff<br/>deep prompt injection<br/>convergence-aware LR"]
-    CC_ENN1["T1:Reformer T2:Helper T3:Achiever<br/>T4:Individualist T5:Investigator<br/>T6:Loyalist T7:Enthusiast<br/>T8:Challenger T9:Orchestrator"]
-    CC_CONV["Convergence Engine<br/>hermes-convergence.py<br/>composite score 73.4%<br/>weight stability + handoff decay<br/>+ prompt effectiveness"]
-    CC_TRAIN["Self-Train Daemon<br/>hermes-self-train.py<br/>selects weakest node<br/>trains autonomously 30s<br/>drives toward 95%"]
-  end
-
-  subgraph L1b_MODELS["LLM and MODELS — Gateway and Free Models"]
-    MODEL_GW["OpenRouter Gateway<br/>opencode-llm-mcp.cjs<br/>5 tools: models, chat<br/>embedding, providers, cost"]
-    MODEL_FREE["Free Models Available<br/>deepseek/deepseek-v4-flash:free<br/>qwen/qwen3-80b:free<br/>google/gemma-4-*:free<br/>mistralai/*:free · meta-llama/*:free<br/>minimax/m2.5:free · and more"]
-    MODEL_DIR["Model Directory and Pricing<br/>pricing.cjs · openrouter-pricing.cjs<br/>check-openrouter-free.cjs<br/>openrouter-note.md"]
-    MODEL_BENCH["LLM Benchmark Suite<br/>llm-benchmark.py<br/>Open Cload cognitive tests<br/>performance comparison"]
-    MODEL_MAP["Agent to Model Mapping<br/>configurable per agent<br/>free model priority<br/>fallback chain"]
-    MODEL_OCONFIG["OpenCode Model Config<br/>.opencode.json · free list<br/>model fallback chain<br/>provider routing"]
-    MODEL_HERMES["Model Usage<br/>routing per node<br/>auto-fallback on failure"]
-  end
-
-  subgraph L2_MC["MISSION CONTROL"]
-    MC_API["REST API — port 8899<br/>status · channels · probe-all"]
-    MC_DASH["Dashboard HTML<br/>components.js · agent list"]
-    MC_MGR["Agent Manager<br/>stats · health · control"]
-    MC_BURN["CodeBurn Cost Tracking<br/>session cost · monthly total"]
-    MC_QUALITY["Quality Gate<br/>pre-push verification"]
-    MC_METRICS["Metrics<br/>_METRICS/ · growth log"]
-  end
-
-  subgraph L3_MEM["INTELLIGENCE and MEMORY — 6 LEVEL PYRAMID"]
-    MEM_N1["N1: EPISODIC<br/>episodic.jsonl<br/>every action saved"]
-    MEM_N2["N2: PATTERNS<br/>patterns.json<br/>Jaccard trigram clusters"]
-    MEM_N3["N3: TECHNIQUES<br/>techniques.json<br/>reusable methods"]
-    MEM_N4["N4: SKILLS<br/>skills_db.json<br/>133 domain skills"]
-    MEM_N5["N5: ATTITUDES<br/>tacit.json<br/>tacit knowledge, mindset"]
-    MEM_N6["N6: PRINCIPLES<br/>principles.json<br/>14 universal rules"]
-    MEM_ENGINE["Pyramid Engine<br/>hermes-memory.py"]
-    MEM_SSA["SSA Semantic Search<br/>Jaccard trigram index"]
-    MEM_SAFLA["SAFLA Adaptive Learning<br/>success rates · weights"]
-    MEM_INST["Instincts<br/>pattern recognition"]
-    MEM_HOLO["Hologram Engine<br/>fractal integration"]
-    MEM_AUTO["Auto-Consolidation<br/>auto_learn_consolidate.py<br/>N2 to N6 periodic"]
-    MEM_MOTORS["Additional Engines<br/>hermes-memory-sync.py<br/>hermes-binary-guardian.py<br/>fractal_patterns.json<br/>self_evolution.json"]
-  end
-
-  subgraph L4_AGENTS["AGENT TREE"]
-    AG_HERMES["Hermes x6+<br/>core · autonomous<br/>memory · voice · notifier<br/>dashboard · binary-guard"]
-    AG_CLAUDE["Claude Agents x105"]
-    AG_C1["core x5<br/>coder · planner<br/>researcher · reviewer · tester"]
-    AG_C2["v3 x16<br/>architect · security · memory<br/>sparc · swarm · reasoning<br/>ADD · PII · injection<br/>performance · defense"]
-    AG_C3["github x13<br/>code-review · issue-tracker<br/>pr-manager · release-manager<br/>workflow · multi-repo-swarm<br/>project-board · repo-architect"]
-    AG_C4["flow-nexus x9<br/>app-store · auth · payments<br/>neural-network · sandbox<br/>challenges · user-tools<br/>swarm · workflow"]
-    AG_C5["sparc x4<br/>architecture · pseudocode<br/>refinement · specification"]
-    AG_C6["swarm x3<br/>adaptive · hierarchical<br/>mesh coordinator"]
-    AG_C7["sublinear x5<br/>consensus · matrix-optimizer<br/>pagerank · performance<br/>trading-predictor"]
-    AG_C8["consensus x7<br/>byzantine · raft · gossip<br/>quorum · crdt · security<br/>performance-benchmarker"]
-    AG_C9["optimization x5<br/>benchmark · load-balancer<br/>performance-monitor<br/>resource-allocator<br/>topology-optimizer"]
-    AG_C10["hermes x2 + templates x9<br/>+ analysis, architecture<br/>browser, data, devops<br/>documentation, payments<br/>sona, specialized, testing"]
-    AG_ZORIN["Zorin Agents x17<br/>tv · media · network<br/>browser · home · hardware<br/>vault · voice · scheduler<br/>bus · dev · personal<br/>launcher · bus · file<br/>hue · memory"]
-    AG_SWARM["Swarm Coordinators x3<br/>adaptive-coordinator<br/>hierarchical-coordinator<br/>mesh-coordinator"]
-    AG_GX["GX Agents<br/>monitor · dispatcher<br/>agent-zero · cron"]
-    AG_EMAIL["Email Intelligence<br/>bb-safe-reader<br/>email-dashboard-server<br/>inbox-triage"]
-  end
-
-  subgraph L5_SKILLS["SKILL TREE — 133 total"]
-    SK_OC["OpenCode Skills x7"]
-    SK_OC1["hermes-ccdew · zorin-tv-system<br/>zorin-tv-repair · gx-monitor<br/>graphify · tv-identifier<br/>auto-skill"]
-    SK_H["Hermes Skills x87"]
-    SK_H1["zorin-romania-tv · zorin-auto-heal<br/>zorin-disk-watch · zorin-kernel-watch<br/>zorin-memory-opt · zorin-service-guard<br/>zorin-auto-* x3"]
-    SK_H2["universal-techniques<br/>qnap-access · deep-stream-finder<br/>autonomous-ai-agents"]
-    SK_H3["apple x6: macos-computer-use<br/>imessage · findmy · reminders<br/>apple-notes"]
-    SK_H4["creative x11: comfyui · touchdesigner<br/>songwriting · sketch · pretext<br/>pixel-art · p5js · manim · ascii<br/>architecture-diagram · design-md"]
-    SK_H5["data-science · devops x3<br/>email · gaming x2 · gifs<br/>github x6 · inference-sh"]
-    SK_H6["media x6: youtube-content<br/>spotify · songsee · heartmula<br/>gif-search"]
-    SK_H7["mlops x10: dspy · segment-anything<br/>audiocraft · vllm · obliteratus<br/>huggingface-hub · llama-cpp<br/>weights-and-biases<br/>lm-evaluation-harness"]
-    SK_H8["research x4 · self-evolution<br/>smart-home · social-media<br/>software-development"]
-    SK_H9["wondelai x30+: web-typography<br/>ux-heuristics · traction-eos<br/>top-design · system-design<br/>31 w-* design books"]
-    SK_H10["workspace-dispatch · yuanbao<br/>mcp-client · note-taking<br/>productivity · red-teaming"]
-    SK_C["Claude Skills x34"]
-    SK_C1["agent-browser · agentdb-* x3<br/>browser · flow-nexus-* x3<br/>github-* x5 · hooks-automation<br/>pair-programming · reasoningbank-*<br/>skill-builder · sparc-methodology<br/>stream-chain · swarm-* x3<br/>v3-* x3 · verification-quality"]
-    SK_OCL["Open-Cload Skills x5<br/>5-zoom-audit · cost-tracking<br/>enneagram-routing<br/>safla-feedback · secret-scanning"]
-  end
-
-  subgraph L6_CMDS["CLI COMMANDS — 7 Categories"]
-    CMD_ANALYSIS["analysis x7<br/>bottleneck-detect · performance<br/>token-efficiency"]
-    CMD_AUTO["automation x7<br/>auto-agent · self-healing<br/>session-memory · smart-spawn"]
-    CMD_GITHUB["github x19<br/>code-review · pr-manager<br/>release-manager · swarm-*"]
-    CMD_HOOKS["hooks x8<br/>overview · post-edit · post-task<br/>pre-edit · pre-task · session-end"]
-    CMD_MONITOR["monitoring x6<br/>agent-metrics · agents<br/>real-time-view · status · swarm"]
-    CMD_OPT["optimization x6<br/>auto-topology · cache-manage<br/>parallel-execute · topology-opt"]
-    CMD_SPARC["sparc x32<br/>analyzer · architect · coder<br/>debug · devops"]
-  end
-
-  subgraph L7_FLOW["CLAUDE-FLOW ENGINE"]
-    FLOW_CONFIG["config.yaml · CAPABILITIES.md"]
-    FLOW_SESSIONS["3505 batch sessions<br/>conversation history"]
-    FLOW_REPORTS["243 session reports<br/>6 evaluate reports"]
-    FLOW_DATA["data x12+ files<br/>circuit9 · safla · memory<br/>learning · skill-usage · graph<br/>harness · perf · ssa · codeburn"]
-    FLOW_MEM["memory storage<br/>snapshots · indices"]
-    FLOW_TEAM["team config<br/>anonymous data"]
-  end
-
-  subgraph L8_TMPL["TEMPLATES — 9 Projects"]
-    TMPL_ANDROID["Android App"]
-    TMPL_CARTE["Book / Carte"]
-    TMPL_DEVCONTAINER["Dev Container"]
-    TMPL_GENERIC["Generic Project"]
-    TMPL_GITHUB["GitHub Workflows<br/>quality-gate.yml"]
-    TMPL_OC["OpenCode Desktop"]
-    TMPL_PREVIEW["Markdown Preview Server"]
-    TMPL_RESEARCH["Research Project"]
-    TMPL_MCP["MCP Project"]
-  end
-
-  subgraph L9_CRON["AUTOMATION — Cron and Watchdogs"]
-    CRON_TOKEN["token refresh 5min"]
-    CRON_WATCH["watchdog 2min"]
-    CRON_CLEAN["clean / probe 6h"]
-    CRON_SECURITY["security monitor 12h"]
-    CRON_EVOLUTION["self-evolution"]
-    CRON_BOOTSTRAP["startup services"]
-    CRON_SCRIPTS["helpers 15+ scripts"]
-  end
-
-  subgraph L10_INFRA["INFRASTRUCTURE"]
-    INFRA_CONFIG[".mcp.json · .opencode.json<br/>swarm.yaml · package.json<br/>.gitignore"]
-    INFRA_MEMORY["_MEMORY/<br/>L0-sensory · L1-working<br/>L2-episodic · L3-semantic<br/>L4-identity · ADR x11"]
-    INFRA_SETTINGS["_SETTINGS/<br/>RULES x17 · QUICK-START<br/>CHANGELOG"]
-    INFRA_BEST["_BEST_PRACTICES/<br/>GROWTH_LOG.md"]
-    INFRA_METRICS["_METRICS/<br/>dashboard · codeburn-latest"]
-    INFRA_VAULT["VAULT · SECRETS<br/>encrypted · PIN protected<br/>3 sensitivity levels"]
-    INFRA_SECURITY["Security System<br/>secret-scan · permissions<br/>OWASP guidelines"]
-  end
-
-  subgraph L11_ANY["UNIVERSAL INTEGRATION — Any Application"]
-    ANY_HOW["6 integration methods"]
-    ANY_BRIDGE["(1) Bridge<br/>HTTP · WS · MQTT · TCP · UDP<br/>gRPC · serial · custom"]
-    ANY_MCP["(2) MCP Server<br/>expose tools to agents"]
-    ANY_PLUGIN["(3) Plugin<br/>hooks on lifecycle events<br/>pre-bash · pre-edit · post-task"]
-    ANY_SKILL["(4) Skill<br/>domain instructions<br/>auto-loaded on match"]
-    ANY_AGENT["(5) Agent Profile<br/>role definition<br/>custom tools + prompts"]
-    ANY_TEMPLATE["(6) Template<br/>full project scaffold<br/>copy + customize"]
-  end
-
-  OC_DASH --> MODEL_GW
-  OC_NOTE --> MODEL_GW
-  OC_MONITOR --> MODEL_GW
-  OC_BENCH --> MODEL_GW
-  OC_COG --> MODEL_GW
-  MODEL_GW --> MODEL_FREE
-  MODEL_GW --> MODEL_DIR
-  MODEL_GW --> MODEL_BENCH
-  MODEL_GW --> MODEL_MAP
-  MODEL_GW --> MODEL_OCONFIG
-  MODEL_GW --> MODEL_HERMES
-  MODEL_GW --> CC_CORE
-  MODEL_MAP --> CC_MCP2
-  CC_CORE --> CC_MCP1
-  CC_CORE --> CC_MCP2
-  CC_CORE --> CC_MCP3
-  CC_CORE --> CC_MCP4
-  CC_CORE --> CC_MCP5
-  CC_CORE --> CC_MCP6
-  CC_CORE --> CC_BR1
-  CC_CORE --> CC_BR2
-  CC_CORE --> CC_BR3
-  CC_CORE --> CC_BR4
-  CC_CORE --> CC_BR5
-  CC_CORE --> CC_RUFLO
-  CC_CORE --> CC_SWARM
-  CC_CORE --> CC_PLUGINS
-CC_CORE --> CC_PIPE
-CC_CORE --> CC_ENN
-CC_ENN --> CC_ENN1
-CC_ENN --> CC_CONV
-CC_ENN --> CC_TRAIN
-CC_CONV --> CC_TRAIN
-CC_TRAIN --> CC_PIPE
-  CC_PLUGINS --> CC_PL1
-  CC_MCP1 --> MC_API
-  CC_MCP2 --> MC_API
-  CC_MCP3 --> MC_API
-  CC_MCP4 --> MC_API
-  CC_MCP5 --> MC_API
-  CC_MCP6 --> MC_API
-  MC_API --> MC_DASH
-  MC_API --> MC_MGR
-  MC_API --> MC_BURN
-  MC_API --> MC_QUALITY
-  MC_API --> MC_METRICS
-  MC_MGR --> MEM_ENGINE
-  MEM_ENGINE --> MEM_N1
-  MEM_ENGINE --> MEM_N2
-  MEM_ENGINE --> MEM_N3
-  MEM_ENGINE --> MEM_N4
-  MEM_ENGINE --> MEM_N5
-  MEM_ENGINE --> MEM_N6
-  MEM_SSA --> MEM_ENGINE
-  MEM_SAFLA --> MEM_ENGINE
-  MEM_INST --> MEM_ENGINE
-  MEM_HOLO --> MEM_ENGINE
-  MEM_AUTO --> MEM_ENGINE
-  MEM_ENGINE --> MEM_MOTORS
-  MEM_N4 --> AG_HERMES
-  MEM_N4 --> AG_CLAUDE
-  MEM_N4 --> AG_ZORIN
-  MEM_N4 --> AG_SWARM
-  MEM_N4 --> AG_GX
-  MEM_N4 --> AG_EMAIL
-  AG_CLAUDE --> AG_C1
-  AG_CLAUDE --> AG_C2
-  AG_CLAUDE --> AG_C3
-  AG_CLAUDE --> AG_C4
-  AG_CLAUDE --> AG_C5
-  AG_CLAUDE --> AG_C6
-  AG_CLAUDE --> AG_C7
-  AG_CLAUDE --> AG_C8
-  AG_CLAUDE --> AG_C9
-  AG_CLAUDE --> AG_C10
-  SK_OC --> SK_OC1
-  SK_H --> SK_H1
-  SK_H --> SK_H2
-  SK_H --> SK_H3
-  SK_H --> SK_H4
-  SK_H --> SK_H5
-  SK_H --> SK_H6
-  SK_H --> SK_H7
-  SK_H --> SK_H8
-  SK_H --> SK_H9
-  SK_H --> SK_H10
-  SK_C --> SK_C1
-  SK_OCL --> SK_OCL
-  MEM_N4 --> SK_OC
-  MEM_N4 --> SK_H
-  MEM_N4 --> SK_C
-  MEM_N4 --> SK_OCL
-  MC_MGR --> CMD_ANALYSIS
-  MC_MGR --> CMD_AUTO
-  MC_MGR --> CMD_GITHUB
-  MC_MGR --> CMD_HOOKS
-  MC_MGR --> CMD_MONITOR
-  MC_MGR --> CMD_OPT
-  MC_MGR --> CMD_SPARC
-  CC_RUFLO --> FLOW_CONFIG
-  FLOW_CONFIG --> FLOW_SESSIONS
-  FLOW_CONFIG --> FLOW_REPORTS
-  FLOW_CONFIG --> FLOW_DATA
-  FLOW_CONFIG --> FLOW_MEM
-  FLOW_CONFIG --> FLOW_TEAM
-  TMPL_ANDROID --> MC_MGR
-  TMPL_CARTE --> MC_MGR
-  TMPL_DEVCONTAINER --> MC_MGR
-  TMPL_GENERIC --> MC_MGR
-  TMPL_GITHUB --> MC_MGR
-  TMPL_OC --> MC_MGR
-  TMPL_PREVIEW --> MC_MGR
-  TMPL_RESEARCH --> MC_MGR
-  TMPL_MCP --> MC_MGR
-  CRON_TOKEN --> MEM_ENGINE
-  CRON_WATCH --> MEM_ENGINE
-  CRON_CLEAN --> MEM_ENGINE
-  CRON_SECURITY --> MEM_ENGINE
-  CRON_EVOLUTION --> MEM_ENGINE
-  CRON_BOOTSTRAP --> MEM_ENGINE
-  CRON_SCRIPTS --> MEM_ENGINE
-  INFRA_CONFIG --> CC_CORE
-  INFRA_MEMORY --> CC_CORE
-  INFRA_SETTINGS --> CC_CORE
-  INFRA_BEST --> CC_CORE
-  INFRA_METRICS --> CC_CORE
-  INFRA_VAULT --> CC_CORE
-  INFRA_SECURITY --> CC_CORE
-  ANY_BRIDGE --> L11_ANY
-  ANY_MCP --> L11_ANY
-  ANY_PLUGIN --> L11_ANY
-  ANY_SKILL --> L11_ANY
-  ANY_AGENT --> L11_ANY
-  ANY_TEMPLATE --> L11_ANY
-
-  style L0_OC fill:#1a1a2e,stroke:#e94560,color:#fff
-  style L1b_MODELS fill:#0f3460,stroke:#e94560,color:#fff
-  style L1_CCDEW fill:#16213e,stroke:#0f3460,color:#fff
-  style L2_MC fill:#0f3460,stroke:#e94560,color:#fff
-  style L3_MEM fill:#533483,stroke:#e94560,color:#fff
-  style L4_AGENTS fill:#e94560,stroke:#1a1a2e,color:#fff
-  style L5_SKILLS fill:#16213e,stroke:#0f3460,color:#fff
-  style L6_CMDS fill:#1a1a2e,stroke:#e94560,color:#fff
-  style L7_FLOW fill:#0f3460,stroke:#533483,color:#fff
-  style L8_TMPL fill:#16213e,stroke:#e94560,color:#fff
-  style L9_CRON fill:#1a1a2e,stroke:#0f3460,color:#fff
-  style L10_INFRA fill:#533483,stroke:#e94560,color:#fff
-  style L11_ANY fill:#e94560,stroke:#1a1a2e,color:#fff,stroke-dasharray: 5 5
+│   ├── helpers/            # Python engines (pipeline, core, convergence, memory, train)
+│   └── mcp/                # MCP servers (notebooklm, convergence, llm gateway)
+├── docs/
+│   └── ccdew-architecture.svg
+├── AGENTS.md               # Auto-loaded by OpenCode Desktop
+└── README.md
 ```
 
 ---
 
-*CCDEW — Universal framework. Integrates anything. Self-healing. Self-evolution.*
+<p align="center"><em>CCDEW — Built to improve itself.</em></p>

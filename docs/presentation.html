@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCDEW — Intelligence Core Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #f0f6fc;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  .slide {
+    min-height: 100vh;
+    padding: 60px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-bottom: 1px solid #21262d;
+    position: relative;
+  }
+
+  .slide-number {
+    position: absolute;
+    bottom: 20px;
+    right: 40px;
+    color: #30363d;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  h1 {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 900;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #58a6ff, #bc8cff, #3fb950);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 700;
+    color: #f0f6fc;
+    margin-bottom: 24px;
+    letter-spacing: -1px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #8b949e;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  p, li { font-size: 16px; line-height: 1.7; color: #c9d1d9; }
+
+  .tagline {
+    font-size: clamp(18px, 2.5vw, 28px);
+    font-weight: 300;
+    color: #8b949e;
+    margin-bottom: 40px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 20px;
+  }
+
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: #58a6ff; }
+
+  .card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .card .big {
+    font-size: 36px;
+    font-weight: 800;
+    color: #f0f6fc;
+    margin-bottom: 4px;
+  }
+
+  .card p { font-size: 13px; color: #8b949e; }
+
+  .convergence-bar {
+    height: 24px;
+    border-radius: 12px;
+    background: #21262d;
+    overflow: hidden;
+    margin: 8px 0;
+    position: relative;
+  }
+
+  .convergence-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 1s ease;
+    position: relative;
+  }
+
+  .convergence-fill::after {
+    content: attr(data-label);
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .node-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+
+  .node-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #21262d;
+  }
+
+  .node-table td {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #21262d;
+  }
+
+  .node-table tr:hover { background: #161b22; }
+
+  .node-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 12px;
+    color: #fff;
+    margin-right: 8px;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .pill-green { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .pill-blue { background: rgba(88,166,255,0.15); color: #58a6ff; }
+  .pill-orange { background: rgba(247,129,102,0.15); color: #f78166; }
+  .pill-purple { background: rgba(188,140,255,0.15); color: #bc8cff; }
+
+  .loop-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .loop-box {
+    background: #161b22;
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .loop-arrow {
+    font-size: 28px;
+    color: #30363d;
+  }
+
+  .loop-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .code-block {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #8b949e;
+    overflow-x: auto;
+    margin-top: 16px;
+  }
+
+  .code-block .keyword { color: #ff7b72; }
+  .code-block .string { color: #a5d6ff; }
+  .code-block .number { color: #79c0ff; }
+  .code-block .comment { color: #8b949e; }
+
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .benefit-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .benefit-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .benefit-card h5 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 4px;
+  }
+
+  .benefit-card p { font-size: 13px; }
+
+  .footer-text {
+    text-align: center;
+    color: #30363d;
+    font-size: 14px;
+    padding: 40px;
+  }
+
+  @media (max-width: 900px) {
+    .slide { padding: 40px 24px; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .benefits-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Hero -->
+<div class="slide" style="padding-top: 120px;">
+  <h1>CCDEW</h1>
+  <p class="tagline">Autonomous AI Agent Ecosystem —<br>Self-Improving · Measurable · Open Source</p>
+  <div style="margin-top: 40px;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="pill pill-green">73.4% Convergence</span>
+      <span class="pill pill-blue">9 Cognitive Nodes</span>
+      <span class="pill pill-purple">111 Iterations</span>
+      <span class="pill pill-orange">187 Episodes</span>
+    </div>
+  </div>
+  <div style="margin-top: 60px; color: #30363d; font-size: 13px; font-family: 'JetBrains Mono', monospace;">
+    git clone https://github.com/Hermeneuticus-of-things/CCDEW.git
+  </div>
+  <div class="slide-number">01 / 07</div>
+</div>
+
+<!-- SLIDE 2: Live Convergence Dashboard -->
+<div class="slide">
+  <h3>Live Metrics</h3>
+  <h2>Convergence Dashboard</h2>
+  <p style="margin-bottom: 32px; max-width: 600px;">Every node tracks its own success rate, weight stability, and prompt effectiveness. The composite score updates every 30 seconds.</p>
+
+  <div style="margin-bottom: 24px;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+      <span style="font-weight:600;">Composite Convergence</span>
+      <span style="font-weight:700; color:#3fb950;">73.4%</span>
+    </div>
+    <div class="convergence-bar">
+      <div class="convergence-fill" style="width:73.4%;background:linear-gradient(90deg,#238636,#3fb950);" data-label="73.4%"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; color:#8b949e; font-size:13px;">
+      <span>0%</span>
+      <span style="color:#3fb950;">▲ converging</span>
+      <span>Target: 95%</span>
+    </div>
+  </div>
+
+  <table class="node-table">
+    <tr>
+      <th>Node</th><th>Name</th><th>Convergence</th><th>Role</th><th>Episodes</th>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#3fb950;">3</span></td>
+      <td>Achiever</td><td><span style="color:#3fb950;font-weight:700;">85.0%</span></td><td>Precision execution</td><td>5</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#3fb950;">7</span></td>
+      <td>Enthusiast</td><td><span style="color:#3fb950;font-weight:700;">85.0%</span></td><td>Exploration & possibilities</td><td>3</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#58a6ff;">5</span></td>
+      <td>Investigator</td><td><span style="color:#58a6ff;font-weight:700;">80.0%</span></td><td>Deep analysis</td><td>8</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#58a6ff;">2</span></td>
+      <td>Helper</td><td><span style="color:#58a6ff;font-weight:700;">79.3%</span></td><td>Collaboration</td><td>7</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#bc8cff;">9</span></td>
+      <td><strong>Orchestrator</strong></td><td><span style="color:#bc8cff;font-weight:700;">73.2%</span></td><td>Routing & coordination</td><td>25</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#f78166;">1</span></td>
+      <td>Reformer</td><td><span style="color:#f78166;font-weight:700;">73.6%</span></td><td>Quality & principles</td><td>8</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#f78166;">4</span></td>
+      <td>Individualist</td><td><span style="color:#f78166;font-weight:700;">73.0%</span></td><td>Unique perspectives</td><td>13</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#f78166;">6</span></td>
+      <td>Loyalist</td><td><span style="color:#f78166;font-weight:700;">73.0%</span></td><td>Risk assessment</td><td>38</td>
+    </tr>
+    <tr>
+      <td><span class="node-badge" style="background:#f78166;">8</span></td>
+      <td>Challenger</td><td><span style="color:#f78166;font-weight:700;">72.5%</span></td><td>Action & execution</td><td>81</td>
+    </tr>
+  </table>
+
+  <p style="margin-top:16px; color:#8b949e; font-size:13px;">
+    ▲ All nodes above 72% — up from <strong>46%</strong> at session start
+  </p>
+  <div class="slide-number">02 / 07</div>
+</div>
+
+<!-- SLIDE 3: The Three Loops -->
+<div class="slide">
+  <h3>How It Works</h3>
+  <h2>Three-Loop Learning System</h2>
+  <p style="margin-bottom: 32px; max-width: 600px;">Three nested feedback loops, each at a different cadence, driving the system toward 95% convergence.</p>
+
+  <div class="grid-3">
+    <div class="card" style="border-color: #58a6ff;">
+      <h4 style="color:#58a6ff;">Loop 1 — Execution</h4>
+      <div class="big" style="color:#58a6ff;">~s</div>
+      <p>Task in → Enneagram Core selects best node → Pipeline divergent/convergent → Record to SAFLA + episodic memory</p>
+      <div style="margin-top:12px;">
+        <span class="pill pill-blue">hermes-enneagram-core.py</span>
+        <span class="pill pill-blue">ccdew-pipeline.py</span>
+      </div>
+    </div>
+
+    <div class="card" style="border-color: #3fb950;">
+      <h4 style="color:#3fb950;">Loop 2 — Self-Train</h4>
+      <div class="big" style="color:#3fb950;">30s</div>
+      <p>Pick weakest node → generate task → run cycle → measure convergence delta → repeat until 95%</p>
+      <div style="margin-top:12px;">
+        <span class="pill pill-green">hermes-self-train.py</span>
+        <span class="pill pill-green">hermes-convergence.py</span>
+      </div>
+    </div>
+
+    <div class="card" style="border-color: #d29922;">
+      <h4 style="color:#d29922;">Loop 3 — Consolidation</h4>
+      <div class="big" style="color:#d29922;">10 ep</div>
+      <p>Every 10 episodes: extract patterns → techniques → attitudes → principles. Reverse mirror to separate channel.</p>
+      <div style="margin-top:12px;">
+        <span class="pill" style="background:rgba(210,153,34,0.15);color:#d29922;">hermes-memory.py</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:40px; background:#0d1117; border:1px solid #21262d; border-radius:8px; padding:20px;">
+    <div class="loop-flow">
+      <div class="loop-box" style="border-color:#58a6ff;">
+        <div class="loop-label" style="color:#58a6ff;">Task</div>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-box" style="border-color:#58a6ff;">
+        <div class="loop-label" style="color:#58a6ff;">Route</div>
+        <div style="font-size:11px;color:#8b949e;">9 nodes</div>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-box" style="border-color:#58a6ff;">
+        <div class="loop-label" style="color:#58a6ff;">Pipeline</div>
+        <div style="font-size:11px;color:#8b949e;">divergent</div>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-box" style="border-color:#58a6ff;">
+        <div class="loop-label" style="color:#58a6ff;">Learn</div>
+        <div style="font-size:11px;color:#8b949e;">SAFLA</div>
+      </div>
+      <div class="loop-arrow" style="color:#3fb950;font-size:20px;">↻</div>
+      <div class="loop-box" style="border-color:#3fb950;">
+        <div class="loop-label" style="color:#3fb950;">Train</div>
+        <div style="font-size:11px;color:#8b949e;">30s loop</div>
+      </div>
+      <div class="loop-arrow" style="color:#d29922;font-size:20px;">↻</div>
+      <div class="loop-box" style="border-color:#d29922;">
+        <div class="loop-label" style="color:#d29922;">Consolidate</div>
+        <div style="font-size:11px;color:#8b949e;">N1→N6</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number">03 / 07</div>
+</div>
+
+<!-- SLIDE 4: Architecture -->
+<div class="slide" style="padding:40px 60px;">
+  <h3>System Design</h3>
+  <h2>Architecture</h2>
+  <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+    <img src="docs/ccdew-architecture.svg" alt="CCDEW Architecture" style="max-width:100%; max-height:65vh; border-radius:8px;">
+  </div>
+  <div class="slide-number">04 / 07</div>
+</div>
+
+<!-- SLIDE 5: Infrastructure -->
+<div class="slide">
+  <h3>Under The Hood</h3>
+  <h2>Infrastructure</h2>
+  <p style="margin-bottom: 32px; max-width: 600px;">Each component has a single responsibility. The bridge eliminates shared-file race conditions entirely.</p>
+
+  <div class="grid-4">
+    <div class="card" style="border-color:#58a6ff;">
+      <h4 style="color:#58a6ff;">HTTP Bridge</h4>
+      <p><code style="background:#0d1117;padding:2px 6px;border-radius:4px;font-size:13px;">127.0.0.1:18777</code></p>
+      <p>Single Python process serves all state. Others read/write via HTTP. Zero race conditions.</p>
+    </div>
+    <div class="card" style="border-color:#3fb950;">
+      <h4 style="color:#3fb950;">SAFLA State</h4>
+      <p>Written exclusively by <code style="background:#0d1117;padding:2px 6px;border-radius:4px;font-size:13px;">pipeline.py</code></p>
+      <p>9 nodes tracked. 187 episodes. 100% single-writer — no data loss.</p>
+    </div>
+    <div class="card" style="border-color:#bc8cff;">
+      <h4 style="color:#bc8cff;">MCP Servers</h4>
+      <p>4 active servers. Native <code style="background:#0d1117;padding:2px 6px;border-radius:4px;font-size:13px;">http.request</code></p>
+      <p>No shell exec, no curl, no injection vectors.</p>
+    </div>
+    <div class="card" style="border-color:#f78166;">
+      <h4 style="color:#f78166;">Inner Observer</h4>
+      <p>Metacognitive daemon</p>
+      <p>Writes consciousness.jsonl (append-only). Tracks confidence, flow, confusion, satisfaction.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <span class="comment"># Bridge endpoints</span>
+    <span class="keyword">GET</span>  /bridge           <span class="comment"># read current bridge state</span>
+    <span class="keyword">GET</span>  /safla            <span class="comment"># read SAFLA state</span>
+    <span class="keyword">POST</span> /safla            <span class="comment"># update SAFLA (single writer)</span>
+    <span class="keyword">POST</span> /log              <span class="comment"># centralized logging</span>
+    <span class="keyword">GET</span>  /core/select?task= <span class="comment"># Enneagram node selection</span>
+    <span class="keyword">POST</span> /core/outcome     <span class="comment"># learn from outcome</span>
+    <span class="keyword">GET</span>  /convergence      <span class="comment"># dashboard JSON</span>
+    <span class="keyword">GET</span>  /health           <span class="comment"># heartbeat</span>
+  </div>
+  <div class="slide-number">05 / 07</div>
+</div>
+
+<!-- SLIDE 6: Benefits -->
+<div class="slide">
+  <h3>Why CCDEW</h3>
+  <h2>Problems Solved</h2>
+
+  <div class="benefits-grid">
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">↗</div>
+      <div>
+        <h5>LLMs never improve with use</h5>
+        <p>Convergence engine tracks every node. Self-train daemon drives toward 95%. The system measurably improves.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">🧠</div>
+      <div>
+        <h5>One-size-fits-all reasoning</h5>
+        <p>9 Enneagram nodes with unique system prompts, task transforms, and per-node episodic memory. The right persona for every task.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:rgba(247,129,102,0.15);color:#f78166;">⚡</div>
+      <div>
+        <h5>Race conditions in state files</h5>
+        <p>HTTP bridge with single writer. Others read/write via HTTP POST/GET. Zero data corruption.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:rgba(210,153,34,0.15);color:#d29922;">🛡</div>
+      <div>
+        <h5>Failure cascades crash everything</h5>
+        <p>Non-fatal pipeline. Each sub-step wrapped in <code style="background:#0d1117;padding:1px 4px;border-radius:3px;">try/except</code>. One failure never takes down the system.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">📝</div>
+      <div>
+        <h5>Memory polluted by reflections</h5>
+        <p>Reverse mirror writes to <code style="background:#0d1117;padding:1px 4px;border-radius:3px;">mirror_inverse.jsonl</code> — separate from episodic. Clean separation.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:rgba(255,123,114,0.15);color:#ff7b72;">🔒</div>
+      <div>
+        <h5>Shell injection in MCP tools</h5>
+        <p>Native <code style="background:#0d1117;padding:1px 4px;border-radius:3px;">http.request</code> in Node.js. No curl, no exec, no shell injection.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number">06 / 07</div>
+</div>
+
+<!-- SLIDE 7: CTA -->
+<div class="slide" style="text-align:center;">
+  <h2>Clone it. Run it. Watch it improve.</h2>
+  <p style="max-width: 500px; margin: 20px auto 40px;">The system starts learning the moment you clone the repo. No API keys required for core functionality.</p>
+
+  <div class="code-block" style="text-align:left; max-width: 600px; margin: 0 auto;">
+    <span style="color:#ff7b72;">git clone</span> https://github.com/Hermeneuticus-of-things/CCDEW.git ~/CCDEW
+    <span style="color:#ff7b72;">cd</span> ~/CCDEW
+    <span style="color:#ff7b72;">nohup python3</span> .claude/helpers/ccdew-pipeline.py serve &gt; /tmp/pipeline.log &
+    <span style="color:#ff7b72;">nohup python3</span> .claude/helpers/hermes-self-train.py --daemon &gt; /tmp/train.log &
+  </div>
+
+  <p style="margin-top: 12px; color: #8b949e;">Open OpenCode Desktop in the repo — it reads AGENTS.md automatically.</p>
+
+  <div style="margin-top: 60px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+    <span class="pill pill-green">73.4% convergence</span>
+    <span class="pill pill-blue">9 nodes</span>
+    <span class="pill pill-purple">111 iterations</span>
+    <span class="pill pill-orange">187 episodes</span>
+    <span class="pill" style="background:rgba(210,153,34,0.15);color:#d29922;">3 loops</span>
+    <span class="pill" style="background:rgba(88,166,255,0.15);color:#58a6ff;">HTTP bridge</span>
+  </div>
+
+  <div class="footer-text">github.com/Hermeneuticus-of-things/CCDEW</div>
+  <div class="slide-number">07 / 07</div>
+</div>
+
+</body>
+</html>
