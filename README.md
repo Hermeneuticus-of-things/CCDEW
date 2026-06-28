@@ -19,36 +19,33 @@
 
 ---
 
-## [MAHA] What CCDEW Actually Is — 10-second read
+## What CCDEW Is — 10-second read
 
-**CCDEW is a workspace that turns [OpenCode Desktop](https://opencode.ai) (formerly Claude Code Desktop) from a chat into an autonomous AI agent ecosystem.** It's not a product you install — it's a structure you clone.
-
-> **Naming note:** OpenCode Desktop (opencode.ai) is the open-source AI CLI that hosts CCDEW. **Open Cload** is a custom dashboard/UI layer built as part of CCDEW on top of OpenCode. They are not the same thing.
+**CCDEW is a workspace that turns [OpenCode Desktop](https://opencode.ai) into an autonomous AI agent ecosystem that improves itself.** It's not a product you install — it's a structure you clone.
 
 ### The core mechanism
 
-OpenCode Desktop reads two files at session start:
+Two files make the magic happen:
 
-1. **`AGENTS.md`** — tells the LLM: "You are not just a chat. You are an ecosystem. Here are your agents, your tools (MCP servers), your skills, your memory system, your commands. This is how you organize yourself, learn from mistakes, and improve over time."
+1. **`AGENTS.md`** — tells the LLM: "You are an ecosystem. Here are your agents, MCP tools, skills, memory system. This is how you learn from mistakes and improve over time."
 
-2. **`opencode.json`** — registers MCP servers. Each MCP server is a set of tools the LLM can call: query a database, run a divergent/convergent thinking pipeline, check system health, ask NotebookLM, track costs.
+2. **`opencode.json`** — registers MCP servers. Each server exposes tools: route tasks through 9 cognitive nodes, run a divergent/convergent pipeline, track convergence, query NotebookLM.
 
-That's the fundamental idea. Everything else — 105+ agent profiles, 133 skills, 6-level memory, CI/CD, bridges, plugins — is just the *content* of those two files. You clone the repo, OpenCode reads the context, and the LLM suddenly has a complete operating system for autonomous work.
+Everything else — agents, skills, memory, plugins — is just the *content* of those two files. Clone the repo, OpenCode reads the context, and the LLM has a complete operating system for autonomous work.
 
 ### In one sentence
 
-> CCDEW = AGENTS.md (context) + MCP servers (tools) + structured directories (memory, agents, skills, templates). That's it. Everything else is what fills those directories.
+> CCDEW = AGENTS.md + MCP servers + structured directories. That's it.
 
 ### Who it's for
 
-- **AI power users** who want more than a chat interface — full agent orchestration
-- **Developers** building autonomous AI workflows with structured memory and reasoning
-- **Researchers** who need grounded (non-hallucinating) answers from their own source materials
-- **Anyone** who wants AI agents that remember, adapt, and improve across sessions
+- **AI power users** who want agents that improve over time, not just chat
+- **Developers** building autonomous workflows with measurable convergence metrics
+- **Anyone** who wants AI that remembers, adapts, and proves its improvement
 
 ---
 
-## [MAHA] Proven Results — Measurable Intelligence Growth
+## Proven Results — Measurable Intelligence Growth
 
 **CCDEW is the only open-source AI ecosystem that tracks its own improvement in real time.** Every action feeds a self-training loop. Here are the live metrics — updated every 30 seconds by the autonomous daemon:
 
@@ -77,36 +74,9 @@ Trend: converging                 ███████████████�
 
 ### Three-Loop Learning System
 
-```ascii
-┌─────────────────────────────────────────────────────────────────┐
-│                    CCDEW INTELLIGENCE CORE                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  LOOP 1: Task Execution (seconds)                               │
-│  ┌──────┐    ┌─────────────┐    ┌──────────┐    ┌──────────┐   │
-│  │Task  │───→│Enneagram    │───→│Pipeline  │───→│Post-     │   │
-│  │Input │    │Core (select)│    │Divergent/│    │Action    │   │
-│  │      │    │             │    │Convergent│    │(Learn)   │   │
-│  └──────┘    └─────────────┘    └──────────┘    └──────────┘   │
-│                                                    │           │
-│  LOOP 2: Self-Training (30s)                       │           │
-│  ┌──────────────┐    ┌───────────────┐             │           │
-│  │Convergence   │←───│Self-Train     │←────────────┘           │
-│  │Dashboard     │    │Daemon         │                         │
-│  │ (73.4%)      │    │(weakest node) │                         │
-│  └──────────────┘    └───────────────┘                         │
-│                                                    │           │
-│  LOOP 3: Consolidation (10 episodes)               │           │
-│  ┌──────────────┐    ┌───────────────┐             │           │
-│  │Principles    │←───│Pyramid Engine │←────────────┘           │
-│  │N6            │    │hermes-memory  │                         │
-│  └──────────────┘    └───────────────┘                         │
-│                                                                 │
-│  BRIDGE: HTTP 127.0.0.1:18777 (zero race conditions)           │
-│  WRITER: SAFLA single-writer via pipeline.py                    │
-│  LOGGING: Centralized ccdew.log (all components)               │
-└─────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="docs/ccdew-architecture.svg" alt="CCDEW Architecture Diagram" width="100%">
+</p>
 
 ### Architecture Benefits
 
@@ -130,7 +100,7 @@ Trend: converging                 ███████████████�
 
 ---
 
-## [MACRO] Getting Started — 60-second read
+## Getting Started — 60-second read
 
 ### What can you do with it?
 
@@ -198,7 +168,7 @@ Open OpenCode Desktop in the repo — the AGENTS.md context loads automatically.
 
 ---
 
-## [MEZZO] Setup & Components — 2-minute scan
+## Setup & Components — 2-minute scan
 
 > [!IMPORTANT]
 > **CCDEW is a bring-your-own-LLM framework.** You don't need any paid API key to start — all core features work with free OpenRouter models (DeepSeek, Qwen, Gemma). Paid keys unlock premium models but are never required.
@@ -295,7 +265,7 @@ _(5 legacy TypeScript plugins archived to `_ARCHIVED_PLUGINS/`)_
 
 ---
 
-## [MICRO] Detailed Reference — 5-minute read
+## Detailed Reference — 5-minute read
 
 ### Convergent/Divergent Engine (v1)
 
@@ -399,7 +369,7 @@ Selection: by profile, by cost, by capability, adaptive (success/failure history
 
 ---
 
-## [NANO] Implementation Detail — Deep Reference
+## Implementation Detail — Deep Reference
 
 ### Repository Structure
 
