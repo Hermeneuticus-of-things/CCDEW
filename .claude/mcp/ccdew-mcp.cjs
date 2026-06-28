@@ -114,6 +114,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const patterns = cached('patterns', getPatterns);
         const safla = cached('safla', getSAFLA);
         const skills = cached('skills', getSkills);
+        const pathway = readJSON(path.join(MEMORY_DIR, 'pathway-bridge.json'));
+
+        const pwLine = pathway ? `\n**Pathway:** ${pathway.pathway_label} | Node: ${pathway.active_node} | Confidence: ${(pathway.confidence*100).toFixed(0)}%` : '';
 
         return { content: [{ type: 'text', text: `## CCDEW Status v2
 
@@ -125,6 +128,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 **SAFLA Learning:**
 - Total feedback: ${safla.total_feedbacks || 0}
 - Noduri active: ${Object.keys(safla.nodes || {}).length}
+
+**Enneagram Pathway:**${pwLine}
 
 **System:** 🟢 Active
 **Cache:** ${cache.size} entries` }] };

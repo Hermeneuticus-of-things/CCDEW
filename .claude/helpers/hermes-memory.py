@@ -42,6 +42,13 @@ def save_episode(task, solution="", outcome="success", tags=None, duration_s=0, 
     with open(EPISODIC, "a") as f:
         f.write(json.dumps(ep, ensure_ascii=False) + "\n")
 
+    # Trigger oglindă inversă (post-acțiune — extrage lecții)
+    try:
+        reverse_mirror(episode_id=ep["id"], task=task, solution=solution,
+                       outcome=outcome, tags=tags, technique=technique)
+    except Exception as e:
+        pass  # Oglinda nu blochează salvarea
+
     # Trigger consolidare dacă avem suficiente episoade
     count = _episode_count()
     if count >= 3 and count % 3 == 0:
@@ -525,6 +532,152 @@ def validate_policies():
 
 
 # =============================================================================
+# PUNTEA SAFLA ↔ PIRAMIDĂ — sincronizare bidirecțională
+# =============================================================================
+
+SAFLA_PATHS = [
+    os.path.expanduser("~/.config/opencode/ccdew-safla-state.json"),
+    os.path.expanduser("~/CCDEW/.claude-flow/data/safla.json"),
+]
+
+NODE_NAMES = {
+    "1": "Perfectionist (reviewer)",
+    "2": "Helper (inbox-triage)",
+    "3": "Achiever (builder)",
+    "4": "Individualist (strategist)",
+    "5": "Investigator (researcher)",
+    "6": "Loyalist (ops/qa)",
+    "7": "Enthusiast (km-agent)",
+    "8": "Challenger (maintainer)",
+    "9": "Peacemaker (orchestrator)",
+}
+
+NODE_DOMAIN_MAP = {
+    "1": "review/quality",
+    "2": "support/triage",
+    "3": "build/implement",
+    "4": "strategy/architecture",
+    "5": "research/analysis",
+    "6": "test/monitor/security",
+    "7": "knowledge/document",
+    "8": "maintain/deploy",
+    "9": "coordinate/orchestrate",
+}
+
+
+def _sync_safla_to_pyramid():
+    """Citește datele SAFLA și creează episoade pentru eșecurile neînregistrate.
+
+    Astfel, eșecurile din nodurile Enneagram (înregistrate de convergent-divergent MCP)
+    ajung în piramida de învățare (pattern-uri → tehnici → principii).
+    """
+    created = 0
+    episodes = _load_episodes()
+    existing_tasks = {ep.get("task", "") for ep in episodes}
+
+    for saf_path in SAFLA_PATHS:
+        if not os.path.exists(saf_path):
+            continue
+        try:
+            with open(saf_path) as f:
+                safla = json.load(f)
+        except:
+            continue
+
+        nodes = safla.get("nodes", {})
+        for nid, ndata in nodes.items():
+            failures = ndata.get("failure", 0)
+            successes = ndata.get("success", 0)
+            last_task = ndata.get("last_task", "")
+            weight = ndata.get("weight_adj", 0)
+
+            if not last_task or last_task in existing_tasks:
+                continue
+
+            # Creează episod pentru ultimul task al nodului
+            outcome = "success" if failures == 0 else "failure"
+            tags = [f"safla:node_{nid}", f"safla:weight_{weight:.2f}"]
+
+            # Adaugă și tehnică dacă e nod problematic
+            technique = ""
+            if failures > successes and failures >= 2:
+                technique = f"rehab_node_{nid}"
+
+            ep = {
+                "id": int(time.time() * 1000) % 10**12 + int(nid),
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "type": "safla_sync",
+                "task": last_task[:500],
+                "solution": f"SAFLA node {nid} ({NODE_NAMES.get(nid, '?')}): {successes} success, {failures} failures, weight={weight}",
+                "outcome": outcome,
+                "tags": tags,
+                "duration_s": 0,
+                "technique": technique,
+                "used_count": 0,
+                "last_retrieved": 0,
+                "safla_node": nid,
+                "safla_success": successes,
+                "safla_failure": failures,
+                "safla_weight": weight,
+            }
+
+            with open(EPISODIC, "a") as f:
+                f.write(json.dumps(ep, ensure_ascii=False) + "\n")
+            created += 1
+            existing_tasks.add(last_task)
+
+    return created
+
+
+def _sync_pyramid_to_safla():
+    """Actualizează SAFLA weights pe baza pattern-urilor și tehnicilor din piramidă.
+
+    Dacă o tehnică are success_rate ridicat, boostează nodul corespunzător.
+    Dacă un principiu are violări, scade weight-ul nodului.
+    """
+    for saf_path in SAFLA_PATHS:
+        if not os.path.exists(saf_path):
+            continue
+        try:
+            with open(saf_path) as f:
+                safla = json.load(f)
+        except:
+            continue
+
+        nodes = safla.get("nodes", {})
+
+        # Încarcă tehnici și ajustează weights pe bază de success_rate
+        try:
+            techs = load_techniques()
+            for nid in nodes:
+                domain = NODE_DOMAIN_MAP.get(nid, "")
+                if not domain:
+                    continue
+                # Găsește tehnici relevante pentru acest nod
+                relevant_techs = [t for t in techs.values()
+                                 if any(kw in t.get("keywords", []) for kw in domain.split("/"))]
+                if relevant_techs:
+                    avg_rate = sum(t.get("success_rate", 0.5) for t in relevant_techs) / len(relevant_techs)
+                    # Ajustare: tecnica cu success_rate > 0.8 → boost, < 0.5 → penalizare
+                    adjustment = (avg_rate - 0.5) * 0.1
+                    nodes[nid]["weight_adj"] = round(
+                        max(-0.5, min(0.5, nodes[nid].get("weight_adj", 0) + adjustment)), 2
+                    )
+        except:
+            pass
+
+        # Scrie înapoi
+        safla["_last_pyramid_sync"] = datetime.now(timezone.utc).isoformat()
+        try:
+            tmp = saf_path + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump(safla, f, indent=2, ensure_ascii=False)
+            os.replace(tmp, saf_path)
+        except:
+            pass
+
+
+# =============================================================================
 # NIVEL 6: PRINCIPII — Auto-validating Principles
 # =============================================================================
 
@@ -659,6 +812,10 @@ def consolidate_all():
     """Rulează toate nivelele de consolidare în cascadă."""
     print(f"\n=== Consolidare piramidă {datetime.now(timezone.utc).strftime('%H:%M:%S')} ===")
 
+    # Sync SAFLA → piramidă (puntea dintre cele 2 sisteme)
+    safla_sync_count = _sync_safla_to_pyramid()
+    print(f"  SAFLA Sync: {safla_sync_count} episoade importate")
+
     # Nivel 1: Acțiuni — count
     count = _episode_count()
     print(f"  Nivel 1 (Acțiuni): {count} episoade")
@@ -722,8 +879,625 @@ def consolidate_all():
                     break
     save_principles(prins)
 
+    # Sync piramidă → SAFLA (ajustează weights pe bază de tehnici)
+    _sync_pyramid_to_safla()
+    print(f"  SAFLA Weights: sincronizate din piramidă")
+
     print(f"  Nivel 6 (Principii): {len(prins.get('principles', []))} principii sincronizate")
     print(f"=== Consolidare completă ===\n")
+
+
+# =============================================================================
+# OGGLINDĂ INVERSĂ: Reflecție post-acțiune (nivelul 7 — mirror loop 1→9)
+# =============================================================================
+
+MIRROR_QUESTIONS = {
+    1: "REZULTATE — Ce am obținut concret? Ce impact a avut asupra sistemului?",
+    2: "TOOL-URI — Ce instrumente/mijloace m-au ajutat? Care au fost ineficiente?",
+    3: "SKILL — Ce mi-a venit natural? Unde m-am împotmolit? Ce mi-a devenit automat?",
+    4: "EVALUARE — Cum aș evalua altfel data viitoare? Ce criterii au lipsit?",
+    5: "FEEDBACK — Ce feedback (din mediu/erori) am ignorat și trebuia să-l ascult?",
+    6: "EXERSARE — Ce exerciții sau pași au fost eficienți? Care au fost în plus?",
+    7: "ÎNDRUMARE — Ce sfat aș da cuiva care face același task de la zero?",
+    8: "PRINCIPIU — Ce principiu general se aplică aici? În ce condiții s-ar schimba?",
+    9: "CONCEPT — Cum rescriu definiția conceptului după ce am trecut prin asta?",
+}
+
+MIRROR_EPISTEMIC_MAP = {
+    1: {"domain": "faptic", "type": "output", "confidence_weight": 0.3},
+    2: {"domain": "practic", "type": "instrument", "confidence_weight": 0.6},
+    3: {"domain": "procedural", "type": "intuitie", "confidence_weight": 0.7},
+    4: {"domain": "metacognitiv", "type": "calitate", "confidence_weight": 0.5},
+    5: {"domain": "social", "type": "corectie", "confidence_weight": 0.8},
+    6: {"domain": "practic", "type": "eficienta", "confidence_weight": 0.6},
+    7: {"domain": "didactic", "type": "transfer", "confidence_weight": 0.7},
+    8: {"domain": "abstract", "type": "regula", "confidence_weight": 0.9},
+    9: {"domain": "conceptual", "type": "teorie", "confidence_weight": 0.95},
+}
+
+
+def reverse_mirror(episode_id=None, task="", solution="", outcome="", tags=None, technique=""):
+    """Oglindă inversă 1→9: post-acțiune, extrage lecții și rescrie concepte.
+
+    Rulează automat după save_episode(). Scrie în episodic.jsonl ca mirror entry.
+    """
+    tags = tags or []
+
+    # Load episode if id given
+    ep = None
+    if episode_id:
+        eps = _load_episodes()
+        for e in eps:
+            if e.get("id") == episode_id:
+                ep = e
+                break
+
+    task_text = ep.get("task", task) if ep else task
+    outcome_val = ep.get("outcome", outcome) if ep else outcome
+
+    # Determină nivelul de reflecție pe baza outcome
+    reflective_depth = 9 if outcome_val == "success" else min(7, 9)
+
+    # Generează răspunsuri la fiecare nivel 1→9
+    reflections = []
+    for level in range(1, reflective_depth + 1):
+        question = MIRROR_QUESTIONS[level]
+        meta = MIRROR_EPISTEMIC_MAP[level]
+
+        reflection = {
+            "level": level,
+            "question": question.split("—", 1)[0].strip(),
+            "question_full": question,
+            "domain": meta["domain"],
+            "type": meta["type"],
+            "confidence_weight": meta["confidence_weight"],
+            "synth": "",  # placeholder — va fi populat de LLM în viitor
+        }
+        reflections.append(reflection)
+
+    # Construiește entry-ul de oglindă
+    mirror_entry = {
+        "id": int(time.time() * 1000) % 10**12,
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "type": "mirror_inverse",
+        "source_episode_id": episode_id or 0,
+        "source_task": task_text[:200],
+        "source_outcome": outcome_val,
+        "source_technique": technique or (ep.get("technique", "") if ep else ""),
+        "reflective_depth": reflective_depth,
+        "reflections": reflections,
+        "summary": _generate_mirror_summary(task_text, outcome_val, reflective_depth),
+    }
+
+    # Salvează în episodic.jsonl
+    with open(EPISODIC, "a") as f:
+        f.write(json.dumps(mirror_entry, ensure_ascii=False) + "\n")
+
+    # Verifică dacă reflecția poate îmbunătăți o tehnică
+    tech_improved = _mirror_update_techniques(task_text, technique, reflections)
+
+    # Scor: înregistrează valoarea de învățare a acestei bucle
+    try:
+        pathway = detect_pathway(window=10)
+        score_pathway_run(
+            pathway=pathway,
+            outcome=outcome_val,
+            mirror_depth=reflective_depth,
+            technique_improved=tech_improved,
+        )
+    except:
+        pass
+
+    return mirror_entry
+
+
+def _generate_mirror_summary(task, outcome, depth):
+    """Generează un scurt sumar al reflecției."""
+    if outcome == "success":
+        return f"✅ {task[:50]} — reflecție completă pe {depth} nivele. Principii validate."
+    else:
+        return f"❌ {task[:50]} — reflecție pe {depth} nivele. Identifică ce a eșuat și ajustează."
+
+
+def _mirror_update_techniques(task_text, technique_id, reflections):
+    """Verifică dacă reflecția sugerează actualizarea unei tehnici.
+    Returnează True dacă a îmbunătățit ceva."""
+    if not technique_id:
+        return False
+
+    techs = None
+    try:
+        techs = load_techniques()
+    except:
+        return False
+    if not techs or technique_id not in techs:
+        return False
+
+    tech = techs[technique_id]
+    improved = False
+
+    # Incrementează use_count
+    tech["use_count"] = tech.get("use_count", 0) + 1
+    improved = True
+
+    # Verifică dacă reflecția nivel 8 dezvăluie o limitare a principiului
+    level8 = next((r for r in reflections if r["level"] == 8), None)
+    if level8 and not tech.get("limitations"):
+        tech["limitations"] = "De explorat: în ce condiții nu se aplică această tehnică?"
+
+    # Adaugă tag-uri noi din task dacă lipsesc
+    tl = task_text.lower()
+    for word in tl.split():
+        if len(word) > 4 and word not in tech.get("keywords", []):
+            if "keywords" not in tech:
+                tech["keywords"] = []
+            tech["keywords"].append(word)
+            improved = True
+            break  # un keyword nou per reflecție
+
+    # Actualizează success_rate când avem suficiente date
+    total_uses = tech.get("use_count", 1)
+    if total_uses >= 3:
+        # Cântărește succesul reflecției: dacă ajungem la nivel 9, e un semn bun
+        max_level = max((r["level"] for r in reflections), default=0)
+        if max_level >= 8:
+            old_rate = tech.get("success_rate", 0.5)
+            tech["success_rate"] = round((old_rate * 0.8 + 0.2), 3)
+            improved = True
+
+    save_techniques(techs)
+    return improved
+
+
+def show_mirror(limit=5):
+    """Afișează ultimele intrări mirror_inverse."""
+    eps = _load_episodes()
+    mirrors = [ep for ep in eps if ep.get("type") == "mirror_inverse"]
+    if not mirrors:
+        print("  Nicio reflecție în oglindă inversă.")
+        return
+
+    print(f"=== Oglindă Inversă (ultimele {min(limit, len(mirrors))}) ===")
+    for m in mirrors[-limit:]:
+        depth = m.get("reflective_depth", 0)
+        outcome = m.get("source_outcome", "?")
+        icon = "✅" if outcome == "success" else "❌"
+        print(f"  {icon} {m.get('source_task', '')[:50]:50s} d={depth} | {m.get('summary', '')[:60]}")
+
+
+# =============================================================================
+# ENNEAGRAM PATHWAY DETECTION: Circle / Triangle / Hexad
+# =============================================================================
+
+ENNEAGRAM_NODES = {
+    1: "REZULTATE",
+    2: "TOOL-URI",
+    3: "SKILL",
+    4: "EVALUARE",
+    5: "FEEDBACK",
+    6: "EXERSARE",
+    7: "ÎNDRUMARE",
+    8: "PRINCIPIU",
+    9: "CONCEPT",
+}
+
+ENNEAGRAM_CIRCLE = [9, 8, 7, 6, 5, 4, 3, 2, 1]   # progresie naturală
+ENNEAGRAM_TRIANGLE = [3, 6, 9]                     # corecție strategică
+ENNEAGRAM_HEXAD = [1, 4, 2, 8, 5, 7, 1]           # scurtătură expert
+
+
+def _infer_node_from_task(task_text):
+    """Inferă ce nod Enneagram corespunde task-ului pe bază de keywords."""
+    tl = task_text.lower()
+    rules = {
+        1: ["rezultat", "produc", "livreaz", "deploy", "merge", "push", "finalizează", "lansează"],
+        2: ["tool", "instrument", "script", "comandă", "setup", "config", "instalează", "pregătește"],
+        3: ["skill", "deprindere", "automat", "execută", "rulează", "implementează", "build", "fă"],
+        4: ["evaluare", "testează", "verifică", "analizează", "măsoară", "compară", "review"],
+        5: ["feedback", "corecție", "ajustare", "fix", "repari", "debug", "eroare", "problemă"],
+        6: ["exersează", "practică", "simulează", "încearcă", "experimentează", "probează"],
+        7: ["îndrumare", "ghid", "explică", "învață", "documentează", "caută", "cercetează"],
+        8: ["principiu", "regulă", "decizie", "strategie", "plan", "arhitectură", "proiectează"],
+        9: ["concept", "idee", "teorie", "înțelege", "definește", "proiectează", "sistematizează"],
+    }
+    scores = {}
+    for node, keywords in rules.items():
+        scores[node] = sum(1 for kw in keywords if kw in tl)
+    if max(scores.values()) == 0:
+        return 0
+    return max(scores, key=scores.get)
+
+
+def detect_pathway(episodes_window=10):
+    """Detectează ce cale Enneagram a fost folosită în ultimele N episoade.
+
+    Returnează: 'circle', 'triangle', 'hexad', sau 'mixed'.
+    """
+    eps = _load_episodes()
+    recent = [ep for ep in eps if ep.get("type") != "mirror_inverse"][-episodes_window:]
+    if len(recent) < 3:
+        return "insufficient_data"
+
+    # Atribuie noduri
+    nodes = []
+    outcomes = []
+    for ep in recent:
+        n = _infer_node_from_task(ep.get("task", ""))
+        nodes.append(n)
+        outcomes.append(ep.get("outcome", ""))
+
+    scores = {"circle": 0, "triangle": 0, "hexad": 0}
+
+    # Circle check: nodes follow 9→8→7→6→5→4→3→2→1 progression
+    if len(nodes) >= 3:
+        # Verifică secvențe descrescătoare (9→8, 8→7, etc.)
+        circle_hits = sum(1 for i in range(len(nodes)-1)
+                         if nodes[i] > 0 and nodes[i+1] > 0
+                         and nodes[i] - nodes[i+1] == 1)
+        scores["circle"] = circle_hits / max(len(nodes)-1, 1)
+
+    # Triangle check: nodes jump between {3, 6, 9} frequently
+    if len(nodes) >= 2:
+        triangle_nodes = {3, 6, 9}
+        in_triangle = sum(1 for n in nodes if n in triangle_nodes)
+        triangle_jumps = sum(1 for i in range(len(nodes)-1)
+                           if nodes[i] in triangle_nodes and nodes[i+1] in triangle_nodes
+                           and nodes[i] != nodes[i+1])
+        scores["triangle"] = (in_triangle + triangle_jumps * 2) / max(len(nodes) * 2, 1)
+
+    # Hexad check: follow 1→4→2→8→5→7→1 pattern + high success + fast
+    if len(nodes) >= 3:
+        hexad_set = {1, 2, 4, 5, 7, 8}
+        in_hexad = sum(1 for n in nodes if n in hexad_set)
+        # Success rate bonus
+        success_rate = sum(1 for o in outcomes if o == "success") / max(len(outcomes), 1)
+        scores["hexad"] = (in_hexad / max(len(nodes), 1)) * 0.6 + success_rate * 0.4
+
+    # Determină pathway-ul dominant
+    best = max(scores, key=scores.get)
+    best_score = scores[best]
+    # Dacă toate scorurile sunt apropiate, e mixed
+    others = [v for k, v in scores.items() if k != best]
+    if others and best_score - max(others) < 0.15:
+        return "mixed"
+
+    return best
+
+
+def pathway_label(pathway):
+    labels = {
+        "circle": "🔵 Cerc Exterior (progresie naturală)",
+        "triangle": "🔺 Triunghi 3-6-9 (corecție strategică)",
+        "hexad": "🔗 Hexadă 1-4-2-8-5-7-1 (scurtătură expert)",
+        "mixed": "🌀 Mixt",
+        "insufficient_data": "⬜ Insuficiente date",
+    }
+    return labels.get(pathway, pathway)
+
+
+def show_pathway(window=10):
+    """Afișează pathway-ul curent și distribuția nodurilor."""
+    eps = _load_episodes()
+    recent = [ep for ep in eps if ep.get("type") != "mirror_inverse"][-window:]
+
+    if not recent:
+        print("  Niciun episod de analizat.")
+        return
+
+    nodes = []
+    outcomes = []
+    for ep in recent:
+        n = _infer_node_from_task(ep.get("task", ""))
+        if n > 0:
+            nodes.append(n)
+        outcomes.append(ep.get("outcome", ""))
+
+    # Distribuția nodurilor
+    from collections import Counter
+    node_counts = Counter(nodes)
+    print(f"=== Enneagram Pathway (ultimele {len(recent)} episoade) ===")
+    print(f"")
+    print(f"  Cale detectată: {pathway_label(detect_pathway(window))}")
+    print(f"")
+    print(f"  Distribuția nodurilor Enneagram:")
+    for n in range(9, 0, -1):
+        count = node_counts.get(n, 0)
+        bar = "█" * count + "░" * (max(0, 10 - count))
+        pct = count / max(len(nodes), 1) * 100
+        nm = ENNEAGRAM_NODES.get(n, "?")
+        print(f"    {n}. {nm:12s} {bar} {count}x ({pct:.0f}%)")
+
+    success_rate = sum(1 for o in outcomes if o == "success") / max(len(outcomes), 1)
+    print(f"")
+    print(f"  Success rate: {success_rate:.0%}")
+    print(f"")
+
+
+# =============================================================================
+# PATHWAY BRIDGE — Sync pathway state to shared file (consumed by MCP routing)
+# =============================================================================
+
+PATHWAY_BRIDGE = os.path.join(BASE, "pathway-bridge.json")
+
+
+def sync_pathway_bridge(pathway=None, active_node=0, confidence=0.5, flow=0.5, confusion=0.0):
+    """Scrie starea curentă a pathway-ului într-un fișier JSON partajat.
+
+    Acest fișier este citit de:
+      - ccdew-notebooklm-mcp.cjs (orchestrator routing)
+      - ccdew-mcp.cjs (status/snapshot)
+      - instincts.cjs (pattern learning)
+    """
+    if pathway is None:
+        try:
+            pathway = detect_pathway(window=10)
+        except:
+            pathway = "insufficient_data"
+
+    # Cea mai bună cale din istoric
+    best_pw, best_score = get_best_pathway()
+
+    bridge = {
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "pathway": pathway,
+        "pathway_label": pathway_label(pathway),
+        "active_node": active_node,
+        "confidence": round(confidence, 3),
+        "flow": round(flow, 3),
+        "confusion": round(confusion, 3),
+        "preferred_nodes": _pathway_preferred_nodes(pathway),
+        "routing_hint": _pathway_routing_hint(pathway),
+        "safla_hint": _pathway_safla_hint(pathway),
+        "best_pathway": best_pw,
+        "best_score": best_score,
+        "best_label": PATHWAY_NAMES.get(best_pw, best_pw),
+    }
+
+    # Scriere atomică
+    tmp = PATHWAY_BRIDGE + ".tmp"
+    try:
+        with open(tmp, "w") as f:
+            json.dump(bridge, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, PATHWAY_BRIDGE)
+    except:
+        pass
+
+    # Sync și în SAFLA data
+    _sync_pathway_to_safla(pathway, active_node)
+
+    return bridge
+
+
+def _pathway_preferred_nodes(pathway):
+    """Ce noduri Enneagram sunt preferate în această cale."""
+    if pathway == "triangle":
+        return [3, 6, 9]
+    elif pathway == "hexad":
+        return [9, 1, 4, 2, 8, 5, 7]
+    else:
+        return list(range(9, 0, -1))
+
+
+def _pathway_routing_hint(pathway):
+    """Hint pentru orchestrator cum să ajusteze rutarea."""
+    hints = {
+        "circle": "normal — routează la nodul cel mai potrivit",
+        "triangle": "blocaj — preferă nodurile 3 (execuție), 6 (testare), 9 (coordonare)",
+        "hexad": "expert — preferă nodurile 1 (review), 4 (strategie), 2 (triage), 8 (decizie), 5 (cercetare), 7 (knowledge)",
+        "mixed": "normal"
+    }
+    return hints.get(pathway, "normal")
+
+
+def _pathway_safla_hint(pathway):
+    """Hint pentru SAFLA cum să ajusteze ponderile."""
+    hints = {
+        "circle": "all_nodes_equal",
+        "triangle": "boost_3_6_9",
+        "hexad": "boost_1_4_2_8_5_7",
+        "mixed": "all_nodes_equal"
+    }
+    return hints.get(pathway, "all_nodes_equal")
+
+
+def _sync_pathway_to_safla(pathway, active_node):
+    """Actualizează fișierul SAFLA cu pathway-ul curent și nodul activ."""
+    safla_path = os.path.join(os.path.expanduser("~/.config/opencode"), "ccdew-safla-state.json")
+    if not os.path.exists(safla_path):
+        return
+
+    try:
+        with open(safla_path) as f:
+            safla = json.load(f)
+    except:
+        return
+
+    safla["_pathway"] = pathway
+    safla["_active_node"] = active_node
+    safla["_updated"] = datetime.now(timezone.utc).isoformat()
+
+    # Adjust weights per pathway
+    hint = _pathway_safla_hint(pathway)
+    if hint == "boost_3_6_9":
+        for n in ["3", "6", "9"]:
+            if n in safla.get("nodes", {}):
+                safla["nodes"][n]["weight_adj"] = min(0.5, safla["nodes"][n].get("weight_adj", 0) + 0.05)
+    elif hint == "boost_1_4_2_8_5_7":
+        for n in ["1", "2", "4", "5", "7", "8"]:
+            if n in safla.get("nodes", {}):
+                safla["nodes"][n]["weight_adj"] = min(0.5, safla["nodes"][n].get("weight_adj", 0) + 0.03)
+
+    try:
+        tmp = safla_path + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(safla, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, safla_path)
+    except:
+        pass
+
+
+def read_pathway_bridge():
+    """Citește pathway-bridge.json (folosit de JS MCP servers)."""
+    if os.path.exists(PATHWAY_BRIDGE):
+        try:
+            with open(PATHWAY_BRIDGE) as f:
+                return json.load(f)
+        except:
+            pass
+    return None
+
+
+# =============================================================================
+# PATHWAY SCORER — măsoară valoarea de învățare a fiecărei bucle
+# =============================================================================
+
+PATHWAY_SCORES = os.path.join(BASE, "pathway-scores.json")
+
+PATHWAY_CYCLES = {
+    "circle":   [9, 8, 7, 6, 5, 4, 3, 2, 1],
+    "triangle": [3, 6, 9],
+    "hexad":    [1, 4, 2, 8, 5, 7, 1],
+}
+
+PATHWAY_NAMES = {
+    "circle":   "🔵 Cerc exterior (progresie)",
+    "triangle": "🔺 Triunghi 3-6-9 (corecție)",
+    "hexad":    "🔗 Hexadă 1-4-2-8-5-7-1 (expert)",
+    "mixed":    "🌀 Mixt",
+}
+
+
+def _init_scores():
+    """Inițializează fișierul de scoruri."""
+    default = {
+        "pathways": {
+            "circle": {"runs": 0, "success": 0, "failure": 0, "mirror_depth_avg": 0, "technique_boost": 0, "score": 0.5},
+            "triangle": {"runs": 0, "success": 0, "failure": 0, "mirror_depth_avg": 0, "technique_boost": 0, "score": 0.5},
+            "hexad": {"runs": 0, "success": 0, "failure": 0, "mirror_depth_avg": 0, "technique_boost": 0, "score": 0.5},
+            "mixed": {"runs": 0, "success": 0, "failure": 0, "mirror_depth_avg": 0, "technique_boost": 0, "score": 0.5},
+        },
+        "best_pathway": "circle",
+        "best_score": 0.5,
+        "iterations": 0,
+        "last_updated": datetime.now(timezone.utc).isoformat(),
+    }
+    if not os.path.exists(PATHWAY_SCORES):
+        with open(PATHWAY_SCORES, "w") as f:
+            json.dump(default, f, indent=2)
+    return default
+
+
+def _load_scores():
+    if os.path.exists(PATHWAY_SCORES):
+        try:
+            with open(PATHWAY_SCORES) as f:
+                return json.load(f)
+        except:
+            pass
+    return _init_scores()
+
+
+def _save_scores(scores):
+    scores["last_updated"] = datetime.now(timezone.utc).isoformat()
+    tmp = PATHWAY_SCORES + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(scores, f, indent=2)
+    os.replace(tmp, PATHWAY_SCORES)
+
+
+def score_pathway_run(pathway, outcome="success", mirror_depth=0, technique_improved=False):
+    """Înregistrează o execuție a unei căi Enneagram și recalculează scorul.
+
+    Fiecare buclă (cerc/triunghi/hexad) primește un scor bazat pe:
+      - succes rate (40%)
+      - adâncimea oglinzii inverse (30%)
+      - îmbunătățirea tehnicilor (30%)
+    """
+    scores = _load_scores()
+    if pathway not in scores["pathways"]:
+        return
+
+    pw = scores["pathways"][pathway]
+    pw["runs"] += 1
+    if outcome == "success":
+        pw["success"] += 1
+    else:
+        pw["failure"] += 1
+
+    # Adâncimea medie a oglinzii (moving average)
+    if mirror_depth > 0:
+        pw["mirror_depth_avg"] = round(
+            (pw["mirror_depth_avg"] * (pw["runs"] - 1) + mirror_depth) / pw["runs"], 1
+        )
+
+    # Boost tehnică
+    if technique_improved:
+        pw["technique_boost"] += 1
+
+    # Scor compus: succes rate × 0.4 + mirror_depth/9 × 0.3 + technique_boost/runs × 0.3
+    total = pw["success"] + pw["failure"]
+    success_rate = pw["success"] / max(total, 1)
+    depth_norm = min(1.0, pw["mirror_depth_avg"] / 9.0)
+    tech_norm = min(1.0, pw["technique_boost"] / max(pw["runs"], 1) * 2)
+
+    pw["score"] = round(
+        success_rate * 0.4 + depth_norm * 0.3 + tech_norm * 0.3, 3
+    )
+
+    # Găsește cea mai bună cale
+    best = max(scores["pathways"].items(), key=lambda x: x[1]["score"])
+    scores["best_pathway"] = best[0]
+    scores["best_score"] = best[1]["score"]
+    scores["iterations"] += 1
+
+    _save_scores(scores)
+    return scores
+
+
+def get_best_pathway():
+    """Returnează calea Enneagram cu cel mai bun scor de învățare."""
+    scores = _load_scores()
+    return scores.get("best_pathway", "circle"), scores.get("best_score", 0.5)
+
+
+def show_scores():
+    """Afișează scorurile de învățare pentru fiecare cale."""
+    scores = _load_scores()
+    print(f"=== Scoruri Căi Enneagram (iterații: {scores.get('iterations', 0)}) ===\n")
+
+    for pw_key, pw_data in sorted(scores["pathways"].items()):
+        name = PATHWAY_NAMES.get(pw_key, pw_key)
+        s = pw_data["score"]
+        runs = pw_data["runs"]
+        ok = pw_data["success"]
+        fail = pw_data["failure"]
+        depth = pw_data["mirror_depth_avg"]
+        tech = pw_data["technique_boost"]
+        bar_len = 20
+        fill = int(s * bar_len)
+        bar = "█" * fill + "░" * (bar_len - fill)
+        star = " ⭐" if pw_key == scores.get("best_pathway") else ""
+        print(f"  {name}{star}")
+        print(f"    Scor: {s:.1%} [{bar}]")
+        print(f"    Execuții: {runs} | Succes: {ok} | Eșec: {fail} | Rată: {ok/max(runs,1):.0%}")
+        print(f"    Oglindă: {depth}/9 | Tehnici îmbunătățite: {tech}")
+        print()
+
+    print(f"  Cea mai eficientă cale: {PATHWAY_NAMES.get(scores.get('best_pathway', '?'), '?')} ({scores.get('best_score', 0):.1%})")
+
+
+def sync_best_pathway_to_bridge():
+    """Sincronizează cea mai bună cale în pathway-bridge.json pentru MCP routing."""
+    best_pw, best_score = get_best_pathway()
+    bridge = read_pathway_bridge()
+    if bridge:
+        bridge["best_pathway"] = best_pw
+        bridge["best_score"] = best_score
+        bridge["best_label"] = PATHWAY_NAMES.get(best_pw, best_pw)
+        tmp = PATHWAY_BRIDGE + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(bridge, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, PATHWAY_BRIDGE)
 
 
 # =============================================================================
@@ -786,11 +1560,62 @@ if __name__ == "__main__":
     elif cmd == "generate-skill":
         generate_skill_from_techniques(sys.argv[2:] if len(sys.argv) > 2 else None)
 
+    elif cmd == "mirror":
+        limit = int(sys.argv[2]) if len(sys.argv) > 2 else 5
+        show_mirror(limit)
+
+    elif cmd == "pathway":
+        window = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+        p = detect_pathway(window)
+        print(f"Cale Enneagram: {pathway_label(p)}")
+        print(f"(bazat pe ultimele {window} episoade)")
+
+    elif cmd == "pathway-show":
+        window = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+        show_pathway(window)
+
+    elif cmd == "pathway-score":
+        show_scores()
+
+    elif cmd == "pathway-score-run":
+        """Simulează un run pe o cale (testare)."""
+        pw = sys.argv[2] if len(sys.argv) > 2 else "circle"
+        outcome = sys.argv[3] if len(sys.argv) > 3 else "success"
+        depth = int(sys.argv[4]) if len(sys.argv) > 4 else 7
+        tech = sys.argv[5] == "1" if len(sys.argv) > 5 else True
+        score_pathway_run(pw, outcome, depth, tech)
+        show_scores()
+
+    elif cmd == "mirror-run":
+        """Rulează oglindă inversă manual pe ultimul episod sau pe un id."""
+        if len(sys.argv) > 2:
+            try:
+                eid = int(sys.argv[2])
+                mirror = reverse_mirror(episode_id=eid)
+                print(f"Reflecție generată pe {len(mirror['reflections'])} nivele")
+            except ValueError:
+                # eid e de fapt un task text
+                mirror = reverse_mirror(task=sys.argv[2], outcome=sys.argv[3] if len(sys.argv) > 3 else "success")
+                print(f"Reflecție generată pe {len(mirror['reflections'])} nivele")
+        else:
+            # Ultimul episod
+            eps = _load_episodes()
+            regular = [ep for ep in eps if ep.get("type") != "mirror_inverse"]
+            if regular:
+                mirror = reverse_mirror(episode_id=regular[-1]["id"])
+                print(f"Reflecție generată pe ultimul episod: {len(mirror['reflections'])} nivele")
+            else:
+                print("  Niciun episod de reflectat.")
+
     elif cmd == "status":
         count = _episode_count()
+        eps = _load_episodes()
+        mirror_count = sum(1 for ep in eps if ep.get("type") == "mirror_inverse")
+        action_count = count - mirror_count
         print(f"=== Piramid Learning Status ===")
         print(f"")
-        print(f"  Nivel 1 (Acțiuni):    {count} episoade")
+        print(f"  Nivel 1 (Acțiuni):    {action_count} episoade")
+        print(f"  Oglindă Inversă:      {mirror_count} reflecții")
 
         if os.path.exists(PATTERNS):
             with open(PATTERNS) as f:
@@ -864,4 +1689,4 @@ if __name__ == "__main__":
             print("  Auto-save: no task provided (set OPENCODE_TASK env)")
 
     else:
-        print("Comenzi: save, consolidate, patterns, match, validate, generate-skill, status, techniques, principles, save-auto")
+        print("Comenzi: save, consolidate, patterns, match, validate, generate-skill, status, techniques, principles, save-auto, mirror, mirror-run, pathway, pathway-show, pathway-score, pathway-score-run")

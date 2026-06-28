@@ -34,11 +34,31 @@ const NODES = {
   9: { name: 'Peacemaker', role: 'orchestrator', keywords: ['coordinate', 'merge', 'integrate', 'balance'] },
 };
 
+// ── Pathway-aware routing ────────────────────────────────────────
+function getPathway() {
+  const bridgePath = path.join(MEMORY_DIR, 'pathway-bridge.json');
+  const bridge = readJSON(bridgePath);
+  if (!bridge) return null;
+  return bridge;
+}
+
 function routeTask(task) {
   const lower = task.toLowerCase();
+  const pathway = getPathway();
   let best = { node: 9, score: 0 };
+
   for (const [id, node] of Object.entries(NODES)) {
-    const score = node.keywords.filter(k => lower.includes(k)).length;
+    let score = node.keywords.filter(k => lower.includes(k)).length;
+
+    // Pathway boost: ajustează scorul pe baza căii curente
+    if (pathway) {
+      const pw = pathway.pathway || 'circle';
+      const preferred = pathway.preferred_nodes || [9,8,7,6,5,4,3,2,1];
+      if (preferred.includes(parseInt(id))) {
+        score += 1; // boost nodurilor preferate de calea curentă
+      }
+    }
+
     if (score > best.score) best = { node: parseInt(id), score };
   }
   return { ...best, ...NODES[best.node] };
@@ -53,6 +73,7 @@ const server = new Server(
 const TOOLS = [
   { name: 'ccdew_route', description: 'Route task to best Enneagram node', inputSchema: { type: 'object', properties: { task: { type: 'string' } }, required: ['task'] } },
   { name: 'ccdew_hermes', description: 'Enneagram routing info', inputSchema: { type: 'object', properties: { task: { type: 'string' } }, required: ['task'] } },
+  { name: 'ccdew_pathway', description: 'Show current Enneagram pathway state', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_graphify', description: 'ASCII graph report', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_snapshot', description: 'Session snapshot', inputSchema: { type: 'object', properties: {} } },
 ];
@@ -71,7 +92,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'ccdew_hermes': {
         const route = routeTask(args.task);
-        return { content: [{ type: 'text', text: `## Hermes → ${route.name} (${route.role})\n\nTask: "${args.task}"\nRouting to node ${route.node}` }] };
+        const pw = getPathway();
+        const pwLine = pw ? `\nPathway: ${pw.pathway_label} | Node: ${pw.active_node} | Confidence: ${(pw.confidence*100).toFixed(0)}%` : '';
+        return { content: [{ type: 'text', text: `## Hermes → ${route.name} (${route.role})\n\nTask: "${args.task}"\nRouting to node ${route.node}${pwLine}` }] };
+      }
+
+      case 'ccdew_pathway': {
+        const pw = getPathway();
+        if (!pw) return { content: [{ type: 'text', text: 'Pathway bridge not available. Inner Observer may not be running.' }] };
+        const best = pw.best_label ? `\nBest pathway: ${pw.best_label} (${(pw.best_score*100).toFixed(0)}%)` : '';
+        return { content: [{ type: 'text', text: `## Current Enneagram Pathway\n\nActive: ${pw.pathway_label}\nActive Node: ${pw.active_node}\nConfidence: ${(pw.confidence*100).toFixed(0)}%\nFlow: ${(pw.flow*100).toFixed(0)}%\nConfusion: ${(pw.confusion*100).toFixed(0)}%${best}\nRouting Hint: ${pw.routing_hint}\nSAFLA Hint: ${pw.safla_hint}` }] };
       }
 
       case 'ccdew_graphify': {
