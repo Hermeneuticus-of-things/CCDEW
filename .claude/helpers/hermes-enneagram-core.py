@@ -588,6 +588,8 @@ class EnneagramCore:
         self.memory = DeepMemory()
         self.node_history = []          # istoric noduri folosite
         self.handoffs = []              # schimbari de nod mid-task
+        self._convergence_lr = 0.7      # learning rate dinamic (0-1)
+        self._adjust_lr_from_convergence()
 
     def select_node(self, task: str, pathway: str = None, exclude: set = None) -> EnneagramNode:
         """Selecteaza nodul optim."""
@@ -644,12 +646,35 @@ class EnneagramCore:
             return {"handoff": True, "from": node_id, "to": next_node.id, "next_node": next_node}
         return {"handoff": False}
 
+    def _adjust_lr_from_convergence(self):
+        """Citeste convergenta si ajusteaza learning rate."""
+        try:
+            r = urllib.request.urlopen("http://127.0.0.1:18777/convergence", timeout=2)
+            data = json.loads(r.read().decode())
+            comp = data.get("composite", {})
+            composite = comp.get("composite", 0.5)
+            plateau = comp.get("plateau", False)
+            pc = comp.get("plateau_count", 0)
+
+            if plateau and pc >= 3:
+                self._convergence_lr = 0.3  # fine-tune
+            elif composite > 0.8:
+                self._convergence_lr = 0.5  # almost done
+            elif composite < 0.3:
+                self._convergence_lr = 1.0  # explore more
+            else:
+                self._convergence_lr = 0.7  # normal
+        except Exception:
+            pass  # use default
+
     def get_status(self) -> dict:
+        self._adjust_lr_from_convergence()
         return {
             "nodes": self.memory.get_node_stats(),
             "node_history": self.node_history[-10:],
             "handoffs": self.handoffs[-5:],
             "total_handoffs": len(self.handoffs),
+            "convergence_lr": self._convergence_lr,
         }
 
 

@@ -129,7 +129,7 @@ const TOOLS = [
   { name: 'ccdew_core', description: 'Enneagram Intelligence Core — deep node status + process task', inputSchema: { type: 'object', properties: { action: { type: 'string', enum: ['status', 'select', 'process', 'handoffs'] }, task: { type: 'string' } }, required: ['action'] } },
   { name: 'ccdew_learn', description: 'Record task outcome for learning (POST outcome → Pipeline + Core + SAFLA)', inputSchema: { type: 'object', properties: { task: { type: 'string' }, outcome: { type: 'string', enum: ['success', 'failure', 'error'] }, node_id: { type: 'number' }, technique: { type: 'string' } }, required: ['task', 'outcome'] } },
   { name: 'ccdew_graphify', description: 'ASCII graph report', inputSchema: { type: 'object', properties: {} } },
-  { name: 'ccdew_snapshot', description: 'Session snapshot', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_convergence', description: 'Convergence dashboard — composite score, per-node metrics, trend', inputSchema: { type: 'object', properties: { format: { type: 'string', enum: ['text', 'json'] } } } },
 ];
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
@@ -202,7 +202,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const graph = Object.entries(types).map(([t, c]) => `  ${t}: ${c}`).join('\n');
         return { content: [{ type: 'text', text: `## Intelligence Graph\n\n**Episoade:** ${episodes.length}\n\n**Tipuri:**\n${graph || '  (gol)'}` }] };
 
-      case 'ccdew_snapshot':
+      case 'ccdew_convergence': {
+        const d = httpGetSync('/convergence');
+        if (!d || d.error) return { content: [{ type: 'text', text: 'Convergence data not available.' }] };
+        const c = d.composite || {};
+        const nodes = d.per_node || {};
+        let text = '## \u{1F4CA} Convergence Dashboard\n\nComposite: ' + (c.composite * 100).toFixed(0) + '% (' + c.trend + ')\n\n';
+        text += '| Metric | Score |\n|--------|------|\n';
+        text += '| Weight stability | ' + (c.weight_stability?.score * 100).toFixed(0) + '% |\n';
+        text += '| Handoff decay | ' + (c.handoff_decay?.score * 100).toFixed(0) + '% |\n';
+        text += '| Prompt effectiveness | ' + (c.prompt_effectiveness?.score * 100).toFixed(0) + '% |\n';
+        text += '\n**Per Node:**\n\n| Node | Conv | Rate | Stab | Eff |\n|------|------|------|------|-----|\n';
+        for (const [nid, n] of Object.entries(nodes).sort((a,b) => a[0]-b[0])) {
+          text += '| ' + n.name + ' | ' + (n.convergence * 100).toFixed(0) + '% | ' + (n.rate * 100).toFixed(0) + '% | ' + (n.stability * 100).toFixed(0) + '% | ' + (n.effectiveness * 100).toFixed(0) + '% |\n';
+        }
+        text += '\nSnapshots: ' + (d.history?.snapshots || 0);
+        if (c.plateau) text += ' | PLATEAU (' + c.plateau_count + 'x)';
+        return { content: [{ type: 'text', text: text }] };
+      }
         const ts = new Date().toISOString();
         const snapPath = path.join('/tmp', `ccdew-snapshot-${Date.now()}.json`);
         fs.writeFileSync(snapPath, JSON.stringify({ timestamp: ts, pid: process.pid, uptime: process.uptime() }, null, 2));

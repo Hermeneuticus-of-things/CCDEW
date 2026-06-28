@@ -56,6 +56,21 @@ if os.path.exists(_ENNEAGRAM_CORE_PATH):
     except Exception as e:
         print(f"[ccdew-pipeline] Enneagram core load error: {e}", file=sys.stderr)
 
+# ─── Load Convergence Engine ───────────────────────────────────────────
+_CONVERGENCE_PATH = os.path.join(
+    os.environ.get("CCDEW_HELPERS_DIR", os.path.expanduser("~/CCDEW/.claude/helpers")),
+    "hermes-convergence.py"
+)
+_convergence = None
+if os.path.exists(_CONVERGENCE_PATH):
+    try:
+        _spec2 = importlib.util.spec_from_file_location("convergence", _CONVERGENCE_PATH)
+        _conv_mod = importlib.util.module_from_spec(_spec2)
+        _spec2.loader.exec_module(_conv_mod)
+        _convergence = _conv_mod
+    except Exception as e:
+        print(f"[ccdew-pipeline] Convergence load error: {e}", file=sys.stderr)
+
 # --- Config ---
 BRIDGE_PORT = 18777
 HELPERS_DIR = os.environ.get("CCDEW_HELPERS_DIR", os.path.expanduser("~/CCDEW/.claude/helpers"))
@@ -411,6 +426,24 @@ class BridgeHandler(BaseHTTPRequestHandler):
             n = int(qs.get("n", [50])[0])
             level = qs.get("level", [None])[0]
             self._json_response({"logs": get_logs(n, level)})
+        elif self.path == "/convergence":
+            try:
+                if _convergence:
+                    cm = _convergence.ConvergenceMetrics()
+                    self._json_response(cm.snapshot())
+                else:
+                    self._json_response({"error": "convergence module not loaded"})
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+        elif self.path == "/convergence/dashboard":
+            try:
+                if _convergence:
+                    cm = _convergence.ConvergenceMetrics()
+                    self._json_response({"dashboard": cm.dashboard()})
+                else:
+                    self._json_response({"error": "convergence module not loaded"})
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
         elif self.path == "/core/status":
             try:
                 if _enneagram_core:
