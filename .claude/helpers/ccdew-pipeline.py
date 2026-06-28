@@ -62,12 +62,39 @@ HELPERS_DIR = os.environ.get("CCDEW_HELPERS_DIR", os.path.expanduser("~/CCDEW/.c
 MEMORY_DIR = os.environ.get("HERMES_MEMORY_DIR", os.path.expanduser("~/.hermes/memories"))
 CONFIG_DIR = os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config/opencode"))
 
-BRIDGE_FILE = os.path.join(MEMORY_DIR, "pathway-bridge.json")
 SAFLA_FILE = os.path.join(CONFIG_DIR, "ccdew-safla-state.json")
 EPISODIC_FILE = os.path.join(MEMORY_DIR, "episodic.jsonl")
 CONSCIOUSNESS_FILE = os.path.join(MEMORY_DIR, "consciousness.jsonl")
+LOG_FILE = os.path.join(MEMORY_DIR, "ccdew.log")
 
 os.makedirs(MEMORY_DIR, exist_ok=True)
+os.makedirs(CONFIG_DIR, exist_ok=True)
+
+# ─── Logging centralizat ──────────────────────────────────────────────
+_log_buffer = []
+_LOG_MAX = 100  # keep last 100 in memory
+
+def log(component, msg, level="INFO"):
+    entry = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "component": component,
+        "level": level,
+        "msg": str(msg)[:500],
+    }
+    _log_buffer.append(entry)
+    if len(_log_buffer) > _LOG_MAX:
+        _log_buffer.pop(0)
+    try:
+        with open(LOG_FILE, "a") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+def get_logs(n=50, level=None):
+    logs = _log_buffer[-n:]
+    if level:
+        logs = [l for l in logs if l["level"] == level]
+    return list(reversed(logs))
 
 # --- Bridge State (thread-safe, in-memory) ---
 _bridge_state = {
@@ -142,16 +169,30 @@ def permissions_check(action_data: dict) -> dict:
 # ─── Post-action sub-steps ─────────────────────────────────────────
 
 def safla_learn(action_data: dict, outcome: str = "success") -> dict:
-    """Inregistreaza in SAFLA."""
+    """Inregistreaza in SAFLA — single writer (pipeline.py e autoritatea)."""
 
 
-    saf = {}
-    if os.path.exists(SAFLA_FILE):
-        try:
+def _load_safla_from_disk():
+    try:
+        if os.path.exists(SAFLA_FILE):
             with open(SAFLA_FILE) as f:
-                saf = json.load(f)
-        except Exception:
-            saf = {}
+                return json.load(f)
+    except Exception:
+        pass
+    return {"version": "2.0", "nodes": {}, "sessions": 0, "total_feedbacks": 0, "updated": datetime.now(timezone.utc).isoformat()}
+
+
+def _save_safla_to_disk(saf):
+    saf["updated"] = datetime.now(timezone.utc).isoformat()
+    tmp = SAFLA_FILE + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(saf, f, indent=2, ensure_ascii=False)
+    os.replace(tmp, SAFLA_FILE)
+
+
+def safla_learn(action_data: dict, outcome: str = "success") -> dict:
+    """Inregistreaza in SAFLA — SINGURUL writer."""
+    saf = _load_safla_from_disk()
     if "nodes" not in saf:
         saf["nodes"] = {}
     node_id = str(action_data.get("node", action_data.get("active_node", 9)))
@@ -163,10 +204,10 @@ def safla_learn(action_data: dict, outcome: str = "success") -> dict:
     else:
         saf["nodes"][node_id]["failure"] += 1
     saf["nodes"][node_id]["last_task"] = action_data.get("task", "")[:200]
+    saf["sessions"] = saf.get("sessions", 0) + 1 if outcome == "success" else saf.get("sessions", 0)
     saf["total_feedbacks"] = saf.get("total_feedbacks", 0) + 1
-    saf["updated"] = datetime.now(timezone.utc).isoformat()
-    with open(SAFLA_FILE, "w") as f:
-        json.dump(saf, f, indent=2, ensure_ascii=False)
+    _save_safla_to_disk(saf)
+    log("pipeline.safla", f"node_{node_id} outcome={outcome} total={saf['total_feedbacks']}")
     return {"node": node_id, "outcome": outcome, "total_feedbacks": saf["total_feedbacks"]}
 
 
@@ -353,11 +394,9 @@ class BridgeHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/bridge.json" or self.path == "/bridge":
             b = get_bridge()
-            # Add Enneagram core status if available
             try:
                 if _enneagram_core:
-                    core = _enneagram_core.get_core()
-                    b["nodes"] = core.memory.get_node_stats()
+                    b["nodes"] = _enneagram_core.get_core().memory.get_node_stats()
             except Exception:
                 pass
             self._json_response(b)
@@ -365,11 +404,17 @@ class BridgeHandler(BaseHTTPRequestHandler):
             self._json_response({"status": "alive", "ts": datetime.now(timezone.utc).isoformat()})
         elif self.path == "/pipeline/status":
             self._json_response(get_bridge().get("pipeline_status", "idle"))
+        elif self.path == "/safla":
+            self._json_response(_load_safla_from_disk())
+        elif self.path.startswith("/logs"):
+            qs = parse_qs(urlparse(self.path).query)
+            n = int(qs.get("n", [50])[0])
+            level = qs.get("level", [None])[0]
+            self._json_response({"logs": get_logs(n, level)})
         elif self.path == "/core/status":
             try:
                 if _enneagram_core:
-                    core = _enneagram_core.get_core()
-                    self._json_response(core.get_status())
+                    self._json_response(_enneagram_core.get_core().get_status())
                 else:
                     self._json_response({"error": "core not loaded"})
             except Exception as e:
@@ -458,6 +503,31 @@ class BridgeHandler(BaseHTTPRequestHandler):
                     "handoff": core_handoff,
                     "pipeline": pipe_result.to_dict().get("convergent_verdict", {}),
                 })
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+        elif self.path == "/safla":
+            """POST /safla — actualizeaza SAFLA (singurul writer)."""
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length) if length > 0 else b"{}"
+            try:
+                data = json.loads(body)
+                outcome = data.get("outcome", "success")
+                saf_result = safla_learn(data, outcome)
+                self._json_response(saf_result)
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+        elif self.path == "/log":
+            """POST /log — logging centralizat."""
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length) if length > 0 else b"{}"
+            try:
+                data = json.loads(body)
+                log(
+                    data.get("component", "unknown"),
+                    data.get("msg", ""),
+                    data.get("level", "INFO"),
+                )
+                self._json_response({"status": "logged"})
             except Exception as e:
                 self._json_response({"error": str(e)}, 500)
         else:

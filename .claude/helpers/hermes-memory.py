@@ -12,6 +12,7 @@ from collections import defaultdict, Counter
 
 BASE = os.path.expanduser("~/.hermes/memories")
 EPISODIC = os.path.join(BASE, "episodic.jsonl")
+MIRROR_LOG = os.path.join(BASE, "mirror_inverse.jsonl")
 WEIGHTS = os.path.join(BASE, "weights.json")
 PATTERNS = os.path.join(BASE, "patterns.json")
 TECHNIQUES = os.path.join(BASE, "techniques.json")
@@ -51,7 +52,7 @@ def save_episode(task, solution="", outcome="success", tags=None, duration_s=0, 
 
     # Trigger consolidare dacă avem suficiente episoade
     count = _episode_count()
-    if count >= 3 and count % 3 == 0:
+    if count >= 10 and count % 10 == 0:
         consolidate_all()
 
     return ep["id"]
@@ -621,10 +622,10 @@ def _sync_safla_to_pyramid():
                 "safla_weight": weight,
             }
 
-            with open(EPISODIC, "a") as f:
-                f.write(json.dumps(ep, ensure_ascii=False) + "\n")
-            created += 1
-            existing_tasks.add(last_task)
+    with open(EPISODIC, "a") as f:
+        f.write(json.dumps(ep, ensure_ascii=False) + "\n")
+    created += 1
+    existing_tasks.add(last_task)
 
     return created
 
@@ -919,7 +920,7 @@ MIRROR_EPISTEMIC_MAP = {
 def reverse_mirror(episode_id=None, task="", solution="", outcome="", tags=None, technique=""):
     """Oglindă inversă 1→9: post-acțiune, extrage lecții și rescrie concepte.
 
-    Rulează automat după save_episode(). Scrie în episodic.jsonl ca mirror entry.
+    Rulează automat după save_episode(). Scrie în mirror_inverse.jsonl (separat de episodic).
     """
     tags = tags or []
 
@@ -969,8 +970,8 @@ def reverse_mirror(episode_id=None, task="", solution="", outcome="", tags=None,
         "summary": _generate_mirror_summary(task_text, outcome_val, reflective_depth),
     }
 
-    # Salvează în episodic.jsonl
-    with open(EPISODIC, "a") as f:
+    # Salvează în mirror_inverse.jsonl (separat de episodic)
+    with open(MIRROR_LOG, "a") as f:
         f.write(json.dumps(mirror_entry, ensure_ascii=False) + "\n")
 
     # Verifică dacă reflecția poate îmbunătăți o tehnică

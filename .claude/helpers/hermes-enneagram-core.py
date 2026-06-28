@@ -25,7 +25,7 @@ Memorie deep:
   - SAFLA state: weight_adj per nod
 """
 
-import json, os, time, re
+import json, os, time, re, urllib.request
 from datetime import datetime, timezone
 from typing import Optional
 from collections import defaultdict, Counter
@@ -465,6 +465,21 @@ class DeepMemory:
         self._load_patterns()
 
     def _load_safla(self):
+        """Citeste SAFLA — prefera HTTP (pipeline), fallback fisier."""
+        try:
+            r = urllib.request.urlopen("http://127.0.0.1:18777/safla", timeout=2)
+            saf = json.loads(r.read().decode())
+            for nid_str, data in saf.get("nodes", {}).items():
+                nid = int(nid_str)
+                if nid in self.nodes:
+                    self.nodes[nid].success_count = data.get("success", 0)
+                    self.nodes[nid].failure_count = data.get("failure", 0)
+                    self.nodes[nid].last_task = data.get("last_task", "")
+                    self.nodes[nid].weight_adj = data.get("weight_adj", 0.1)
+            return
+        except Exception:
+            pass
+        # Fallback: fisier
         if not os.path.exists(SAFLA_FILE):
             return
         try:
@@ -499,6 +514,7 @@ class DeepMemory:
         self._save_episodic(node_id, task, outcome, technique)
 
     def _save_safla(self):
+        """Scrie SAFLA — prefera HTTP (pipeline=single writer), fallback fisier."""
         saf = {
             "version": "2.0",
             "updated": datetime.now(timezone.utc).isoformat(),
@@ -506,6 +522,19 @@ class DeepMemory:
             "sessions": sum(m.total for m in self.nodes.values()),
             "total_feedbacks": sum(m.total for m in self.nodes.values()),
         }
+        # Varianta 1: HTTP POST catre pipeline (single writer)
+        try:
+            req = urllib.request.Request(
+                "http://127.0.0.1:18777/safla",
+                data=json.dumps(saf).encode(),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            urllib.request.urlopen(req, timeout=3)
+            return
+        except Exception:
+            pass
+        # Varianta 2: fallback direct file
         os.makedirs(os.path.dirname(SAFLA_FILE), exist_ok=True)
         with open(SAFLA_FILE, "w") as f:
             json.dump(saf, f, indent=2, ensure_ascii=False)

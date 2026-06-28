@@ -20,36 +20,61 @@ const MEMORY_DIR = process.env.HERMES_MEMORY_DIR || '/home/think/.hermes/memorie
 const BRIDGE_HOST = '127.0.0.1';
 const BRIDGE_PORT = 18777;
 
-// ── Bridge via HTTP (elimină race condition din JSON file) ───────
+// ── Bridge via HTTP (nativ Node.js — fără curl/wget, fără shell) ──
 let _bridgeCache = null;
 let _bridgeCacheTs = 0;
 const BRIDGE_CACHE_TTL = 2000; // 2s cache
+
+function httpGet(urlPath) {
+  return new Promise((resolve) => {
+    const opts = { hostname: BRIDGE_HOST, port: BRIDGE_PORT, path: urlPath, method: 'GET', timeout: 3000 };
+    const req = http.request(opts, (res) => {
+      let body = '';
+      res.on('data', c => body += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(body)); } catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+    req.end();
+  });
+}
+
+function httpPost(urlPath, data) {
+  return new Promise((resolve) => {
+    const body = JSON.stringify(data);
+    const opts = { hostname: BRIDGE_HOST, port: BRIDGE_PORT, path: urlPath, method: 'POST', timeout: 5000,
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } };
+    const req = http.request(opts, (res) => {
+      let b = '';
+      res.on('data', c => b += c);
+      res.on('end', () => { try { resolve(JSON.parse(b)); } catch { resolve(null); } });
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+    req.write(body);
+    req.end();
+  });
+}
+
+function httpGetSync(urlPath) {
+  try {
+    const url = `http://${BRIDGE_HOST}:${BRIDGE_PORT}${urlPath}`;
+    const out = require('child_process').execSync(
+      `node -e "const h=require('http');h.get('${url.replace(/'/g, "\\'")}',r=>{let b='';r.on('data',c=>b+=c);r.on('end',()=>process.stdout.write(b))}).on('error',()=>process.stdout.write('null'))"`,
+      { encoding: 'utf-8', timeout: 3000 }
+    );
+    return JSON.parse(out);
+  } catch { return null; }
+}
 
 function fetchBridge() {
   const now = Date.now();
   if (_bridgeCache && now - _bridgeCacheTs < BRIDGE_CACHE_TTL) return _bridgeCache;
   try {
-    const url = `http://${BRIDGE_HOST}:${BRIDGE_PORT}/bridge.json`;
-    const data = JSON.parse(
-      require('child_process').execSync(
-        `curl -sf --max-time 1 '${url}' 2>/dev/null || wget -qO- --timeout=1 '${url}' 2>/dev/null || echo 'null'`
-      , { encoding: 'utf-8', timeout: 2000 })
-    );
-    if (data && data.pathway) {
-      _bridgeCache = data;
-      _bridgeCacheTs = now;
-      return data;
-    }
-  } catch {}
-  // Fallback: file bridge (dacă HTTP nu e disponibil)
-  try {
-    const file = path.join(MEMORY_DIR, 'pathway-bridge.json');
-    const data = JSON.parse(fs.readFileSync(file, 'utf-8'));
-    if (data && data.pathway) {
-      _bridgeCache = data;
-      _bridgeCacheTs = now;
-      return data;
-    }
+    const data = httpGetSync('/bridge.json');
+    if (data && data.pathway) { _bridgeCache = data; _bridgeCacheTs = now; return data; }
   } catch {}
   return null;
 }
@@ -114,17 +139,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'ccdew_route': {
-        let r2 = null;
-        try {
-          const o = require('child_process').execSync(
-            "curl -sf --max-time 2 'http://127.0.0.1:18777/core/select?task=" + encodeURIComponent(args.task) + "' 2>/dev/null || echo 'null'",
-            { encoding: 'utf-8', timeout: 3000 }
-          );
-          r2 = JSON.parse(o);
-        } catch {}
-        if (r2 && r2.node_id) {
-          const sp = (r2.system_prompt || '').split('\n').filter(Boolean).map(l => '> ' + l).join('\n');
-          return { content: [{ type: 'text', text: '## \u{1F9E0} Enneagram Node ' + r2.node_id + ' \u2014 ' + r2.node_name + ' (' + r2.archetype + ')\nSuccess Rate: ' + (r2.success_rate * 100).toFixed(0) + '% | Pathway: ' + r2.prefers_pathway + '\n\n### System Prompt\n' + sp + '\n\n### Task Transformation\n' + (r2.task_transform || '') + '\n\n### Execution\nNow respond using the ' + r2.node_name + ' persona.' }] };
+        const coreResult = httpGetSync('/core/select?task=' + encodeURIComponent(args.task));
+        if (coreResult && coreResult.node_id) {
+          const sp = (coreResult.system_prompt || '').split('\n').filter(Boolean).map(l => '> ' + l).join('\n');
+          return { content: [{ type: 'text', text: '## \u{1F9E0} Enneagram Node ' + coreResult.node_id + ' \u2014 ' + coreResult.node_name + ' (' + coreResult.archetype + ')\nSuccess Rate: ' + (coreResult.success_rate * 100).toFixed(0) + '% | Pathway: ' + coreResult.prefers_pathway + '\n\n### System Prompt\n' + sp + '\n\n### Task Transformation\n' + (coreResult.task_transform || '') + '\n\n### Execution\nNow respond using the ' + coreResult.node_name + ' persona.' }] };
         }
         const route = routeTask(args.task);
         return { content: [{ type: 'text', text: '## Routing: "' + args.task + '"\n\n**Node:** ' + route.node + ' \u2014 ' + route.name + '\n**Role:** ' + route.role + '\n**Score:** ' + route.score + '\n\n(Enneagram Core not available \u2014 keyword fallback)' }] };
@@ -143,22 +161,32 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: 'text', text: `## Current Enneagram Pathway\n\nActive: ${p.pathway_label}\nActive Node: ${p.active_node}\nConfidence: ${(p.confidence*100).toFixed(0)}%\nFlow: ${(p.flow*100).toFixed(0)}%\nConfusion: ${(p.confusion*100).toFixed(0)}%${best}\nRouting Hint: ${p.routing_hint}\nSAFLA Hint: ${p.safla_hint}` }] };
 
       case 'ccdew_core': {
-        const CORE = '/home/think/CCDEW/.claude/helpers/hermes-enneagram-core.py';
         const a = args.action;
         let output = '';
         try {
           if (a === 'status') {
-            output = require('child_process').execSync(`python3 "${CORE}" status 2>&1`, { encoding: 'utf-8', timeout: 5000 });
+            const d = httpGetSync('/core/status');
+            output = d && d.nodes ? Object.entries(d.nodes).map(([id, n]) =>
+              id + '. ' + (['','Reformer','Helper','Achiever','Individualist','Investigator','Loyalist','Enthusiast','Challenger','Orchestrator'][parseInt(id)] || '?') +
+              '  ' + n.success + 'ok/' + n.failure + 'fail (' + (n.rate*100).toFixed(0) + '%)  w=' + n.weight_adj
+            ).join('\n') : 'Core not available';
+            if (d && d.handoffs && d.handoffs.length) output += '\n\nHandoffs: ' + d.handoffs.length;
+            output = output || '(empty)';
           } else if (a === 'select' || a === 'process') {
-            if (!args.task) return { content: [{ type: 'text', text: 'Error: task required for select/process' }], isError: true };
-            output = require('child_process').execSync(`python3 "${CORE}" ${a} ${JSON.stringify(args.task).replace(/"/g, '\\"')} 2>&1 | head -80`, { encoding: 'utf-8', timeout: 8000 });
+            if (!args.task) return { content: [{ type: 'text', text: 'Error: task required' }], isError: true };
+            const d = httpGetSync('/core/select?task=' + encodeURIComponent(args.task));
+            output = d && d.node_id ? 'Node ' + d.node_id + ' — ' + d.node_name + ' (' + d.archetype + ')\nRate: ' + (d.success_rate*100).toFixed(0) + '%\n\nPrompt:\n' + d.system_prompt : 'Core not available';
           } else if (a === 'handoffs') {
-            output = require('child_process').execSync(`python3 "${CORE}" handoffs 2>&1`, { encoding: 'utf-8', timeout: 5000 });
+            const d = httpGetSync('/core/status');
+            output = d && d.handoffs ? (d.handoffs.length ? d.handoffs.map(h =>
+              (['','Reformer','Helper','Achiever','Individualist','Investigator','Loyalist','Enthusiast','Challenger','Orchestrator'][h.from] || '?') +
+              ' → ' + (['','Reformer','Helper','Achiever','Individualist','Investigator','Loyalist','Enthusiast','Challenger','Orchestrator'][h.to] || '?')
+            ).join('\n') : 'No handoffs recorded') : 'Core not available';
           } else {
-            return { content: [{ type: 'text', text: `Unknown action: ${a}` }], isError: true };
+            return { content: [{ type: 'text', text: 'Unknown action: ' + a }], isError: true };
           }
         } catch (e) {
-          output = `Error: ${e.message}`;
+          output = 'Error: ' + e.message;
         }
         return { content: [{ type: 'text', text: output.trim() || '(empty)' }] };
       }
@@ -181,15 +209,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: 'text', text: `## Snapshot salvat\n\n${snapPath}\n**Timp:** ${ts}` }] };
 
       case 'ccdew_learn': {
-        let learnOut = '';
-        try {
-          const body = JSON.stringify({ task: args.task, outcome: args.outcome, node_id: args.node_id || 9, technique: args.technique || '' });
-          learnOut = require('child_process').execSync(
-            "curl -sf -X POST -H 'Content-Type: application/json' --max-time 3 -d '" + body.replace(/'/g, "'\\''") + "' 'http://127.0.0.1:18777/core/outcome' 2>/dev/null || echo '{\"status\":\"fallback\"}'",
-            { encoding: 'utf-8', timeout: 5000 }
-          );
-        } catch (e) { learnOut = '{"error":"' + e.message.replace(/"/g, '\\"') + '"}'; }
-        const lr = JSON.parse(learnOut);
+        const body = { task: args.task, outcome: args.outcome, node_id: args.node_id || 9, technique: args.technique || '' };
+        const lr = await httpPost('/core/outcome', body) || { status: 'fallback' };
         let text = '## \u{1F3EB} Learning Recorded\n\n**Task:** ' + args.task + '\n**Outcome:** ' + args.outcome + '\n**Node:** ' + (args.node_id || 9);
         if (lr.handoff) text += '\n\n**Handoff:** Node ' + lr.handoff.from + ' \u2192 Node ' + lr.handoff.to;
         if (lr.pipeline) text += '\n\n**Pipeline:** ' + JSON.stringify(lr.pipeline);
