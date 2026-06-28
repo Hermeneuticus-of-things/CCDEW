@@ -101,6 +101,7 @@ const TOOLS = [
   { name: 'ccdew_route', description: 'Route task to best Enneagram node', inputSchema: { type: 'object', properties: { task: { type: 'string' } }, required: ['task'] } },
   { name: 'ccdew_hermes', description: 'Enneagram routing info', inputSchema: { type: 'object', properties: { task: { type: 'string' } }, required: ['task'] } },
   { name: 'ccdew_pathway', description: 'Show current Enneagram pathway state', inputSchema: { type: 'object', properties: {} } },
+  { name: 'ccdew_core', description: 'Enneagram Intelligence Core — deep node status + process task', inputSchema: { type: 'object', properties: { action: { type: 'string', enum: ['status', 'select', 'process', 'handoffs'] }, task: { type: 'string' } }, required: ['action'] } },
   { name: 'ccdew_graphify', description: 'ASCII graph report', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_snapshot', description: 'Session snapshot', inputSchema: { type: 'object', properties: {} } },
 ];
@@ -126,6 +127,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!p) return { content: [{ type: 'text', text: 'Pathway bridge not available. Inner Observer may not be running.' }] };
         const best = p.best_label ? `\nBest pathway: ${p.best_label} (${(p.best_score*100).toFixed(0)}%)` : '';
         return { content: [{ type: 'text', text: `## Current Enneagram Pathway\n\nActive: ${p.pathway_label}\nActive Node: ${p.active_node}\nConfidence: ${(p.confidence*100).toFixed(0)}%\nFlow: ${(p.flow*100).toFixed(0)}%\nConfusion: ${(p.confusion*100).toFixed(0)}%${best}\nRouting Hint: ${p.routing_hint}\nSAFLA Hint: ${p.safla_hint}` }] };
+
+      case 'ccdew_core': {
+        const CORE = '/home/think/CCDEW/.claude/helpers/hermes-enneagram-core.py';
+        const a = args.action;
+        let output = '';
+        try {
+          if (a === 'status') {
+            output = require('child_process').execSync(`python3 "${CORE}" status 2>&1`, { encoding: 'utf-8', timeout: 5000 });
+          } else if (a === 'select' || a === 'process') {
+            if (!args.task) return { content: [{ type: 'text', text: 'Error: task required for select/process' }], isError: true };
+            output = require('child_process').execSync(`python3 "${CORE}" ${a} ${JSON.stringify(args.task).replace(/"/g, '\\"')} 2>&1 | head -80`, { encoding: 'utf-8', timeout: 8000 });
+          } else if (a === 'handoffs') {
+            output = require('child_process').execSync(`python3 "${CORE}" handoffs 2>&1`, { encoding: 'utf-8', timeout: 5000 });
+          } else {
+            return { content: [{ type: 'text', text: `Unknown action: ${a}` }], isError: true };
+          }
+        } catch (e) {
+          output = `Error: ${e.message}`;
+        }
+        return { content: [{ type: 'text', text: output.trim() || '(empty)' }] };
+      }
 
       case 'ccdew_graphify':
         const episodes = [];

@@ -38,6 +38,23 @@ from datetime import datetime, timezone
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urlparse, parse_qs
+
+# ─── Load Enneagram Core (intelligence architecture + deep memory) ──
+_ENNEAGRAM_CORE_PATH = os.path.join(
+    os.environ.get("CCDEW_HELPERS_DIR", os.path.expanduser("~/CCDEW/.claude/helpers")),
+    "hermes-enneagram-core.py"
+)
+_enneagram_core = None
+if os.path.exists(_ENNEAGRAM_CORE_PATH):
+    try:
+        import importlib.util
+        _spec = importlib.util.spec_from_file_location("enneagram_core", _ENNEAGRAM_CORE_PATH)
+        _ec_mod = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_ec_mod)
+        _enneagram_core = _ec_mod
+    except Exception as e:
+        print(f"[ccdew-pipeline] Enneagram core load error: {e}", file=sys.stderr)
 
 # --- Config ---
 BRIDGE_PORT = 18777
@@ -336,11 +353,40 @@ class BridgeHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/bridge.json" or self.path == "/bridge":
             b = get_bridge()
+            # Add Enneagram core status if available
+            try:
+                if _enneagram_core:
+                    core = _enneagram_core.get_core()
+                    b["nodes"] = core.memory.get_node_stats()
+            except Exception:
+                pass
             self._json_response(b)
         elif self.path == "/health":
             self._json_response({"status": "alive", "ts": datetime.now(timezone.utc).isoformat()})
         elif self.path == "/pipeline/status":
             self._json_response(get_bridge().get("pipeline_status", "idle"))
+        elif self.path == "/core/status":
+            try:
+                if _enneagram_core:
+                    core = _enneagram_core.get_core()
+                    self._json_response(core.get_status())
+                else:
+                    self._json_response({"error": "core not loaded"})
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
+        elif self.path.startswith("/core/select"):
+            qs = parse_qs(urlparse(self.path).query)
+            task = qs.get("task", [""])[0]
+            if not task:
+                self._json_response({"error": "task parameter required"}, 400)
+            else:
+                try:
+                    core = _enneagram_core.get_core()
+                    node = core.select_node(task)
+                    result = core.process_task(task, node)
+                    self._json_response(result)
+                except Exception as e:
+                    self._json_response({"error": str(e)}, 500)
         else:
             self._json_response({"error": "not found"}, 404)
 
