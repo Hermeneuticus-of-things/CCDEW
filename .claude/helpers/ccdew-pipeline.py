@@ -420,6 +420,46 @@ class BridgeHandler(BaseHTTPRequestHandler):
                 self._json_response(result.to_dict())
             except Exception as e:
                 self._json_response({"error": str(e)}, 500)
+        elif self.path == "/core/outcome":
+            """POST /core/outcome — inregistreaza outcome complet: Pipeline + Core + SAFLA."""
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length) if length > 0 else b"{}"
+            try:
+                data = json.loads(body)
+                node_id = int(data.get("node_id", data.get("active_node", 9)))
+                task = data.get("task", "")
+                outcome = data.get("outcome", "success")
+                technique = data.get("technique", "")
+
+                # 1. Ruleaza pipeline post-action
+                pipe_result = _pipeline_global.run_post(data, outcome)
+
+                # 2. Inregistreaza in Enneagram Core
+                core_handoff = None
+                if _enneagram_core:
+                    core = _enneagram_core.get_core()
+                    hr = core.record_outcome(node_id, task, outcome, technique)
+                    if hr.get("handoff"):
+                        core_handoff = {"from": hr["from"], "to": hr["to"]}
+
+                # 3. Update bridge cu noul nod
+                if core_handoff:
+                    update_bridge(
+                        active_node=core_handoff["to"],
+                        pipeline_status=f"handoff_{core_handoff['from']}→{core_handoff['to']}"
+                    )
+                else:
+                    update_bridge(active_node=node_id)
+
+                self._json_response({
+                    "status": "recorded",
+                    "outcome": outcome,
+                    "node_id": node_id,
+                    "handoff": core_handoff,
+                    "pipeline": pipe_result.to_dict().get("convergent_verdict", {}),
+                })
+            except Exception as e:
+                self._json_response({"error": str(e)}, 500)
         else:
             self._json_response({"error": "not found"}, 404)
 

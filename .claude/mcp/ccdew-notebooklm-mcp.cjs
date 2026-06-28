@@ -98,10 +98,11 @@ const server = new Server(
 );
 
 const TOOLS = [
-  { name: 'ccdew_route', description: 'Route task to best Enneagram node', inputSchema: { type: 'object', properties: { task: { type: 'string' } }, required: ['task'] } },
+  { name: 'ccdew_route', description: 'Route task to best Enneagram node + inject system prompt into LLM context', inputSchema: { type: 'object', properties: { task: { type: 'string' } }, required: ['task'] } },
   { name: 'ccdew_hermes', description: 'Enneagram routing info', inputSchema: { type: 'object', properties: { task: { type: 'string' } }, required: ['task'] } },
   { name: 'ccdew_pathway', description: 'Show current Enneagram pathway state', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_core', description: 'Enneagram Intelligence Core — deep node status + process task', inputSchema: { type: 'object', properties: { action: { type: 'string', enum: ['status', 'select', 'process', 'handoffs'] }, task: { type: 'string' } }, required: ['action'] } },
+  { name: 'ccdew_learn', description: 'Record task outcome for learning (POST outcome → Pipeline + Core + SAFLA)', inputSchema: { type: 'object', properties: { task: { type: 'string' }, outcome: { type: 'string', enum: ['success', 'failure', 'error'] }, node_id: { type: 'number' }, technique: { type: 'string' } }, required: ['task', 'outcome'] } },
   { name: 'ccdew_graphify', description: 'ASCII graph report', inputSchema: { type: 'object', properties: {} } },
   { name: 'ccdew_snapshot', description: 'Session snapshot', inputSchema: { type: 'object', properties: {} } },
 ];
@@ -112,9 +113,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
   try {
     switch (name) {
-      case 'ccdew_route':
+      case 'ccdew_route': {
+        let r2 = null;
+        try {
+          const o = require('child_process').execSync(
+            "curl -sf --max-time 2 'http://127.0.0.1:18777/core/select?task=" + encodeURIComponent(args.task) + "' 2>/dev/null || echo 'null'",
+            { encoding: 'utf-8', timeout: 3000 }
+          );
+          r2 = JSON.parse(o);
+        } catch {}
+        if (r2 && r2.node_id) {
+          const sp = (r2.system_prompt || '').split('\n').filter(Boolean).map(l => '> ' + l).join('\n');
+          return { content: [{ type: 'text', text: '## \u{1F9E0} Enneagram Node ' + r2.node_id + ' \u2014 ' + r2.node_name + ' (' + r2.archetype + ')\nSuccess Rate: ' + (r2.success_rate * 100).toFixed(0) + '% | Pathway: ' + r2.prefers_pathway + '\n\n### System Prompt\n' + sp + '\n\n### Task Transformation\n' + (r2.task_transform || '') + '\n\n### Execution\nNow respond using the ' + r2.node_name + ' persona.' }] };
+        }
         const route = routeTask(args.task);
-        return { content: [{ type: 'text', text: `## Routing: "${args.task}"\n\n**Node:** ${route.node} — ${route.name}\n**Role:** ${route.role}\n**Score:** ${route.score}` }] };
+        return { content: [{ type: 'text', text: '## Routing: "' + args.task + '"\n\n**Node:** ' + route.node + ' \u2014 ' + route.name + '\n**Role:** ' + route.role + '\n**Score:** ' + route.score + '\n\n(Enneagram Core not available \u2014 keyword fallback)' }] };
+      }
 
       case 'ccdew_hermes':
         const r = routeTask(args.task);
@@ -165,6 +179,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const snapPath = path.join('/tmp', `ccdew-snapshot-${Date.now()}.json`);
         fs.writeFileSync(snapPath, JSON.stringify({ timestamp: ts, pid: process.pid, uptime: process.uptime() }, null, 2));
         return { content: [{ type: 'text', text: `## Snapshot salvat\n\n${snapPath}\n**Timp:** ${ts}` }] };
+
+      case 'ccdew_learn': {
+        let learnOut = '';
+        try {
+          const body = JSON.stringify({ task: args.task, outcome: args.outcome, node_id: args.node_id || 9, technique: args.technique || '' });
+          learnOut = require('child_process').execSync(
+            "curl -sf -X POST -H 'Content-Type: application/json' --max-time 3 -d '" + body.replace(/'/g, "'\\''") + "' 'http://127.0.0.1:18777/core/outcome' 2>/dev/null || echo '{\"status\":\"fallback\"}'",
+            { encoding: 'utf-8', timeout: 5000 }
+          );
+        } catch (e) { learnOut = '{"error":"' + e.message.replace(/"/g, '\\"') + '"}'; }
+        const lr = JSON.parse(learnOut);
+        let text = '## \u{1F3EB} Learning Recorded\n\n**Task:** ' + args.task + '\n**Outcome:** ' + args.outcome + '\n**Node:** ' + (args.node_id || 9);
+        if (lr.handoff) text += '\n\n**Handoff:** Node ' + lr.handoff.from + ' \u2192 Node ' + lr.handoff.to;
+        if (lr.pipeline) text += '\n\n**Pipeline:** ' + JSON.stringify(lr.pipeline);
+        text += '\n\n**Status:** ' + (lr.status || 'recorded');
+        return { content: [{ type: 'text', text: text }] };
+      }
 
       default:
         return { content: [{ type: 'text', text: `Unknown: ${name}` }], isError: true };
