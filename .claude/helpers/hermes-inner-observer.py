@@ -33,6 +33,22 @@ ERROR_SPIKE_THRESHOLD = 2 # câte eșecuri în fereastră = spike
 
 os.makedirs(MEMORIES, exist_ok=True)
 
+# ─── Bridge HTTP — divergență / convergență (elimină race condition .json) ──
+
+import threading
+_PIPELINE_DIR = os.path.dirname(os.path.abspath(__file__))
+_PIPELINE_PATH = os.path.join(_PIPELINE_DIR, "ccdew-pipeline.py")
+if os.path.exists(_PIPELINE_PATH):
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location("ccdew_pipeline", _PIPELINE_PATH)
+    _pipeline_mod = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_pipeline_mod)
+    _pipeline = _pipeline_mod
+    _bridge_http = threading.Thread(target=_pipeline.serve_forever, daemon=True)
+    _bridge_http.start()
+else:
+    _pipeline = None
+
 # ─── Terminal Width Helper ──────────────────────────────────────────────────
 
 def terminal_width():
@@ -530,18 +546,28 @@ class InnerObserver:
             entry = self.record_consciousness(triggers=triggers)
             self.write_mirror_state()
 
-            # Sync pathway to bridge (consumed by MCP routing + SAFLA)
+            # Sync pathway to bridge — prin HTTP in-memory (fără race condition)
             try:
-                _hm = self._load_hermes_memory()
-                if _hm:
-                    c = self.current
-                    _hm.sync_pathway_bridge(
+                c = self.current
+                if _pipeline:
+                    _pipeline.update_bridge(
                         pathway=c.get("pathway", "insufficient_data"),
+                        pathway_label=c.get("pathway_label", "⬜"),
                         active_node=c.get("active_node", 0),
                         confidence=c["confidence"],
                         flow=c["flow"],
                         confusion=c["confusion"],
                     )
+                else:
+                    _hm = self._load_hermes_memory()
+                    if _hm:
+                        _hm.sync_pathway_bridge(
+                            pathway=c.get("pathway", "insufficient_data"),
+                            active_node=c.get("active_node", 0),
+                            confidence=c["confidence"],
+                            flow=c["flow"],
+                            confusion=c["confusion"],
+                        )
             except Exception:
                 pass
 

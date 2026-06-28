@@ -19,6 +19,33 @@ const fs = require('fs');
 const CCDEW_ROOT = process.env.CCDEW_PROJECT_DIR || '/home/think/CCDEW';
 const MEMORY_DIR = process.env.HERMES_MEMORY_DIR || '/home/think/.hermes/memories';
 const CACHE_TTL = 5000; // 5s cache
+const BRIDGE_HOST = '127.0.0.1';
+const BRIDGE_PORT = 18777;
+
+// ── Bridge HTTP (in-memory, no file race condition) ──────────────
+let _bridgeCache = null;
+let _bridgeCacheTs = 0;
+const BRIDGE_CACHE_TTL = 3000; // 3s
+
+function readBridgeJSON() {
+  const now = Date.now();
+  if (_bridgeCache && now - _bridgeCacheTs < BRIDGE_CACHE_TTL) return _bridgeCache;
+  try {
+    const url = `http://${BRIDGE_HOST}:${BRIDGE_PORT}/bridge.json`;
+    const out = require('child_process').execSync(
+      `curl -sf --max-time 1 '${url}' 2>/dev/null || wget -qO- --timeout=1 '${url}' 2>/dev/null || echo 'null'`,
+      { encoding: 'utf-8', timeout: 2000 }
+    );
+    const data = JSON.parse(out);
+    if (data && data.pathway) { _bridgeCache = data; _bridgeCacheTs = now; return data; }
+  } catch {}
+  // Fallback file
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(MEMORY_DIR, 'pathway-bridge.json'), 'utf-8'));
+    if (data && data.pathway) { _bridgeCache = data; _bridgeCacheTs = now; return data; }
+  } catch {}
+  return null;
+}
 
 // ── Cache (avoid repeated disk reads) ───────────────────────────
 const cache = new Map();
@@ -114,7 +141,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const patterns = cached('patterns', getPatterns);
         const safla = cached('safla', getSAFLA);
         const skills = cached('skills', getSkills);
-        const pathway = readJSON(path.join(MEMORY_DIR, 'pathway-bridge.json'));
+        const pathway = readBridgeJSON();
 
         const pwLine = pathway ? `\n**Pathway:** ${pathway.pathway_label} | Node: ${pathway.active_node} | Confidence: ${(pathway.confidence*100).toFixed(0)}%` : '';
 
