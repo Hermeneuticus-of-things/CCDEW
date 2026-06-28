@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCDEW Intelligence Core</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+  body {
+    background: radial-gradient(ellipse at 50% 0%, #161b22 0%, #0d1117 70%);
+    color: #f0f6fc;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .dashboard {
+    max-width: 1280px;
+    width: 100%;
+    background: rgba(22,27,34,0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid #30363d;
+    border-radius: 24px;
+    padding: 48px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .logo h1 {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #f0f6fc, #8b949e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logo p {
+    font-size: 13px;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(63,185,80,0.1);
+    border: 1px solid rgba(63,185,80,0.3);
+    border-radius: 100px;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3fb950;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .live-badge span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3fb950;
+  }
+
+  .grid-main {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: rgba(13,17,23,0.6);
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8b949e;
+    margin-bottom: 20px;
+  }
+
+  .composite-section {
+    margin-bottom: 28px;
+  }
+
+  .composite-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .composite-header .label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f0f6fc;
+  }
+
+  .composite-header .value {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #3fb950, #58a6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 24px;
+    background: #21262d;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #238636, #3fb950, #58a6ff);
+    width: 0%;
+    transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .bar-fill::after {
+    content: attr(data-pct);
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #484f58;
+  }
+
+  .bar-labels .target {
+    color: #3fb950;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .stat-box {
+    background: rgba(13,17,23,0.8);
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-box .num {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+
+  .stat-box .lbl {
+    font-size: 11px;
+    color: #8b949e;
+    margin-top: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Node grid in right panel */
+  .node-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .node-item {
+    background: rgba(13,17,23,0.8);
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .node-item:hover {
+    border-color: #30363d;
+    transform: translateY(-1px);
+  }
+
+  .node-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .node-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .node-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f0f6fc;
+  }
+
+  .node-pct {
+    font-size: 14px;
+    font-weight: 700;
+    margin-left: auto;
+  }
+
+  .node-bar {
+    width: 100%;
+    height: 4px;
+    background: #21262d;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .node-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 2s ease;
+  }
+
+  .node-ep {
+    font-size: 10px;
+    color: #484f58;
+    margin-top: 4px;
+  }
+
+  /* Bottom section */
+  .grid-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .loop-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid #21262d;
+  }
+
+  .loop-item:last-child { border-bottom: none; }
+
+  .loop-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .loop-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .loop-info p {
+    font-size: 13px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+
+  .loop-info .meta {
+    font-size: 11px;
+    color: #484f58;
+    margin-top: 4px;
+  }
+
+  .benefit-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #21262d;
+    align-items: flex-start;
+  }
+
+  .benefit-item:last-child { border-bottom: none; }
+
+  .benefit-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .benefit-text h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .benefit-text p {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+
+  .footer {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #21262d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #484f58;
+    padding: 8px 12px;
+    background: rgba(13,17,23,0.8);
+    border: 1px solid #21262d;
+    border-radius: 8px;
+  }
+
+  .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    body { padding: 16px; }
+    .dashboard { padding: 24px; }
+    .grid-main { grid-template-columns: 1fr; }
+    .grid-bottom { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .node-grid { grid-template-columns: 1fr 1fr; }
+    .header { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="dashboard" id="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <h1>CCDEW Intelligence Core</h1>
+      <p>Autonomous Self-Improving AI Agent Ecosystem</p>
+    </div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      <span>Live — updates every 30s</span>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="grid-main">
+    <!-- Left: Composite + Stats -->
+    <div class="card">
+      <div class="card-title">Convergence Score</div>
+      <div class="composite-section">
+        <div class="composite-header">
+          <span class="label">Composite Convergence</span>
+          <span class="value" id="compositeValue">0%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="compositeBar" data-pct="0%" style="width:0%;"></div>
+        </div>
+        <div class="bar-labels">
+          <span>0%</span>
+          <span class="target">▲ converging</span>
+          <span>Target: 95%</span>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="num" style="color:#3fb950;" id="statIterations">0</div>
+          <div class="lbl">Auto Iterations</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" style="color:#58a6ff;" id="statEpisodes">0</div>
+          <div class="lbl">Total Episodes</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" style="color:#bc8cff;" id="statNodes">9</div>
+          <div class="lbl">Cognitive Nodes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: 9 Nodes Grid -->
+    <div class="card">
+      <div class="card-title">9 Cognitive Nodes</div>
+      <div class="node-grid" id="nodeGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom grid -->
+  <div class="grid-bottom">
+    <!-- Left: 3 Loops -->
+    <div class="card">
+      <div class="card-title">Three-Loop Learning System</div>
+      <div id="loops">
+        <div class="loop-item">
+          <div class="loop-icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">L1</div>
+          <div class="loop-info">
+            <h4 style="color:#58a6ff;">Execution — <span style="font-weight:400;color:#8b949e;">≈seconds</span></h4>
+            <p>Task → Enneagram Core (9 nodes) → Pipeline divergent/convergent → Record to SAFLA</p>
+            <div class="meta">hermes-enneagram-core.py · ccdew-pipeline.py</div>
+          </div>
+        </div>
+        <div class="loop-item">
+          <div class="loop-icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">L2</div>
+          <div class="loop-info">
+            <h4 style="color:#3fb950;">Self-Training — <span style="font-weight:400;color:#8b949e;">≈30 seconds</span></h4>
+            <p>Daemon picks weakest node → generates task → trains → measures convergence delta</p>
+            <div class="meta">hermes-self-train.py · hermes-convergence.py</div>
+          </div>
+        </div>
+        <div class="loop-item">
+          <div class="loop-icon" style="background:rgba(210,153,34,0.15);color:#d29922;">L3</div>
+          <div class="loop-info">
+            <h4 style="color:#d29922;">Consolidation — <span style="font-weight:400;color:#8b949e;">≈10 episodes</span></h4>
+            <p>Extract patterns → techniques → attitudes → principles via pyramid engine</p>
+            <div class="meta">hermes-memory.py · mirror_inverse.jsonl</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Benefits -->
+    <div class="card">
+      <div class="card-title">What CCDEW Solves</div>
+      <div id="benefits">
+        <div class="benefit-item">
+          <div class="benefit-icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">↗</div>
+          <div class="benefit-text">
+            <h4 style="color:#3fb950;">Self-Improving</h4>
+            <p>Convergence engine tracks every node. Daemon drives toward 95%. Measurable improvement every 30s.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">🧠</div>
+          <div class="benefit-text">
+            <h4 style="color:#58a6ff;">9 Specialized Personas</h4>
+            <p>Each node has unique system prompt, task transform, and episodic memory. Right persona for every task.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">⚡</div>
+          <div class="benefit-text">
+            <h4 style="color:#bc8cff;">Zero Race Conditions</h4>
+            <p>HTTP bridge (127.0.0.1:18777) with single writer. Others read/write via HTTP. No file corruption.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon" style="background:rgba(247,129,102,0.15);color:#f78166;">🛡</div>
+          <div class="benefit-text">
+            <h4 style="color:#f78166;">Non-Fatal Pipeline</h4>
+            <p>Each sub-step wrapped in try/except. One failure never crashes the system. Self-healing by design.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="code">git clone https://github.com/Hermeneuticus-of-things/CCDEW.git</div>
+    <div class="tags">
+      <span class="tag" style="background:rgba(63,185,80,0.12);color:#3fb950;">73.4% convergence</span>
+      <span class="tag" style="background:rgba(88,166,255,0.12);color:#58a6ff;">9 nodes</span>
+      <span class="tag" style="background:rgba(188,140,255,0.12);color:#bc8cff;">3 loops</span>
+      <span class="tag" style="background:rgba(210,153,34,0.12);color:#d29922;">HTTP bridge</span>
+      <span class="tag" style="background:rgba(63,185,80,0.12);color:#3fb950;">open source</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Live Data ──
+const DATA = {
+  composite: 73.4,
+  trend: "converging",
+  iterations: 111,
+  episodes: 187,
+  nodes: [
+    {id:3,name:"Achiever",    conv:85,  color:"#3fb950", ep:5,  role:"Execution"},
+    {id:7,name:"Enthusiast",  conv:85,  color:"#3fb950", ep:3,  role:"Exploration"},
+    {id:5,name:"Investigator",conv:80,  color:"#58a6ff", ep:8,  role:"Deep analysis"},
+    {id:2,name:"Helper",      conv:79.3,color:"#58a6ff", ep:7,  role:"Collaboration"},
+    {id:9,name:"Orchestrator",conv:73.2,color:"#bc8cff", ep:25, role:"Coordination"},
+    {id:1,name:"Reformer",    conv:73.6,color:"#f78166", ep:8,  role:"Principles"},
+    {id:4,name:"Individualist",conv:73, color:"#f78166", ep:13, role:"Perspectives"},
+    {id:6,name:"Loyalist",    conv:73,  color:"#f78166", ep:38, role:"Risk"},
+    {id:8,name:"Challenger",  conv:72.5,color:"#f78166", ep:81, role:"Action"},
+  ]
+};
+
+// ── Render ──
+function animateBars() {
+  // Composite
+  document.getElementById('compositeValue').textContent = DATA.composite + '%';
+  const bar = document.getElementById('compositeBar');
+  bar.style.width = DATA.composite + '%';
+  bar.setAttribute('data-pct', DATA.composite + '%');
+
+  // Stats
+  document.getElementById('statIterations').textContent = DATA.iterations;
+  document.getElementById('statEpisodes').textContent = DATA.episodes;
+
+  // Nodes
+  const grid = document.getElementById('nodeGrid');
+  grid.innerHTML = DATA.nodes.map(n => {
+    const color = n.color;
+    return `<div class="node-item">
+      <div class="node-top">
+        <div class="node-circle" style="background:${color};">${n.id}</div>
+        <span class="node-name">${n.name}</span>
+        <span class="node-pct" style="color:${color};">${n.conv}%</span>
+      </div>
+      <div class="node-bar"><div class="node-bar-fill" style="width:0%;background:${color};" data-w="${n.conv}"></div></div>
+      <div class="node-ep">${n.ep} episodes · ${n.role}</div>
+    </div>`;
+  }).join('');
+
+  // Animate node bars after DOM
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.node-bar-fill').forEach(el => {
+      el.style.width = el.getAttribute('data-w') + '%';
+    });
+  });
+}
+
+// ── Animate on load ──
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(animateBars, 300);
+});
+</script>
+</body>
+</html>
